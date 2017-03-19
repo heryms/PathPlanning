@@ -82,6 +82,7 @@
     <ClCompile Include="DataCenter.cpp" />
     <ClCompile Include="GaussProjection.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="testGit.cpp" />
     <ClCompile Include="testModule.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +91,7 @@
     <ClInclude Include="CoordTransform.h" />
     <ClInclude Include="DataCenter.h" />
     <ClInclude Include="GaussProjection.h" />
+    <ClInclude Include="testGit.h" />
     <ClInclude Include="testModule.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
