@@ -1,4 +1,5 @@
 #pragma once
+#include "BaseType.h"
 /************************************************************************/
 /*  class for coordinate transform
     created:2017/3/19 
@@ -10,30 +11,6 @@
 
 // define a camera parameter struct 
 
-typedef struct {
-	int width;
-	int height;
-
-	double cam_pos_x;
-	double cam_pos_y;
-	double cam_pos_z;
-	double roll;
-	double pitch;
-	double yaw;
-
-	double f;//f=fy
-	double fx;
-	double fy;
-	double cx;
-	double cy;
-
-}CamParam, *ptrCamParam;
-typedef struct
-{
-	double  X;
-	double  Y;
-	double  Angle;
-}OriginPt;
 
 enum CoordSystem
 {
@@ -44,8 +21,8 @@ enum CoordSystem
 class CoordTransform
 {
 public:
-	static int WorldtoMap(OriginPt org, double xIn, double yIn, double &xOut, double &yOut);
-	static int MaptoWorld(OriginPt org, double xIn, double yIn, double &xOut, double &yOut);
+	static int WorldtoMap(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
+	static int MaptoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
 
 	// image to road
 	static int ImageToRoad(CamParam *pCamParam, int iIimage, int iJimage, double *pdIRoad, double *pdJRoad);

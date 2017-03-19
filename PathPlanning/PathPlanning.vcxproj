@@ -79,10 +79,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CoordTransform.cpp" />
+    <ClCompile Include="DataCenter.cpp" />
+    <ClCompile Include="GaussProjection.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="testModule.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BaseAngle.h" />
+    <ClInclude Include="BaseType.h" />
     <ClInclude Include="CoordTransform.h" />
+    <ClInclude Include="DataCenter.h" />
+    <ClInclude Include="GaussProjection.h" />
+    <ClInclude Include="testModule.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

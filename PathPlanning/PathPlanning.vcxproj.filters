@@ -24,10 +24,34 @@
     <ClCompile Include="CoordTransform.cpp">
       <Filter>头文件\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="DataCenter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GaussProjection.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="testModule.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoordTransform.h">
       <Filter>头文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseAngle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseType.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DataCenter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GaussProjection.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="testModule.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
