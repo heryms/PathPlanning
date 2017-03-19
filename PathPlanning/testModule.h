@@ -1,0 +1,12 @@
+#ifndef _TEST_MODULE_
+#define _TEST_MODULE_
+//#include "CoordTransform.h"
+#include "GaussProjection.h"
+void test_To_Guassian(
+	double grad, double minute, double second,
+	double grad1, double minute1, double second1);
+void test_To_Guassian(
+	double lon, double lat
+	);
+
+#endif
