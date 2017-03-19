@@ -32,7 +32,8 @@ public:
 
 	RadAngle(double v){
 		value = Normalize(v);
-		int i;
+		double i = 0;
+
 	}
 
 	operator double() const {
