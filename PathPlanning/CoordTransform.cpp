@@ -1,46 +1,116 @@
-#include "CoordTransform.h"
+ï»¿#include "CoordTransform.h"
 #include <cmath>
 
-//¾­Î³¶È×ª¸ßË¹Í¶Ó°(X, Y)
+
+#pragma region IMAGE_TO_ROAD_AND_ROAD_TO_IMAGE
+
+double CoordTransform::calcZcameraFromYcameraOnRoad(CamParam *pCamParam, double dYcamera)
+{
+	double dZcamera = -pCamParam->fy * (pCamParam->cam_pos_y) / dYcamera;	
+	return dZcamera;
+}
+double CoordTransform::calcZvehicleFromUimage(CamParam *pCamParam, double dUimage)	// Uimage->Zvehicle
+{
+	double dYcamera = calcYcameraFromUimage(pCamParam, dUimage);
+	double dZcameraRoad = calcZcameraFromYcameraOnRoad(pCamParam, dYcamera);
+	//heryms set this function
+	double dZvehicle = dZcameraRoad + pCamParam->cam_pos_z;	// 
+	return dZvehicle;
+}
+double CoordTransform::calcXvehicleFromVimageAndZvehicle(CamParam *pCamParam, double dVimage, double dZvehicle)
+{
+	double dZcamera = dZvehicle - pCamParam->cam_pos_z;
+	double dXcamera = calcXcameraFromVimage(pCamParam, dVimage);
+	
+	double dXcameraRoad = dXcamera * dZcamera / pCamParam->f;
+	double dXvehicle = dXcameraRoad + (pCamParam->cam_pos_x);;	// (lateral)
+	return dXvehicle;
+}
+double CoordTransform::calcYcameraFromUimage(CamParam *pCamParam, double dUimage)
+{
+	double dYcamera = dUimage - pCamParam->fy * (pCamParam->pitch);
+	return dYcamera;
+}
+// Vimage->Xcamera
+double CoordTransform::calcXcameraFromVimage(CamParam *pCamParam, double dVimage)
+{
+	double dXcamera = dVimage + pCamParam->f * pCamParam->yaw;
+	return dXcamera;
+}
+int CoordTransform::ImageToRoad(CamParam *pCamParam, int iIimage, int iJimage, double *pdIRoad, double *pdJRoad){
+	// convert image coordinate to center in pixel center
+	double dUimage = (double)iIimage - pCamParam->cy;
+	double dVimage = (double)iJimage - pCamParam->cx;
+	double dZvehicle = calcZvehicleFromUimage(pCamParam, dUimage);
+	double dXvehicle = calcXvehicleFromVimageAndZvehicle(pCamParam, dVimage, dZvehicle);
+	*pdIRoad = dZvehicle;
+	*pdJRoad = dXvehicle;
+	return 1;
+
+}
+int CoordTransform::calciIsrcFromZcameraOnRoad(CamParam *pCamParam, double dZcamera){
+	double dYcamera = -pCamParam->fy * (pCamParam->cam_pos_y) / dZcamera;
+	double dUimage = dYcamera + pCamParam->fy * (pCamParam->pitch);
+	int iIsrc = (int)(dUimage - 0.5 + pCamParam->cy);
+	return iIsrc;
+
+}
+// //(longitidinal,lateral->horizontal)	// Xvehicle,Zvehicle->Vimage
+int CoordTransform::calciJsrcFromXvehicleAndZvehicleOnRoad(CamParam *pCamParam, double dXvehicleOnRoad, double dZvehicleOnRoad)
+{
+	double dXcameraOnRoad = dXvehicleOnRoad - pCamParam->cam_pos_x;
+	double dZcameraOnRoad = dZvehicleOnRoad - pCamParam->cam_pos_z;
+	double dVimage = calcVimageFromXcameraAndZcameraOnRoad(pCamParam, dXcameraOnRoad, dZcameraOnRoad);
+	int iJsrc = (int)(dVimage - 0.5 + pCamParam->cx);	
+	return iJsrc;
+	
+}
+double CoordTransform::calcVimageFromXcameraAndZcameraOnRoad(CamParam *pCamParam, double dXcameraRoad, double dZcameraRoad)
+{
+	double dVimage = dXcameraRoad * pCamParam->f / dZcameraRoad - pCamParam->f * pCamParam->yaw;
+	return dVimage;
+}
+#pragma endregion IMAGE_TO_ROAD_AND_ROAD_TO_IMAGE
+//ç»çº¬åº¦è½¬é«˜æ–¯æŠ•å½±(X, Y)
 int CoordTransform::LongLat2XY(double lon, double lat, CoordSystem coordSys, double &X, double &Y)
 {
-	int ProjNo = 0; int ZoneWide; ////´ø¿í 
+	int ProjNo = 0; int ZoneWide; ////å¸¦å®½ 
 	double longitude1, latitude1, longitude0, latitude0, X0, Y0, xval, yval;
 	double a, f, e2, ee, NN, T, C, A, M, iPI;
 	iPI = 0.0174532925199433; ////3.1415926535898/180.0;
-	ZoneWide = 3;////3¶È´ø¿í
-	//ZoneWide = 6; ////6¶È´ø¿í 
+	ZoneWide = 3;////3åº¦å¸¦å®½
+	//ZoneWide = 6; ////6åº¦å¸¦å®½ 
 
 	switch (coordSys)
 	{
 	case WGS84:
 		a = 6378137.0;
-		f = 1.0 / 298.257223563;//WGS84×ø±êÏµ²ÎÊı
+		f = 1.0 / 298.257223563;//WGS84åæ ‡ç³»å‚æ•°
 		break;
 	case Beijing54:
 		a = 6378245.0; 
-		f = 1.0 / 298.3; //54Äê±±¾©×ø±êÏµ²ÎÊı
+		f = 1.0 / 298.3; //54å¹´åŒ—äº¬åæ ‡ç³»å‚æ•°
 		break;
 	case Xian80:
 		a = 6378140.0; 
-		f = 1 / 298.257; //80ÄêÎ÷°²×ø±êÏµ²ÎÊı 
+		f = 1 / 298.257; //80å¹´è¥¿å®‰åæ ‡ç³»å‚æ•° 
 		break;
 	default:
-		//Ä¬ÈÏWGS84
+		//é»˜è®¤WGS84
 		a = 6378137.0;
-		f = 1.0 / 298.257223563;//WGS84×ø±êÏµ²ÎÊı
+		f = 1.0 / 298.257223563;//WGS84åæ ‡ç³»å‚æ•°
 		break;
 	}
 	// ;
-	//ProjNo = (int)(longitude / ZoneWide) ;      //6¶È´ø
-	//longitude0 = ProjNo * ZoneWide + ZoneWide / 2; //6¶È´ø
+	//ProjNo = (int)(longitude / ZoneWide) ;      //6åº¦å¸¦
+	//longitude0 = ProjNo * ZoneWide + ZoneWide / 2; //6åº¦å¸¦
 	ProjNo = (int)(lon / ZoneWide + 0.5);
 
 	longitude0 = ProjNo * ZoneWide;
 	longitude0 = longitude0 * iPI;
 	latitude0 = 0;
-	longitude1 = lon * iPI; //¾­¶È×ª»»Îª»¡¶È
-	latitude1 = lat * iPI; //Î³¶È×ª»»Îª»¡¶È
+	longitude1 = lon * iPI; //ç»åº¦è½¬æ¢ä¸ºå¼§åº¦
+	latitude1 = lat * iPI; //çº¬åº¦è½¬æ¢ä¸ºå¼§åº¦
 	e2 = 2 * f - f*f;
 	ee = e2*(1.0 - e2);
 	NN = a / sqrt(1.0 - e2*sin(latitude1)*sin(latitude1));
@@ -54,9 +124,9 @@ int CoordTransform::LongLat2XY(double lon, double lat, CoordSystem coordSys, dou
 	xval = NN*(A + (1 - T + C)*A*A*A / 6 + (5 - 18 * T + T*T + 72 * C - 58 * ee)*A*A*A*A*A / 120);
 	yval = M + NN*tan(latitude1)*(A*A / 2 + (5 - T + 9 * C + 4 * C*C)*A*A*A*A / 24
 		+ (61 - 58 * T + T*T + 600 * C - 330 * ee)*A*A*A*A*A*A / 720);
-	//X0 = 1000000L*(ProjNo+1)+500000L; //6¶È´ø
-	//X0 = 1000000L*ProjNo+500000L;  //3¶È´ø
-	X0 = 500000L;  //3¶È´ø,²»Ëã´øºÅ
+	//X0 = 1000000L*(ProjNo+1)+500000L; //6åº¦å¸¦
+	//X0 = 1000000L*ProjNo+500000L;  //3åº¦å¸¦
+	X0 = 500000L;  //3åº¦å¸¦,ä¸ç®—å¸¦å·
 	Y0 = 0;
 	xval = xval + X0; yval = yval + Y0;
 
@@ -66,47 +136,47 @@ int CoordTransform::LongLat2XY(double lon, double lat, CoordSystem coordSys, dou
 	return 1;
 }
 
-//¸ßË¹Í¶Ó°(X, Y)×ª¾­Î³¶È
+//é«˜æ–¯æŠ•å½±(X, Y)è½¬ç»çº¬åº¦
 int CoordTransform::XY2LongLat(double X, double Y, CoordSystem coordSys, double& lon, double& lat)
 {
-	int ProjNo; int ZoneWide; ////´ø¿í 
+	int ProjNo; int ZoneWide; ////å¸¦å®½ 
 	double longitude1, latitude1, longitude0, latitude0(0), X0, Y0, xval, yval;
 	double e1, e2, f, a, ee, NN, T, C, M, D, R, u, fai, iPI;
 	iPI = 0.0174532925199433; ////3.1415926535898/180.0; 
-	///a = 6378245.0; f = 1.0/298.3; //54Äê±±¾©×ø±êÏµ²ÎÊı 
-	////a=6378140.0; f=1/298.257; //80ÄêÎ÷°²×ø±êÏµ²ÎÊı
-	//a = 6378137.0; f = 1.0 / 298.257223563;//WGS84×ø±êÏµ²ÎÊı
+	///a = 6378245.0; f = 1.0/298.3; //54å¹´åŒ—äº¬åæ ‡ç³»å‚æ•° 
+	////a=6378140.0; f=1/298.257; //80å¹´è¥¿å®‰åæ ‡ç³»å‚æ•°
+	//a = 6378137.0; f = 1.0 / 298.257223563;//WGS84åæ ‡ç³»å‚æ•°
 
 	switch (coordSys)
 	{
 	case WGS84:
 		a = 6378137.0;
-		f = 1.0 / 298.257223563;//WGS84×ø±êÏµ²ÎÊı
+		f = 1.0 / 298.257223563;//WGS84åæ ‡ç³»å‚æ•°
 		break;
 	case Beijing54:
 		a = 6378245.0;
-		f = 1.0 / 298.3; //54Äê±±¾©×ø±êÏµ²ÎÊı
+		f = 1.0 / 298.3; //54å¹´åŒ—äº¬åæ ‡ç³»å‚æ•°
 		break;
 	case Xian80:
 		a = 6378140.0;
-		f = 1 / 298.257; //80ÄêÎ÷°²×ø±êÏµ²ÎÊı 
+		f = 1 / 298.257; //80å¹´è¥¿å®‰åæ ‡ç³»å‚æ•° 
 		break;
 	default:
-		//Ä¬ÈÏWGS84
+		//é»˜è®¤WGS84
 		a = 6378137.0;
-		f = 1.0 / 298.257223563;//WGS84×ø±êÏµ²ÎÊı
+		f = 1.0 / 298.257223563;//WGS84åæ ‡ç³»å‚æ•°
 		break;
 	}
-	ProjNo = (int)(X / 1000000L); //²éÕÒ´øºÅ
-	// 	ZoneWide = 6; ////6¶È´ø¿í 
-	// 	longitude0 = (ProjNo-1) * ZoneWide + ZoneWide / 2; //¼ÆËãÃ¿´øÖĞÑë×ÓÎçÏß¾­¶È
-	ZoneWide = 3;   ////3¶È´ø¿í
+	ProjNo = (int)(X / 1000000L); //æŸ¥æ‰¾å¸¦å·
+	// 	ZoneWide = 6; ////6åº¦å¸¦å®½ 
+	// 	longitude0 = (ProjNo-1) * ZoneWide + ZoneWide / 2; //è®¡ç®—æ¯å¸¦ä¸­å¤®å­åˆçº¿ç»åº¦
+	ZoneWide = 3;   ////3åº¦å¸¦å®½
 	longitude0 = ProjNo * ZoneWide;
-	longitude0 = longitude0 * iPI; //ÖĞÑë¾­Ïß
+	longitude0 = longitude0 * iPI; //ä¸­å¤®ç»çº¿
 
 	X0 = ProjNo * 1000000L + 500000L;
 	Y0 = 0;
-	xval = X - X0; yval = Y - Y0; //´øÄÚ´óµØ×ø±ê
+	xval = X - X0; yval = Y - Y0; //å¸¦å†…å¤§åœ°åæ ‡
 	e2 = 2 * f - f*f;
 	e1 = (1.0 - sqrt(1 - e2)) / (1.0 + sqrt(1 - e2));
 	ee = e2 / (1 - e2);
@@ -116,14 +186,14 @@ int CoordTransform::XY2LongLat(double X, double Y, CoordSystem coordSys, double&
 		+ (151 * e1*e1*e1 / 96)*sin(6 * u) + (1097 * e1*e1*e1*e1 / 512)*sin(8 * u);
 	C = ee*cos(fai)*cos(fai);
 	T = tan(fai)*tan(fai);
-	NN = a / sqrt(1.0 - e2*sin(fai)*sin(fai));// ×Ö´®1 
+	NN = a / sqrt(1.0 - e2*sin(fai)*sin(fai));// å­—ä¸²1 
 	R = a*(1 - e2) / sqrt((1 - e2*sin(fai)*sin(fai))*(1 - e2*sin(fai)*sin(fai))*(1 - e2*sin(fai)*sin(fai)));
 	D = xval / NN;
-	//¼ÆËã¾­¶È(Longitude) Î³¶È(Latitude)
+	//è®¡ç®—ç»åº¦(Longitude) çº¬åº¦(Latitude)
 	longitude1 = longitude0 + (D - (1 + 2 * T + C)*D*D*D / 6 + (5 - 2 * C + 28 * T - 3 * C*C + 8 * ee + 24 * T*T)*D*D*D*D*D / 120) / cos(fai);
 	latitude1 = fai - (NN*tan(fai) / R)*(D*D / 2 - (5 + 3 * T + 10 * C - 4 * C*C - 9 * ee)*D*D*D*D / 24 + (61 + 90 * T + 298 * C + 45 * T*T - 256 * ee - 3 * C*C)*D*D*D*D*D*D / 720);
 	int g = 0;
-	//×ª»»Îª¶È DD
+	//è½¬æ¢ä¸ºåº¦ DD
 	lon = longitude1 / iPI;
 	lat = latitude1 / iPI;
 
@@ -131,17 +201,17 @@ int CoordTransform::XY2LongLat(double X, double Y, CoordSystem coordSys, double&
 }
 
 
-//×ª»»È«¾ÖÊÀ½ç×ø±êµ½¾Ö²¿×ø±ê
+//è½¬æ¢å…¨å±€ä¸–ç•Œåæ ‡åˆ°å±€éƒ¨åæ ‡
 /************************************************************************/
 /*
 Param:
-org Ä¿±ê×ø±êÏµµÄÔ­µãºÍ·½Î»½Ç
-xIn ÊäÈëµÄX×ø±ê
-yIn ÊäÈëµÄY×ø±ê
-xOut Êä³öµÄX×ø±ê
-yOut  Êä³öµÄY×ø±ê
-Function£º
-½«È«¾Ö×ø±êÍ¶Ó°µ½³µÌå£¨»òÕßÖ¸¶¨Î»ÖÃ£©µÄ¾Ö²¿×ø±êÏµ,È«¾Ö×ø±êµÄXºÍYÓë¾Ö²¿×ø±êÊÇÏà·´µÄ
+org ç›®æ ‡åæ ‡ç³»çš„åŸç‚¹å’Œæ–¹ä½è§’
+xIn è¾“å…¥çš„Xåæ ‡
+yIn è¾“å…¥çš„Yåæ ‡
+xOut è¾“å‡ºçš„Xåæ ‡
+yOut  è¾“å‡ºçš„Yåæ ‡
+Functionï¼š
+å°†å…¨å±€åæ ‡æŠ•å½±åˆ°è½¦ä½“ï¼ˆæˆ–è€…æŒ‡å®šä½ç½®ï¼‰çš„å±€éƒ¨åæ ‡ç³»,å…¨å±€åæ ‡çš„Xå’ŒYä¸å±€éƒ¨åæ ‡æ˜¯ç›¸åçš„
 */
 /************************************************************************/
 int CoordTransform::WorldtoMap(OriginPt org, double xIn, double yIn, double &xOut, double &yOut)
@@ -157,7 +227,7 @@ int CoordTransform::WorldtoMap(OriginPt org, double xIn, double yIn, double &xOu
 	return 1;
 }
 
-//×ª»»¾Ö²¿×ø±êµ½È«¾ÖÊÀ½ç×ø±ê
+//è½¬æ¢å±€éƒ¨åæ ‡åˆ°å…¨å±€ä¸–ç•Œåæ ‡
 int CoordTransform::MaptoWorld(OriginPt org, double xIn, double yIn, double &xOut, double &yOut)
 {
 	double dx = 0, dy = 0, dstX = 0, dstY = 0;
