@@ -21,8 +21,8 @@ enum CoordSystem
 class CoordTransform
 {
 public:
-	static int WorldtoMap(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
-	static int MaptoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
+	static int WorldtoLocal(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
+	static int LocaltoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
 
 	// image to road
 	static int ImageToRoad(CamParam *pCamParam, int iIimage, int iJimage, double *pdIRoad, double *pdJRoad);
