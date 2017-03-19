@@ -5,6 +5,8 @@
 
 #include <cmath>
 
+#define TTTTT 
+
 class RadAngle
 {
 private:
