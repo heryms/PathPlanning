@@ -14,7 +14,7 @@ public:
 #ifdef PI
 #undef PI
 #endif
-#define PI 3.141592653589793
+#define PI 3.1415926535897930
 		int n = (int)(value / (2 * PI));
 		value -= n*(2 * PI);
 		if (value >= PI) {
