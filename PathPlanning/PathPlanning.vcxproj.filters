@@ -16,6 +16,9 @@
     <Filter Include="头文件\Utils">
       <UniqueIdentifier>{db7a0bea-15e3-4cbd-8b59-11607e978909}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\testUtils">
+      <UniqueIdentifier>{98093109-e9a7-4ad2-8b81-a2868ee8d617}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -24,9 +27,21 @@
     <ClCompile Include="CoordTransform.cpp">
       <Filter>头文件\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="testModule.cpp">
+      <Filter>头文件\testUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="GaussProjection.cpp">
+      <Filter>头文件\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoordTransform.h">
+      <Filter>头文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="testModule.h">
+      <Filter>头文件\testUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="GaussProjection.h">
       <Filter>头文件\Utils</Filter>
     </ClInclude>
   </ItemGroup>
