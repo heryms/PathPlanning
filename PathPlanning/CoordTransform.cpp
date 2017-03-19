@@ -86,7 +86,7 @@ Function：
 将全局坐标投影到车体（或者指定位置）的局部坐标系,全局坐标的X和Y与局部坐标是相反的
 */
 /************************************************************************/
-int CoordTransform::WorldtoMap(OriginPt org, double xIn, double yIn, double &xOut, double &yOut)
+int CoordTransform::WorldtoLocal(PosPoint org, double xIn, double yIn, double &xOut, double &yOut)
 {
 	double dx = 0, dy = 0, dstX = 0, dstY = 0;
 	dx = xIn - org.X;
@@ -100,7 +100,7 @@ int CoordTransform::WorldtoMap(OriginPt org, double xIn, double yIn, double &xOu
 }
 
 //转换局部坐标到全局世界坐标
-int CoordTransform::MaptoWorld(OriginPt org, double xIn, double yIn, double &xOut, double &yOut)
+int CoordTransform::LocaltoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut)
 {
 	double dx = 0, dy = 0, dstX = 0, dstY = 0;
 	dstX = xIn*cos(org.Angle) + yIn*sin(org.Angle);
