@@ -16,6 +16,9 @@
     <Filter Include="头文件\Utils">
       <UniqueIdentifier>{db7a0bea-15e3-4cbd-8b59-11607e978909}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\LcmType">
+      <UniqueIdentifier>{f8311bd3-13cc-4f4b-a829-b8bfd2850446}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -34,6 +37,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="testGit.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseAngle.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -58,6 +64,18 @@
     </ClInclude>
     <ClInclude Include="testGit.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\controlcommand_t.hpp">
+      <Filter>头文件\LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\LcmType_Handler.h">
+      <Filter>头文件\LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\Location_t.hpp">
+      <Filter>头文件\LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\StatusBody_t.hpp">
+      <Filter>头文件\LcmType</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
