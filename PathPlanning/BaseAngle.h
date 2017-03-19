@@ -10,7 +10,11 @@ class RadAngle
 private:
 	double value;
 public:
-	inline static double Normalize(double value) {
+	RadAngle(){};
+
+	~RadAngle(){};
+
+	inline static double Normalize(double value){
 #ifdef PI
 #undef PI
 #endif
@@ -25,11 +29,8 @@ public:
 		}
 		return value;
 	}
-	RadAngle() {};
 
-	~RadAngle() {};
-
-	RadAngle(double v) {
+	RadAngle(double v){
 		value = Normalize(v);
 	}
 
