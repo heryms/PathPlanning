@@ -1,6 +1,5 @@
 #include "DataCenter.h"
 
-
 DataCenter::DataCenter()
 {
 }

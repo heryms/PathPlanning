@@ -89,6 +89,7 @@
     <ClCompile Include="CoordTransform.cpp" />
     <ClCompile Include="DataCenter.cpp" />
     <ClCompile Include="GaussProjection.cpp" />
+    <ClCompile Include="LoopThread.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testGit.cpp" />
     <ClCompile Include="testModule.cpp" />
@@ -100,9 +101,11 @@
     <ClInclude Include="DataCenter.h" />
     <ClInclude Include="GaussProjection.h" />
     <ClInclude Include="lcmtype\controlcommand_t.hpp" />
+    <ClInclude Include="lcmtype\LcmRecvHelper.h" />
     <ClInclude Include="lcmtype\LcmType_Handler.h" />
     <ClInclude Include="lcmtype\Location_t.hpp" />
     <ClInclude Include="lcmtype\StatusBody_t.hpp" />
+    <ClInclude Include="LoopThread.h" />
     <ClInclude Include="testGit.h" />
     <ClInclude Include="testModule.h" />
   </ItemGroup>

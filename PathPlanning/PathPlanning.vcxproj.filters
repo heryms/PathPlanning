@@ -42,6 +42,9 @@
     <ClCompile Include="BaseAngle.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LoopThread.cpp">
+      <Filter>头文件\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoordTransform.h">
@@ -75,6 +78,12 @@
       <Filter>头文件\LcmType</Filter>
     </ClInclude>
     <ClInclude Include="lcmtype\StatusBody_t.hpp">
+      <Filter>头文件\LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="LoopThread.h">
+      <Filter>头文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\LcmRecvHelper.h">
       <Filter>头文件\LcmType</Filter>
     </ClInclude>
   </ItemGroup>

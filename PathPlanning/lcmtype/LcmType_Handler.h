@@ -4,16 +4,20 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <functional>
+#include "../LoopThread.h"
 template <typename T> class LcmHandler 
 {
-protected:
-	bool recvOn;
+//protected:
+	//bool recvOn;
 private:
 	void *  _lpParam;
-	typedef void (*msg_output)(const T *msg, void * lpParam);
+	typedef std::function<void(const T*, void *)> msg_output;
+	//typedef void (*msg_output)(const T *msg, void * lpParam);
 	msg_output _rcvMsg; //callback function for output data
 	std::string _channel;  //channel  id
 	lcm::LCM *_lcm;
+	ZBaseLoopThread _recvThread;
 public:
 
 	~LcmHandler() {
@@ -25,14 +29,20 @@ public:
 		_channel = "";
 		_rcvMsg = nullptr;
 		_lcm = nullptr;
-		recvOn = false;
+		//recvOn = false;
+		_recvThread = ZBaseLoopThread(std::bind(&LcmHandler<T>::RecvBody, this));
 	}
 
-	static void recvThread(LcmHandler<T>* h) {
-		while (h->recvOn) {
-			h->grabTimeout(20);
-		}
+	virtual bool RecvBody(){
+		grabTimeout(20);
+		return true;
 	}
+
+	//static void recvThread(LcmHandler<T>* h) {
+	//	while (h->recvOn) {
+	//		h->grabTimeout(20);
+	//	}
+	//}
 
 	void handleMessage(const lcm::ReceiveBuffer* rbuf,
 		const std::string& chan,
@@ -72,6 +82,9 @@ public:
 
 	int initialLcm(std::string net, std::string channel, msg_output rcv, void * lpParam)
 	{
+		if (_recvThread.Started()){
+			return 0;
+		}
 		_lpParam = lpParam;
 		_rcvMsg = rcv;
 		_channel = channel;
@@ -82,14 +95,16 @@ public:
 			return 0;
 		}
 		_lcm->subscribe(channel, &LcmHandler::handleMessage, this);
-		recvOn = true;
-		std::thread t(recvThread, this);
-		t.detach();
+		//recvOn = true;
+		_recvThread.Start();
+		//std::thread t(recvThread, this);
+		//t.detach();
 		return 1;
 	}
 
 	void uninitialLcm() {
-		recvOn = false;
+		_recvThread.Stop();
+		//recvOn = false;
 		//std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		delete _lcm;
 		_channel = " ";

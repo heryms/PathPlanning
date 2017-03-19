@@ -48,13 +48,12 @@ bool RadAngle::operator !=(const double & v) const {
 	return (value) != (Normalize(v));
 }
 
+
+
 DegAngle::DegAngle()
 	:value(0){
 
 }
-
-
-
 
 DegAngle::DegAngle(double v)
 	: value(Normalize(v)){
