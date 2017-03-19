@@ -5,8 +5,6 @@
 
 #include <cmath>
 
-#define TTTTT 
-
 class RadAngle
 {
 private:
@@ -20,7 +18,7 @@ public:
 #ifdef PI
 #undef PI
 #endif
-#define PI 3.141592653589793
+#define PI 3.1415926535897930
 		int n = (int)(value / (2 * PI));
 		value -= n*(2 * PI);
 		if (value >= PI) {
@@ -34,6 +32,7 @@ public:
 
 	RadAngle(double v){
 		value = Normalize(v);
+		int i;
 	}
 
 	operator double() const {
@@ -71,63 +70,5 @@ public:
 	}
 };
 
-class DegAngle
-{
-private:
-	double value;
-public:
-	DegAngle(){};
 
-	~DegAngle(){};
-
-	inline static double Normalize(double value){
-		int n = (int)(value / (360));
-		value -= n*(360);
-		if (value >= 180) {
-			value -= 360;
-		}
-		if (value < -180) {
-			value += 360;
-		}
-		return value;
-	}
-
-	DegAngle(double v){
-		value = Normalize(v);
-	}
-
-	operator double() const {
-		return value;
-	}
-
-	DegAngle operator = (const double & v) {
-		value = Normalize(v);
-		return *this;
-	}
-
-	DegAngle operator + (const double & v) const {
-		return DegAngle(Normalize(value + v));
-	}
-
-	DegAngle operator - (const double & v) {
-		return DegAngle(Normalize(value - v));
-	}
-
-	DegAngle& operator +=(const double & v) {
-		value = Normalize(value + v);
-		return *this;
-	}
-
-	DegAngle& operator -=(const double & v) {
-		value = Normalize(value - v);
-		return *this;
-	}
-
-	bool operator ==(const double & v) const {
-		return (value) == (Normalize(v));
-	}
-	bool operator !=(const double & v) const {
-		return (value) != (Normalize(v));
-	}
-};
 #endif //  _PATH_PLANNING_BASE_ANGLE_H
