@@ -4,7 +4,7 @@
 #define _PATH_PLANNING_BASE_ANGLE_H
 
 #include <cmath>
-
+#define BADEEE
 class RadAngle
 {
 private:
