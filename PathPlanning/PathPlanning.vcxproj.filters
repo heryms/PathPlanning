@@ -42,9 +42,6 @@
     <ClCompile Include="Clothoid.cpp">
       <Filter>头文件\PathGenerate</Filter>
     </ClCompile>
-    <ClCompile Include="ClothoidBuilder.cpp">
-      <Filter>头文件\Utils</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoordTransform.h">
@@ -72,9 +69,6 @@
       <Filter>头文件\Utils</Filter>
     </ClInclude>
     <ClInclude Include="BaseAngle.h">
-      <Filter>头文件\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="ClothoidBuilder.h">
       <Filter>头文件\Utils</Filter>
     </ClInclude>
   </ItemGroup>

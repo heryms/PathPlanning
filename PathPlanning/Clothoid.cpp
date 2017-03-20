@@ -1,5 +1,6 @@
 #include "Clothoid.h"
-int a = 1;
+#include "BaseAngle.h"
+
 double fns[] = { 0.49999988085884732562,
 1.3511177791210715095,
 1.3175407836168659241,
@@ -50,12 +51,8 @@ double gds[] = { 1.0,
 0.0044099273693067311209,
 -0.00009070958410429993314 };
 
-void FresnelCS(double *FresnelC, double *FresnelS, double y)
+void Clothoid::FresnelCS(double *FresnelC, double *FresnelS, double y)
 {
-	//	FresnelC=new double[3];
-	//	FresnelS =new double[3];
-	//	memset(FresnelC,0,3*sizeof(double));
-	//memset(FresnelS,0,3*sizeof(double));
 	double t, twofn, fact, denterm, numterm, sum, ratio, term, sumn, sumd, f, g, U, SinU, CosU, oldterm, eps10, absterm;
 
 	double x = abs(y);
@@ -102,9 +99,7 @@ void FresnelCS(double *FresnelC, double *FresnelS, double y)
 		}
 		FresnelS[0] = (PI / 2)*sum*x*x*x;
 	}
-	else if (x < 6.0)
-
-		//	% Rational approximation for f
+	else if (x < 6.0)		//	% Rational approximation for f
 	{
 		sumn = 0.0;
 		sumd = fds[11];
@@ -158,8 +153,6 @@ void FresnelCS(double *FresnelC, double *FresnelS, double y)
 
 			oldterm = absterm;
 		}
-
-
 		f = sum / (PI*x);
 		//% Expansion for  g
 		numterm = -1.0;
@@ -191,26 +184,17 @@ void FresnelCS(double *FresnelC, double *FresnelS, double y)
 		FresnelC[0] = 0.5 + f*SinU - g*CosU;
 		FresnelS[0] = 0.5 - f*CosU - g*SinU;
 	}
-
-
 	if (y < 0)
 	{
 		FresnelC[0] = -FresnelC[0];
 		FresnelS[0] = -FresnelS[0];
 	}
-
-
-
 }
-void intXY(double *X, double *Y, int nk, double a, double b, double c)
+void Clothoid::intXY(double *X, double *Y, int nk, double a, double b, double c)
 {
 	double absa = abs(a);
 	double epsi = 0.01;// % best thresold
 
-	//X = new double[nk] ;
-	//Y = new double[nk] ;
-	//memset(X,0,nk*sizeof(double));
-	//memset(Y,0,nk*sizeof(double));
 	if (absa < epsi)//% case `a` small
 	{
 		evalXYaSmall(X, Y, nk, a, b, 5);
@@ -233,7 +217,7 @@ void intXY(double *X, double *Y, int nk, double a, double b, double c)
 	}
 
 }
-void FresnelCSk(int nk, double t, double *FresnelC, double*FresnelS)
+void Clothoid::FresnelCSk(int nk, double t, double *FresnelC, double*FresnelS)
 {
 	double C[3];
 	double S[3];
@@ -254,11 +238,9 @@ void FresnelCSk(int nk, double t, double *FresnelC, double*FresnelS)
 		}
 	}
 
-	//delete C;
-	//	delete S;
 }
 
-void evalXYaLarge(double* X, double* Y, int nk, double a, double b)
+void Clothoid::evalXYaLarge(double* X, double* Y, int nk, double a, double b)
 {
 	double	s = 0;
 	if (a > 0)s = 1;
@@ -306,7 +288,7 @@ void evalXYaLarge(double* X, double* Y, int nk, double a, double b)
 	delete dC;
 	delete dS;
 }
-double S(double mu, double nu, double b)
+double Clothoid::S(double mu, double nu, double b)
 {
 
 	double tmp = 1 / ((mu + nu + 1)*(mu - nu + 1));
@@ -321,7 +303,7 @@ double S(double mu, double nu, double b)
 	}
 	return res;
 }
-void evalXYazero(double *X, double *Y, int nk, double b)
+void Clothoid::evalXYazero(double *X, double *Y, int nk, double b)
 {
 	double sb = sin(b);
 	double cb = cos(b);
@@ -338,7 +320,7 @@ void evalXYazero(double *X, double *Y, int nk, double b)
 	}
 	double A = b*sb;
 	double D = sb - b*cb;
-	double B = b*D;            //这个错误花了我两天时间！！！！！！
+	double B = b*D;
 	double C = -b2*sb;
 	for (int k = 1; k < nk; k++)
 	{
@@ -346,7 +328,7 @@ void evalXYazero(double *X, double *Y, int nk, double b)
 		Y[k] = (C*S(k + 1.5, 1.5, b) + sb) / (2 + k) + D*S(k + 0.5, 0.5, b);
 	}
 }
-void evalXYaSmall(double *X, double *Y, int nk, double a, double b, double p)
+void Clothoid::evalXYaSmall(double *X, double *Y, int nk, double a, double b, double p)
 {
 
 	double* X0 = new double[nk + 4 * (int)p + 2];
@@ -380,15 +362,32 @@ void evalXYaSmall(double *X, double *Y, int nk, double a, double b, double p)
 	delete Y0;
 }
 
-void buildClothoid(double &k, double &dk, double &L, double x0, double y0, double theta0, double x1, double y1, double theta1, double tol)
+Clothoid::Clothoid(const double& x0, const double &y0, const double& theta0, const double& x1, const double &y1, const double& theta1):
+_x0(x0), _y0(y0), _theta0(theta0), _x1(x1), _y1(y1), _theta1(theta1), _init(true)
 {
+	BuildClothoid();
+}
 
-	double dx = x1 - x0;
-	double dy = y1 - y0;
+void Clothoid::SetPoint(const double& x0, const double &y0, const double& theta0, const double& x1, const double &y1, const double& theta1)
+{
+	_x0 = x0;
+	_y0 = y0;
+	_theta0 = theta0;
+	_x1 = x1;
+	_y1 = y1;
+	_theta1 = theta1;
+
+	_init = true;
+}
+
+void Clothoid::BuildClothoid(double tol /*=0.05*/)
+{
+	double dx = _x1 - _x0;
+	double dy = _y1 - _y0;
 	double r = sqrt(dx*dx + dy*dy);
 	double phi = atan2(dy, dx);
-	double phi0 = normalizeAngle(theta0 - phi);
-	double phi1 = normalizeAngle(theta1 - phi);
+	double phi0 = RadAngle::Normalize(_theta0 - phi);
+	double phi1 = RadAngle::Normalize(_theta1 - phi);
 
 	double delta = phi1 - phi0;
 
@@ -404,45 +403,30 @@ void buildClothoid(double &k, double &dk, double &L, double x0, double y0, doubl
 	memset(g, 0, sizeof(double));
 	//% final operation
 	intXY(h, g, 1, 2 * A, delta - A, phi0);
-	L = r / h[0];
+	_L = r / h[0];
 
-	if (L > 0)
+	if (_L > 0)
 	{
-		k = (delta - A) / L;
-		dk = 2 * A / L / L;
+		_k = (delta - A) / _L;
+		_dk = 2 * A / _L / _L;
 	}
 	else
-		// %      error('negative length') ;
 	{
-		k = infcon;
-		dk = infcon;
-		L = infcon;
+		_k = infcon;
+		_dk = infcon;
+		_L = infcon;
 	}
 
 	delete h;
 	delete g;
 }
-double normalizeAngle(double phi_in)
-{
-	double phi;
-	phi = phi_in;
-	while (phi > PI)
-		phi = phi - 2 * PI;
-	while (phi < -PI)
-		phi = phi + 2 * PI;
-	return phi;
 
-}
-
-void findA(double &A, double Aguess, double delta, double phi0, double tol)
+void Clothoid::findA(double &A, double Aguess, double delta, double phi0, double tol)
 {
 	double f, df;
 	double intC[3];
 	double intS[3];
-	//double* intC=new double[3];
-	//double* intS=new double[3];
-	//memset(intC,0,3*sizeof(double));
-	//memset(intS,0,3*sizeof(double));
+
 	A = Aguess;
 	for (int iter = 1; iter <= 100; iter++)
 	{
@@ -453,15 +437,10 @@ void findA(double &A, double Aguess, double delta, double phi0, double tol)
 		if (abs(f) < tol)
 			break;
 	}
-	//if (abs(f) > tol*10)
-	//fprintf( 1, 'Newton iteration fails, f = %g\n', f ) ;
-	//fprintf( 1, 'Aguess = %g, A = %g, delta = %g , phi0 = %g\n', Aguess, A, delta, phi0 ) ;
-	//delete intC;
-	//delete intS;
 }
 
 
-double guessA(double phi0, double phi1)
+double Clothoid::guessA(double phi0, double phi1)
 {
 	double CF[6] = { 2.989696028701907,
 		0.716228953608281,
@@ -478,39 +457,21 @@ double guessA(double phi0, double phi1)
 	return A;
 }
 
-void pointsOnClothoid(RoadPoint XY[], double x0, double y0, double theta0, double kappa, double dkappa, double L, int npts)
+//XY为保存Clothoid上点的数组，npts为点的个数
+void Clothoid::PointsOnClothoid(RoadPoint XY[], int npts)
 {
-	//	XY=new double[2*npts];
 	double C[1];
 	double S[1];
-	//double* C=new double;
-	//double* S=new double;
-	//memset(C,0,sizeof(double));
-	//memset(S,0,sizeof(double));
 	int j = 0;
-	//FILE *fp=fopen("clothoid.txt","a+");
 
-	for (double t = 0; t <= L;)
+	for (double t = 0; t <= _L;)
 	{
-		intXY(C, S, 1, dkappa*t*t, kappa*t, theta0);
-		//XY    = [ XY [ x0 + t*C ; y0 + t*S ] ];
+		intXY(C, S, 1, _dk * t * t, _k * t, _theta0);
 
-		XY[j].x = x0 + t*C[0];
-		XY[j].y = y0 + t*S[0];
-		XY[j].angle = theta0 + t*kappa + 0.5*t*t*dkappa;
-		//clothoidpath[j].x=XY[j];
-		//clothoidpath[j].y=XY[npts+j];
-		//fprintf(fp,"%d\t%f\t%f\n",j, clothoidpath[j].x,clothoidpath[j].y);
-		t = t + L / (double)npts;
+		XY[j].x = _x0 + t * C[0];
+		XY[j].y = _y0 + t * S[0];
+		XY[j].angle = _theta0 + t * _k + 0.5 * t * t * _dk;
+		t = t + _L / (double)npts;
 		j++;
 	}
-	//delete C;
-	//delete S;
-	//	fclose(fp);
 }
-
-
-
-
-
-
