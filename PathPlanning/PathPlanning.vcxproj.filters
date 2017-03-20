@@ -107,5 +107,14 @@
     <ClInclude Include="CoordTransform.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="lcmtype\pointXYZI.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\lasercurb_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\VeloGrid_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

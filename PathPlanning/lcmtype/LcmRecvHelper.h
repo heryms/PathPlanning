@@ -55,6 +55,7 @@ public:
 	void uninitialLcm(){
 		std::cout << typeid(T).name() << " Stoping..." << std::endl;
 		LcmHandler<T>::uninitialLcm();
+		hasMsg = false;
 		std::cout << typeid(T).name() << " Stoped" << std::endl;
 	}
 };
