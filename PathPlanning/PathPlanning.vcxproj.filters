@@ -39,9 +39,6 @@
     <ClCompile Include="testGit.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="BaseAngle.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="LoopThread.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
@@ -51,16 +48,13 @@
     <ClCompile Include="Topology.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="BaseAngle.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoordTransform.h">
       <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseAngle.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseType.h">
-      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DataCenter.h">
       <Filter>头文件</Filter>
@@ -99,7 +93,13 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Variables.h">
-      <Filter>头文件</Filter>
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseAngle.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseType.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
