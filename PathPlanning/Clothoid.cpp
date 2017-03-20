@@ -463,15 +463,28 @@ void Clothoid::PointsOnClothoid(RoadPoint XY[], int npts)
 	double C[1];
 	double S[1];
 	int j = 0;
+#ifdef LOG_CLOTHOID
 
+	FILE *fp=fopen("clothoid.txt","a+");
+#endif // LOG_CLOTHOID
 	for (double t = 0; t <= _L;)
 	{
 		intXY(C, S, 1, _dk * t * t, _k * t, _theta0);
 
-		XY[j].x = _x0 + t * C[0];
-		XY[j].y = _y0 + t * S[0];
-		XY[j].angle = _theta0 + t * _k + 0.5 * t * t * _dk;
+		XY[j].x = _x0 + t*C[0];
+		XY[j].y = _y0 + t*S[0];
+		XY[j].angle = _theta0 + t*_k + 0.5*t*t*_dk;
+		//clothoidpath[j].x=XY[j];
+		//clothoidpath[j].y=XY[npts+j];
+		//fprintf(fp,"%d\t%f\t%f\n",j, clothoidpath[j].x,clothoidpath[j].y);
 		t = t + _L / (double)npts;
 		j++;
 	}
+	//delete C;
+	//delete S;
+#ifdef LOG_CLOTHOID
+	fclose(fp);
+#endif // 
+
+	//	
 }
