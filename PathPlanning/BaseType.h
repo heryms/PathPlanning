@@ -32,5 +32,19 @@ typedef struct {
 	double steerAngle;
 }CarInfo;
 
+typedef struct tagRoadPoint
+{
+	double x;
+	double y;
+	double angle;
+	double changeangle;
+	double k;
+}RoadPoint;
 
+struct LINESEG
+{
+	RoadPoint s;
+	RoadPoint e;
+
+};
 #endif // !_PATH_PLANNING_BASE_TYPE_H

@@ -85,6 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Clothoid.cpp" />
     <ClCompile Include="BaseAngle.cpp" />
     <ClCompile Include="CoordTransform.cpp" />
     <ClCompile Include="DataCenter.cpp" />
@@ -93,10 +94,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testGit.cpp" />
     <ClCompile Include="testModule.cpp" />
+    <ClCompile Include="Topology.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAngle.h" />
     <ClInclude Include="BaseType.h" />
+    <ClInclude Include="Clothoid.h" />
     <ClInclude Include="CoordTransform.h" />
     <ClInclude Include="DataCenter.h" />
     <ClInclude Include="GaussProjection.h" />
@@ -108,6 +111,8 @@
     <ClInclude Include="LoopThread.h" />
     <ClInclude Include="testGit.h" />
     <ClInclude Include="testModule.h" />
+    <ClInclude Include="Topology.h" />
+    <ClInclude Include="Variables.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
