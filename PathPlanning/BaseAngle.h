@@ -11,7 +11,6 @@ private:
 	double value;
 public:
 	RadAngle(){};
-
 	~RadAngle(){};
 
 	inline static double Normalize(double value){
