@@ -48,14 +48,14 @@
     <ClCompile Include="BaseAngle.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="CoordTransform.cpp">
-      <Filter>math</Filter>
-    </ClCompile>
     <ClCompile Include="Clothoid.cpp">
       <Filter>PathGenerate</Filter>
     </ClCompile>
     <ClCompile Include="Topology.cpp">
       <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="CoordTransform.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -98,14 +98,14 @@
     <ClInclude Include="BaseType.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="CoordTransform.h">
-      <Filter>math</Filter>
-    </ClInclude>
     <ClInclude Include="Clothoid.h">
       <Filter>PathGenerate</Filter>
     </ClInclude>
     <ClInclude Include="Topology.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="CoordTransform.h">
+      <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
