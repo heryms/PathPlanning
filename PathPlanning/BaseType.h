@@ -41,4 +41,10 @@ typedef struct tagRoadPoint
 	double k;
 }RoadPoint;
 
+struct LINESEG
+{
+	RoadPoint s;
+	RoadPoint e;
+
+};
 #endif // !_PATH_PLANNING_BASE_TYPE_H

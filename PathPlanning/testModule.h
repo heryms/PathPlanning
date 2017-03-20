@@ -8,5 +8,8 @@ void test_To_Guassian(
 void test_To_Guassian(
 	double lon, double lat
 	);
+void test_Clothoid(){
+
+}
 
 #endif

@@ -88,6 +88,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testGit.cpp" />
     <ClCompile Include="testModule.cpp" />
+    <ClCompile Include="Topology.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAngle.h" />
@@ -99,6 +100,7 @@
     <ClInclude Include="GaussProjection.h" />
     <ClInclude Include="testGit.h" />
     <ClInclude Include="testModule.h" />
+    <ClInclude Include="Topology.h" />
     <ClInclude Include="Variables.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

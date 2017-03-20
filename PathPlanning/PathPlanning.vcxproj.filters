@@ -19,6 +19,9 @@
     <Filter Include="头文件\PathGenerate">
       <UniqueIdentifier>{d4b75397-4b32-4f8a-9ac7-0d535fec7c43}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\math">
+      <UniqueIdentifier>{bd284801-142a-4126-bc42-1fbf4bb7953d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -44,6 +47,9 @@
     </ClCompile>
     <ClCompile Include="ClothoidBuilder.cpp">
       <Filter>头文件\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Topology.cpp">
+      <Filter>头文件\math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -76,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="ClothoidBuilder.h">
       <Filter>头文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Topology.h">
+      <Filter>头文件\math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
