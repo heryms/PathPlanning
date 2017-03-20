@@ -1,6 +1,6 @@
 
 #pragma once
-#ifndef  _PATH_PLANNING_BASE_ANGLE_H
+#ifndef _PATH_PLANNING_BASE_ANGLE_H
 #define _PATH_PLANNING_BASE_ANGLE_H
 
 #include <cmath>

@@ -1,6 +1,6 @@
 #include "Clothoid.h"
 #include "BaseAngle.h"
-
+#define LOG_CLOTHOID
 double fns[] = { 0.49999988085884732562,
 1.3511177791210715095,
 1.3175407836168659241,
@@ -478,8 +478,13 @@ void Clothoid::PointsOnClothoid(RoadPoint XY[], int npts)
 		//clothoidpath[j].y=XY[npts+j];
 		//fprintf(fp,"%d\t%f\t%f\n",j, clothoidpath[j].x,clothoidpath[j].y);
 		t = t + _L / (double)npts;
+
+		fprintf(fp, "%lf %lf %lf\n", XY[j].x, XY[j].y, XY[j].angle);
+
 		j++;
+
 	}
+	
 	//delete C;
 	//delete S;
 #ifdef LOG_CLOTHOID

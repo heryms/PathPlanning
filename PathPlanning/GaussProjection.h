@@ -2,9 +2,9 @@
 #define GAUSSPROJECTION_H
 
 #include <cmath>
-
+#include "Variables.h"
 const double RHO = 206265;
-const double PI = 3.1415926535897932384626;
+
 
 class unitSwitch
 {

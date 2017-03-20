@@ -4,6 +4,7 @@
 #include "Variables.h"
 #include <cmath>
 #include <algorithm>
+int fileLength = 100;
 bool InsideConvexPolygon(int vcount, RoadPoint polygon[], RoadPoint q);//点与多边形关系判断
 bool CurveInsects(RoadPoint Up[], RoadPoint Down[], LINESEG u);//
 bool intersect(LINESEG u, LINESEG v);//直线相交算法

@@ -29,3 +29,12 @@ void test_To_Guassian(
 	test.calculateAll();
 	cout << setiosflags(ios::fixed) << setprecision(10)<< test.getx() << "/" << test.gety() + 500000 << endl;
 }
+
+
+void test_Clothoid()
+{
+	RoadPoint *rdPt = new RoadPoint[100];
+
+	Clothoid clo(0.0, 0.0, 0.0, 50.0, 50.0, PI / 2.0);
+	clo.PointsOnClothoid(rdPt, 100);
+}
