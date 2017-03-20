@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Clothoid.cpp" />
+    <ClCompile Include="ClothoidBuilder.cpp" />
     <ClCompile Include="CoordTransform.cpp" />
     <ClCompile Include="DataCenter.cpp" />
     <ClCompile Include="GaussProjection.cpp" />
@@ -92,6 +93,7 @@
     <ClInclude Include="BaseAngle.h" />
     <ClInclude Include="BaseType.h" />
     <ClInclude Include="Clothoid.h" />
+    <ClInclude Include="ClothoidBuilder.h" />
     <ClInclude Include="CoordTransform.h" />
     <ClInclude Include="DataCenter.h" />
     <ClInclude Include="GaussProjection.h" />
