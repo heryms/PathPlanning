@@ -13,19 +13,22 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="头文件\Utils">
+    <Filter Include="LcmType">
+      <UniqueIdentifier>{f8311bd3-13cc-4f4b-a829-b8bfd2850446}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
       <UniqueIdentifier>{db7a0bea-15e3-4cbd-8b59-11607e978909}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\PathGenerate">
-      <UniqueIdentifier>{d4b75397-4b32-4f8a-9ac7-0d535fec7c43}</UniqueIdentifier>
+    <Filter Include="math">
+      <UniqueIdentifier>{a7f266e1-5885-4776-bc74-8ee849a7e219}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PathGenerate">
+      <UniqueIdentifier>{10eac84c-823e-4698-a659-b3282ab8a25b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CoordTransform.cpp">
-      <Filter>头文件\Utils</Filter>
     </ClCompile>
     <ClCompile Include="DataCenter.cpp">
       <Filter>源文件</Filter>
@@ -39,17 +42,23 @@
     <ClCompile Include="testGit.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LoopThread.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseAngle.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
     <ClCompile Include="Clothoid.cpp">
-      <Filter>头文件\PathGenerate</Filter>
+      <Filter>PathGenerate</Filter>
     </ClCompile>
     <ClCompile Include="Topology.cpp">
-      <Filter>源文件</Filter>
+      <Filter>math</Filter>
+    </ClCompile>
+    <ClCompile Include="CoordTransform.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CoordTransform.h">
-      <Filter>头文件\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="DataCenter.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -62,20 +71,50 @@
     <ClInclude Include="testGit.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Clothoid.h">
-      <Filter>头文件\PathGenerate</Filter>
+    <ClInclude Include="lcmtype\controlcommand_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\LcmType_Handler.h">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\Location_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\StatusBody_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="LoopThread.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\LcmRecvHelper.h">
+      <Filter>LcmType</Filter>
     </ClInclude>
     <ClInclude Include="Variables.h">
-      <Filter>头文件\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseType.h">
-      <Filter>头文件\Utils</Filter>
+      <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="BaseAngle.h">
-      <Filter>头文件\Utils</Filter>
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseType.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Clothoid.h">
+      <Filter>PathGenerate</Filter>
     </ClInclude>
     <ClInclude Include="Topology.h">
-      <Filter>头文件</Filter>
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="CoordTransform.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\pointXYZI.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\lasercurb_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\VeloGrid_t.hpp">
+      <Filter>LcmType</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

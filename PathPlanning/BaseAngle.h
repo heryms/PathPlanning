@@ -1,17 +1,17 @@
-
 #pragma once
 #ifndef _PATH_PLANNING_BASE_ANGLE_H
 #define _PATH_PLANNING_BASE_ANGLE_H
 
-#include <cmath>
-#define ZRENGOUBIGITHUB
 class RadAngle
 {
 private:
 	double value;
 public:
-	RadAngle(){};
-	~RadAngle(){};
+	RadAngle();
+
+	RadAngle(double v);
+
+	~RadAngle();
 
 	inline static double Normalize(double value){
 #ifdef PI
@@ -29,43 +29,21 @@ public:
 		return value;
 	}
 
-	RadAngle(double v){
-		value = Normalize(v);
-	}
+	operator double() const;
 
-	operator double() const {
-		return value;
-	}
+	RadAngle operator = (const double & v);
 
-	RadAngle operator = (const double & v) {
-		value = Normalize(v);
-		return *this;
-	}
+	RadAngle operator + (const double & v) const;
 
-	RadAngle operator + (const double & v) const {
-		return RadAngle(Normalize(value + v));
-	}
+	RadAngle operator - (const double & v) const;
 
-	RadAngle operator - (const double & v) {
-		return RadAngle(Normalize(value - v));
-	}
+	RadAngle& operator +=(const double & v);
 
-	RadAngle& operator +=(const double & v) {
-		value = Normalize(value + v);
-		return *this;
-	}
+	RadAngle& operator -=(const double & v);
 
-	RadAngle& operator -=(const double & v) {
-		value = Normalize(value - v);
-		return *this;
-	}
+	bool operator ==(const double & v) const;
 
-	bool operator ==(const double & v) const {
-		return (value) == (Normalize(v));
-	}
-	bool operator !=(const double & v) const {
-		return (value) != (Normalize(v));
-	}
+	bool operator !=(const double & v) const;
 };
 
 class DegAngle
@@ -73,9 +51,11 @@ class DegAngle
 private:
 	double value;
 public:
-	DegAngle(){};
+	DegAngle();
 
-	~DegAngle(){};
+	DegAngle(double v);
+
+	~DegAngle();
 
 	inline static double Normalize(double value){
 		int n = (int)(value / (360));
@@ -89,42 +69,21 @@ public:
 		return value;
 	}
 
-	DegAngle(double v){
-		value = Normalize(v);
-	}
 
-	operator double() const {
-		return value;
-	}
+	operator double() const;
 
-	DegAngle operator = (const double & v) {
-		value = Normalize(v);
-		return *this;
-	}
+	DegAngle operator = (const double & v);
 
-	DegAngle operator + (const double & v) const {
-		return DegAngle(Normalize(value + v));
-	}
+	DegAngle operator + (const double & v) const;
 
-	DegAngle operator - (const double & v) {
-		return DegAngle(Normalize(value - v));
-	}
+	DegAngle operator - (const double & v) const;
 
-	DegAngle& operator +=(const double & v) {
-		value = Normalize(value + v);
-		return *this;
-	}
+	DegAngle& operator +=(const double & v);
 
-	DegAngle& operator -=(const double & v) {
-		value = Normalize(value - v);
-		return *this;
-	}
+	DegAngle& operator -=(const double & v);
 
-	bool operator ==(const double & v) const {
-		return (value) == (Normalize(v));
-	}
-	bool operator !=(const double & v) const {
-		return (value) != (Normalize(v));
-	}
+	bool operator ==(const double & v) const;
+
+	bool operator !=(const double & v) const;
 };
 #endif //  _PATH_PLANNING_BASE_ANGLE_H
