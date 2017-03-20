@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Clothoid.cpp" />
     <ClCompile Include="CoordTransform.cpp" />
     <ClCompile Include="DataCenter.cpp" />
     <ClCompile Include="GaussProjection.cpp" />
@@ -90,11 +91,13 @@
   <ItemGroup>
     <ClInclude Include="BaseAngle.h" />
     <ClInclude Include="BaseType.h" />
+    <ClInclude Include="Clothoid.h" />
     <ClInclude Include="CoordTransform.h" />
     <ClInclude Include="DataCenter.h" />
     <ClInclude Include="GaussProjection.h" />
     <ClInclude Include="testGit.h" />
     <ClInclude Include="testModule.h" />
+    <ClInclude Include="Variables.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -16,6 +16,9 @@
     <Filter Include="头文件\Utils">
       <UniqueIdentifier>{db7a0bea-15e3-4cbd-8b59-11607e978909}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\PathGenerate">
+      <UniqueIdentifier>{d4b75397-4b32-4f8a-9ac7-0d535fec7c43}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,16 +39,13 @@
     <ClCompile Include="testGit.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Clothoid.cpp">
+      <Filter>头文件\PathGenerate</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CoordTransform.h">
       <Filter>头文件\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseAngle.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseType.h">
-      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DataCenter.h">
       <Filter>头文件</Filter>
@@ -58,6 +58,18 @@
     </ClInclude>
     <ClInclude Include="testGit.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Clothoid.h">
+      <Filter>头文件\PathGenerate</Filter>
+    </ClInclude>
+    <ClInclude Include="Variables.h">
+      <Filter>头文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseType.h">
+      <Filter>头文件\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseAngle.h">
+      <Filter>头文件\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
