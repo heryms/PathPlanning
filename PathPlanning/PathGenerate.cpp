@@ -63,8 +63,4 @@ void path_generate_grid(PosPoint startPt, PosPoint endPt){
 
 	}
 
-
-
-
-
 }
