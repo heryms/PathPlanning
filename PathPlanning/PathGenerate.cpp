@@ -80,7 +80,7 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 	
 
 }
-void PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
+bool PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
 	// create clothoid curve
 	Clothoid path_clothoid(startPt.x, startPt.y, startPt.angle, endPt.x, endPt.y, endPt.angle);
 
