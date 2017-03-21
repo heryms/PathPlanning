@@ -21,7 +21,8 @@ private:
 public:
 
 	~LcmHandler() {
-			delete _lcm;
+		uninitialLcm();
+		//delete _lcm;
 	}
 	LcmHandler()
 	{
