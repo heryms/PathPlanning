@@ -12,6 +12,11 @@ using ckLcmType::Location_t;
 using ckLcmType::VeloGrid_t;
 using ckLcmType::cloudHandler;
 
+enum CurbDirection{
+	LEFT = 0,
+	RIGHT
+};
+
 class DataCenter
 {
 private:
@@ -54,7 +59,8 @@ public:
 	bool HasCurb();
 	//return Lidar Data
 	VeloGrid_t GetLidarData();
-
+	//return a point on road edge
+	PosPoint GetRoadEdgePoint(double y, CurbDirection dir);
 
 private:
 
