@@ -89,10 +89,10 @@ Function：
 int CoordTransform::WorldtoLocal(PosPoint org, double xIn, double yIn, double &xOut, double &yOut)
 {
 	double dx = 0, dy = 0, dstX = 0, dstY = 0;
-	dx = xIn - org.X;
-	dy = yIn - org.Y;
-	dstX = dx*cos(org.Angle) - dy*sin(org.Angle);
-	dstY = dx*sin(org.Angle) + dy*cos(org.Angle);
+	dx = xIn - org.x;
+	dy = yIn - org.y;
+	dstX = dx*cos(org.angle) - dy*sin(org.angle);
+	dstY = dx*sin(org.angle) + dy*cos(org.angle);
 	xOut = dstX;
 	yOut = dstY;
 
@@ -103,17 +103,17 @@ int CoordTransform::WorldtoLocal(PosPoint org, double xIn, double yIn, double &x
 int CoordTransform::LocaltoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut)
 {
 	double dx = 0, dy = 0, dstX = 0, dstY = 0;
-	dstX = xIn*cos(org.Angle) + yIn*sin(org.Angle);
-	dstY = -xIn*sin(org.Angle) + yIn*cos(org.Angle);
-	xOut = dstX + org.X;
-	yOut = dstY + org.Y;
+	dstX = xIn*cos(org.angle) + yIn*sin(org.angle);
+	dstY = -xIn*sin(org.angle) + yIn*cos(org.angle);
+	xOut = dstX + org.x;
+	yOut = dstY + org.y;
 	return 1;
 }
 
 bool CoordTransform::LocaltoGrid(PosPoint org, int &xOut, int &yOut)
 {
-	xOut = (int)((org.X - X_START) / Grid);
-	yOut = (int)((org.Y - Y_START) / Grid);
+	xOut = (int)((org.x - X_START) / Grid);
+	yOut = (int)((org.y - Y_START) / Grid);
 	if (xOut>=0 && xOut <= Grid_NUM_X && yOut >=0 && yOut<=Grid_NUM_Y)
 	{
 		return true;
