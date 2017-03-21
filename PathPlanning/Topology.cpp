@@ -1,18 +1,34 @@
 #include "Topology.h"
-double Distance(RoadPoint m1, RoadPoint m2)
+
+
+//两点距离的平方
+double Topology::Distance2(RoadPoint m1, RoadPoint m2)
 {
 	return (m1.x - m2.x)*(m1.x - m2.x) + (m1.y - m2.y)*(m1.y - m2.y);
 }
-double cosangle(RoadPoint m1, RoadPoint m2, RoadPoint m3)
+
+//三点余弦
+double Topology::cosangle(RoadPoint m1, RoadPoint m2, RoadPoint m3)
 {
 	return (m2.x - m1.x)*(m2.x - m3.x) + (m2.y - m1.y)*(m2.y - m3.y);
 }
-double multiply(RoadPoint sp, RoadPoint ep, RoadPoint op)
+
+double Topology::multiply(RoadPoint sp, RoadPoint ep, RoadPoint op)
 {
 	return((sp.x - op.x)*(ep.y - op.y) - (ep.x - op.x)*(sp.y - op.y));
 }
+//符号函数
+int Topology::sign(double m)
+{
+	if (m > 0)
+		return 1;
+	if (m < 0)
+		return -1;
+
+	return 0;
+}
 //判断线段与线段是否相交
-bool intersect(LINESEG u, LINESEG v)
+bool Topology::intersect(LINESEG u, LINESEG v)
 {
 	return((std::max(u.s.x, u.e.x) >= std::min(v.s.x, v.e.x)) &&                     //排斥实验 
 		(std::max(v.s.x, v.e.x) >= std::min(u.s.x, u.e.x)) &&
@@ -21,14 +37,21 @@ bool intersect(LINESEG u, LINESEG v)
 		(multiply(v.s, u.e, u.s)*multiply(u.e, v.e, u.s) >= 0) &&         //跨立实验 
 		(multiply(u.s, v.e, v.s)*multiply(v.e, u.e, v.s) >= 0));
 }
-bool CurveInsects(RoadPoint Up[], RoadPoint Down[], LINESEG u)
+
+//点与多边形关系判断
+bool Topology::InsideConvexPolygon(int vcount, RoadPoint polygon[], RoadPoint q)
+{
+	return false;
+}
+//判断两条曲线是否相交，其中GPSPtNum为路网点扩充的数量或gps点的数量
+bool Topology::CurveInsects(RoadPoint Up[], RoadPoint Down[], LINESEG u, int GPSPtNum)
 {
 
 	bool flag_up, flag_down;
 	flag_down = flag_up = 0;
 
 	// TODO:(HERYMS) fileLength REMAIN TO SOLVED
-	for (int i = 0; i < fileLength - 1; i++)
+	for (int i = 0; i < GPSPtNum - 1; i++)
 	{
 		LINESEG l;
 		l.s = Up[i];
@@ -40,7 +63,7 @@ bool CurveInsects(RoadPoint Up[], RoadPoint Down[], LINESEG u)
 		}
 	}
 
-	for (int i = 0; i < fileLength - 1; i++)
+	for (int i = 0; i < GPSPtNum - 1; i++)
 	{
 		LINESEG l;
 		l.s = Down[i];
@@ -58,7 +81,7 @@ bool CurveInsects(RoadPoint Up[], RoadPoint Down[], LINESEG u)
 }
 
 //获取线段交点
-RoadPoint getIntersectPoint(RoadPoint u1, RoadPoint u2, RoadPoint v1, RoadPoint v2){
+RoadPoint Topology::getIntersectPoint(RoadPoint u1, RoadPoint u2, RoadPoint v1, RoadPoint v2){
 	RoadPoint ret = u1;
 	double t = ((u1.x - v1.x)*(v1.y - v2.y) - (u1.y - v1.y)*(v1.x - v2.x))
 		/ ((u1.x - u2.x)*(v1.y - v2.y) - (u1.y - u2.y)*(v1.x - v2.x));
@@ -68,7 +91,7 @@ RoadPoint getIntersectPoint(RoadPoint u1, RoadPoint u2, RoadPoint v1, RoadPoint 
 }
 
 //计算点（x,y）到线段的距离
-double PointToSegDist(double x, double y, double x1, double y1, double x2, double y2)
+double Topology::PointToSegDist(double x, double y, double x1, double y1, double x2, double y2)
 {
 	double cross = (x2 - x1) * (x - x1) + (y2 - y1) * (y - y1);
 	if (cross <= 0) return sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1));
@@ -83,7 +106,7 @@ double PointToSegDist(double x, double y, double x1, double y1, double x2, doubl
 }
 
 //已知直线上两点，求直线方程ax+by+c=0(a >= 0)
-void  makeline(RoadPoint p1, RoadPoint p2, double &a, double &b, double &c)
+void  Topology::makeline(RoadPoint p1, RoadPoint p2, double &a, double &b, double &c)
 {
 	int sign = 1;
 	a = p2.y - p1.y;
@@ -96,7 +119,7 @@ void  makeline(RoadPoint p1, RoadPoint p2, double &a, double &b, double &c)
 	c = sign*(p1.y*p2.x - p1.x*p2.y);
 }
 //判断线段和直线是否相交
-bool  Line_Seg_Intersect(double x1, double y1, double x2, double y2, double a, double b, double c)
+bool  Topology::Line_Seg_Intersect(double x1, double y1, double x2, double y2, double a, double b, double c)
 {
 	if ((x1*a + y1*b + c)*(x2*a + y2*b + c) <= 0)
 	{
@@ -105,7 +128,7 @@ bool  Line_Seg_Intersect(double x1, double y1, double x2, double y2, double a, d
 	else return false;
 }
 
-bool LineIntersection(double a1, double b1, double c1, double a2, double b2, double c2, RoadPoint &p)
+bool Topology::LineIntersection(double a1, double b1, double c1, double a2, double b2, double c2, RoadPoint &p)
 {
 	double d = a1*b2 - a2*b1;
 	if (d == 0)
@@ -118,7 +141,7 @@ bool LineIntersection(double a1, double b1, double c1, double a2, double b2, dou
 }
 
 //求三角形角平分线和对边的交点
-bool Angle_Bisector_Intersect(RoadPoint p1, RoadPoint p2, RoadPoint p3, RoadPoint &p)
+bool Topology::Angle_Bisector_Intersect(RoadPoint p1, RoadPoint p2, RoadPoint p3, RoadPoint &p)
 {
 	double A1, B1, C1, A2, B2, C2, A3, B3, C3, A4, B4, C4, A5, B5, C5;
 	makeline(p1, p2, A1, B1, C1);
