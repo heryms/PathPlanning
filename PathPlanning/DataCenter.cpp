@@ -45,6 +45,7 @@ void DataCenter::VeloGridRecvOperation(const VeloGrid_t* msg, void*){
 void DataCenter::CurbRecvOperation(const cloudHandler* msg, void*){
 	QuickLock lk(m_lockCurb);
 	m_waitCurb.notify_all();
+	m_lcmMsgCurb = *msg;
 }
 
 void DataCenter::StartAllSensor(){
@@ -79,6 +80,51 @@ VeloGrid_t DataCenter::GetLidarData()
 {
 	QuickLock lk(m_lockVeloGrid);
 	return m_lcmMsgVeloGrid;
+}
+
+PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
+{
+	QuickLock lk(m_lockCurb);
+	PosPoint pt;
+	pt.Y = y;
+	double x;
+	switch (dir)
+	{
+	case LEFT:
+		if (m_lcmMsgCurb.cloud[0].x)
+		{
+			x = -(m_lcmMsgCurb.cloud[0].y * y + m_lcmMsgCurb.cloud[0].z) / m_lcmMsgCurb.cloud[0].x;
+			pt.X = x;
+		}
+		else
+		{
+			x = 0;
+			pt.Y = -m_lcmMsgCurb.cloud[0].z / m_lcmMsgCurb.cloud[0].y;
+			pt.X = x;
+		}
+
+		pt.Angle = atan(y / x);
+		break;
+	case RIGHT:
+		if (m_lcmMsgCurb.cloud[1].x)
+		{
+			x = -(m_lcmMsgCurb.cloud[1].y * y + m_lcmMsgCurb.cloud[1].z) / m_lcmMsgCurb.cloud[1].x;
+			pt.X = x;
+		}
+		else
+		{
+			x = 0;
+			pt.Y = -m_lcmMsgCurb.cloud[1].z / m_lcmMsgCurb.cloud[1].y;
+		}
+
+		break;
+	default:
+		break;
+	}
+
+	double angle = atan(y / x);
+	pt.Angle = RadAngle::Normalize(angle);
+	return pt;
 }
 
 bool DataCenter::WaitForLocation(unsigned int milliseconds){
@@ -116,3 +162,4 @@ bool DataCenter::HasVeloGrid(){
 bool DataCenter::HasCurb(){
 	return m_lcmCurb.HasLcmMessage();
 }
+

@@ -14,6 +14,11 @@ using ckLcmType::Location_t;
 using ckLcmType::VeloGrid_t;
 using ckLcmType::cloudHandler;
 
+enum CurbDirection{
+	LEFT = 0,
+	RIGHT
+};
+
 class DataCenter
 {
 private:
@@ -60,6 +65,8 @@ public:
 	CarInfo GetCarInfo();
 	//return Lidar Data
 	VeloGrid_t GetLidarData();
+	//return a point on road edge
+	PosPoint GetRoadEdgePoint(double y, CurbDirection dir);
 	/*continue while Location Processing completed*/
 	bool WaitForLocation(unsigned int milliseconds);
 	/*continue while StatusBody Processing completed*/
@@ -76,6 +83,7 @@ public:
 	bool HasVeloGrid();
 	/*@return if having curb during 500ms*/
 	bool HasCurb();
+
 private:
 
 };
