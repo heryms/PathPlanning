@@ -3,8 +3,8 @@ void PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 	
 	// 
 	int * grid_map = new int[MAP_HEIGHT*MAP_WIDTH];
-	int * grid_map_start = new int[MAP_HEIGHT*MAP_WIDTH];
-	int * grid_map_end = new int[MAP_HEIGHT*MAP_WIDTH];
+	int * grid_map_start = new int[MAP_HEIGHT];
+	int * grid_map_end = new int[MAP_HEIGHT];
 	int x_start = 0;
 	int y_start = 0;
 	int x_end = 0;
@@ -32,20 +32,24 @@ void PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 		}*/
 		if (((int)rdPt[i].x + 9) >= 0 && ((int)rdPt[i].x + 9) <= MAP_WIDTH - 1)
 		{
-			grid_map_end[MAP_WIDTH*(int)rdPt[i].y + (int)rdPt[i].x + 9] = (int)rdPt[i].x + 9 > grid_map_end[MAP_WIDTH*(int)rdPt[i].y + (int)rdPt[i].x + 9] ?
-				(int)rdPt[i].x + 9 : (int)rdPt[i].x + 9;
+			grid_map_end[(int)rdPt[i].y] =
+				(int)rdPt[i].x + 9 > grid_map_end[(int)rdPt[i].y] 
+				?
+				(int)rdPt[i].x + 9 : grid_map_end[(int)rdPt[i].y];
 			
 		}
 		else{
-			grid_map_end[MAP_WIDTH*(int)rdPt[i].y + (int)rdPt[i].x + 9] = MAP_WIDTH - 1;
+			grid_map_end[(int)rdPt[i].y] = MAP_WIDTH - 1;
 		}
 		if (((int)rdPt[i].x - 9) >= 0 && ((int)rdPt[i].x - 9) <= MAP_WIDTH - 1)
 		{
-			grid_map_start[MAP_WIDTH*(int)rdPt[i].y + (int)rdPt[i].x - 9] = (int)rdPt[i].x - 9 < grid_map_start[MAP_WIDTH*(int)rdPt[i].y + (int)rdPt[i].x + 9] ?
-				(int)rdPt[i].x - 9 : (int)rdPt[i].x - 9;
+			grid_map_start[(int)rdPt[i].y] = 
+				(int)rdPt[i].x - 9 < grid_map_start[(int)rdPt[i].y]
+				?
+				(int)rdPt[i].x - 9 : grid_map_start[(int)rdPt[i].y];
 		}
 		else{
-			grid_map_start[MAP_WIDTH*(int)rdPt[i].y + (int)rdPt[i].x - 9] = 0;
+			grid_map_start[(int)rdPt[i].y] = 0;
 		}
 		
 	}
@@ -56,8 +60,8 @@ void PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 	for (int i = 0; i < obstacle_size;i++)
 	{
 		int x, y;
-		int start = grid_map_start[MAP_WIDTH * y + x];
-		int end = grid_map_end[MAP_WIDTH*y + x];
+		int start = grid_map_start[y];
+		int end = grid_map_end[y];
 		if (x >= start && x <= end)
 			return ;
 
