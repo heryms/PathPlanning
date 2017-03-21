@@ -85,6 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CarControl.cpp" />
     <ClCompile Include="Clothoid.cpp" />
     <ClCompile Include="BaseAngle.cpp" />
     <ClCompile Include="CoordTransform.cpp" />
@@ -92,6 +93,7 @@
     <ClCompile Include="GaussProjection.cpp" />
     <ClCompile Include="LoopThread.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PathDraw.cpp" />
     <ClCompile Include="PathGenerate.cpp" />
     <ClCompile Include="testGit.cpp" />
     <ClCompile Include="testModule.cpp" />
@@ -100,19 +102,23 @@
   <ItemGroup>
     <ClInclude Include="BaseAngle.h" />
     <ClInclude Include="BaseType.h" />
+    <ClInclude Include="CarControl.h" />
     <ClInclude Include="Clothoid.h" />
     <ClInclude Include="CoordTransform.h" />
     <ClInclude Include="DataCenter.h" />
     <ClInclude Include="GaussProjection.h" />
     <ClInclude Include="lcmtype\controlcommand_t.hpp" />
+    <ClInclude Include="lcmtype\DecisionDraw_t.hpp" />
     <ClInclude Include="lcmtype\lasercurb_t.hpp" />
     <ClInclude Include="lcmtype\LcmRecvHelper.h" />
+    <ClInclude Include="lcmtype\LcmSet.h" />
     <ClInclude Include="lcmtype\LcmType_Handler.h" />
     <ClInclude Include="lcmtype\Location_t.hpp" />
     <ClInclude Include="lcmtype\pointXYZI.hpp" />
     <ClInclude Include="lcmtype\StatusBody_t.hpp" />
     <ClInclude Include="lcmtype\VeloGrid_t.hpp" />
     <ClInclude Include="LoopThread.h" />
+    <ClInclude Include="PathDraw.h" />
     <ClInclude Include="PathGenerate.h" />
     <ClInclude Include="testGit.h" />
     <ClInclude Include="testModule.h" />

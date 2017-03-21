@@ -1,13 +1,6 @@
 #include "DataCenter.h"
+#include "lcmtype\LcmSet.h"
 
-#define LCM_NET_LOCATION ""
-#define LCM_CHANNEL_LOCATION "CKLOCATION"
-#define LCM_NET_STATUS_BODY ""
-#define LCM_CHANNEL_STATUS_BODY "CKSTATUS"
-#define LCM_NET_VELO_GRID ""
-#define LCM_CHANNEL_VELO_GRID "CKVELOGRID"
-#define LCM_NET_CLOUD ""
-#define LCM_CHANNEL_CLOUD "CKCLOUD"
 
 typedef std::unique_lock<std::mutex> QuickLock;
 
