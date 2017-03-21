@@ -60,6 +60,12 @@
     <ClCompile Include="PathGenerate.cpp">
       <Filter>PathGenerate</Filter>
     </ClCompile>
+    <ClCompile Include="CarControl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PathDraw.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataCenter.h">
@@ -121,6 +127,18 @@
     </ClInclude>
     <ClInclude Include="PathGenerate.h">
       <Filter>PathGenerate</Filter>
+    </ClInclude>
+    <ClInclude Include="CarControl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\LcmSet.h">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\DecisionDraw_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="PathDraw.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
