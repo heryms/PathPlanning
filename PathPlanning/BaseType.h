@@ -22,9 +22,9 @@ typedef struct {
 
 typedef struct
 {
-	double  X;
-	double  Y;
-	RadAngle  Angle;
+	double  x;
+	double  y;
+	RadAngle  angle;
 }PosPoint;
 
 typedef struct {
@@ -32,11 +32,11 @@ typedef struct {
 	double steerAngle;
 }CarInfo;
 
-typedef struct tagRoadPoint
+typedef struct tagRoadPoint : public PosPoint
 {
-	double x;
-	double y;
-	double angle;
+	//double x;
+	//double y;
+	//double angle;
 	double changeangle;
 	double k;
 }RoadPoint;
