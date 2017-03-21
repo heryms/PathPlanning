@@ -69,9 +69,9 @@ void DataCenter::EndAllSensor(){
 
 PosPoint DataCenter::GetCurPosition(){
 	QuickLock lk(m_lockCurb);
-	m_curPos.X = m_lcmMsgLocation.gau_pos[1] + 500000;
-	m_curPos.Y = m_lcmMsgLocation.gau_pos[0];
-	m_curPos.Angle = PI / 2 - m_lcmMsgLocation.orientation[2];
+	m_curPos.x = m_lcmMsgLocation.gau_pos[1] + 500000;
+	m_curPos.y = m_lcmMsgLocation.gau_pos[0];
+	m_curPos.angle = PI / 2 - m_lcmMsgLocation.orientation[2];
 	return m_curPos;
 }
 
@@ -92,7 +92,7 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 {
 	QuickLock lk(m_lockCurb);
 	PosPoint pt;
-	pt.Y = y;
+	pt.y = y;
 	double x;
 	switch (dir)
 	{
@@ -100,27 +100,27 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 		if (m_lcmMsgCurb.cloud[0].x)
 		{
 			x = -(m_lcmMsgCurb.cloud[0].y * y + m_lcmMsgCurb.cloud[0].z) / m_lcmMsgCurb.cloud[0].x;
-			pt.X = x;
+			pt.x = x;
 		}
 		else
 		{
 			x = 0;
-			pt.Y = -m_lcmMsgCurb.cloud[0].z / m_lcmMsgCurb.cloud[0].y;
-			pt.X = x;
+			pt.y = -m_lcmMsgCurb.cloud[0].z / m_lcmMsgCurb.cloud[0].y;
+			pt.x = x;
 		}
 
-		pt.Angle = atan(y / x);
+		pt.angle = atan(y / x);
 		break;
 	case RIGHT:
 		if (m_lcmMsgCurb.cloud[1].x)
 		{
 			x = -(m_lcmMsgCurb.cloud[1].y * y + m_lcmMsgCurb.cloud[1].z) / m_lcmMsgCurb.cloud[1].x;
-			pt.X = x;
+			pt.x = x;
 		}
 		else
 		{
 			x = 0;
-			pt.Y = -m_lcmMsgCurb.cloud[1].z / m_lcmMsgCurb.cloud[1].y;
+			pt.y = -m_lcmMsgCurb.cloud[1].z / m_lcmMsgCurb.cloud[1].y;
 		}
 
 		break;
@@ -129,7 +129,7 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 	}
 
 	double angle = atan(y / x);
-	pt.Angle = RadAngle::Normalize(angle);
+	pt.angle = RadAngle::Normalize(angle);
 	return pt;
 }
 

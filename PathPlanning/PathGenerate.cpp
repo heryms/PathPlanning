@@ -14,7 +14,7 @@ void PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 	CoordTransform::LocaltoGrid(endPt, x_end, y_end);
 
 	// create clothoid curve
-	Clothoid path_clothoid(x_start, y_start, startPt.Angle, x_end, y_end, endPt.Angle);
+	Clothoid path_clothoid(x_start, y_start, startPt.angle, x_end, y_end, endPt.angle);
 
 	// get roadPoints
 	int num_pt = 100;
@@ -66,7 +66,7 @@ void PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 }
 void PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
 	// create clothoid curve
-	Clothoid path_clothoid(startPt.X, startPt.Y, startPt.Angle, endPt.X, endPt.Y, endPt.Angle);
+	Clothoid path_clothoid(startPt.x, startPt.y, startPt.angle, endPt.x, endPt.y, endPt.angle);
 
 	// get roadPoints
 	int num_pt = 100;
@@ -80,9 +80,9 @@ void PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
 		int x = 0;
 		int y = 0;
 		PosPoint pt;
-		pt.X = rdPt[i].x;
-		pt.Y = rdPt[i].y;
-		pt.Angle = rdPt[i].angle;
+		pt.x = rdPt[i].x;
+		pt.y = rdPt[i].y;
+		pt.angle = rdPt[i].angle;
 		CoordTransform::LocaltoGrid(pt, x, y);
 		gridPt[i].x = x;
 		gridPt[i].y = y;
