@@ -5,8 +5,8 @@
 #define eps1 2.2204e-016
 #define infcon 10000000
 #define Grid 0.2
-#define MAP_WIDTH 100
-#define MAP_HEIGHT 100
+#define MAP_WIDTH 400
+#define MAP_HEIGHT 150
 #define Grid_NUM_X MAP_WIDTH / Grid
 #define Grid_NUM_Y MAP_WIDTH / Grid
 #define X_START -MAP_WIDTH / 2

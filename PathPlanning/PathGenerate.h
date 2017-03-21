@@ -13,7 +13,7 @@ public:
 	~PathGenerate()
 	{
 	}
-	void path_generate_grid(PosPoint startPt, PosPoint endPt);
+	bool path_generate_grid(PosPoint startPt, PosPoint endPt);
 	void path_generate_local(PosPoint startPt, PosPoint endPt);
 private:
 

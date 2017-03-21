@@ -1,6 +1,9 @@
 #include "PathGenerate.h"
-void PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
-	
+#include "DataCenter.h"
+bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
+
+	VeloGrid_t veloGrids=DataCenter::GetInstance().GetLidarData();
+
 	// 
 	int * grid_map = new int[MAP_HEIGHT*MAP_WIDTH];
 	int * grid_map_start = new int[MAP_HEIGHT];
@@ -55,17 +58,26 @@ void PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 	}
 
 	//
-	int * new_obstacle = new int[100];
+	
 	int obstacle_size;
-	for (int i = 0; i < obstacle_size;i++)
+	for (size_t i = 0; i < veloGrids.height; i++)
 	{
-		int x, y;
-		int start = grid_map_start[y];
-		int end = grid_map_end[y];
-		if (x >= start && x <= end)
-			return ;
-
+		for (size_t j = 0; j < veloGrids.width; j++)
+		{
+			int index = i*veloGrids.width + j;
+			if (veloGrids.velo_grid[i])
+			{
+				bool flag = j >= grid_map_start[j] && grid_map_end[j] <= j;
+				if (flag)
+				{
+					return false;
+				}
+			}
+		}
 	}
+
+	return true;
+	
 
 }
 void PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
@@ -77,7 +89,6 @@ void PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
 	RoadPoint *rdPt = new RoadPoint[num_pt];
 	RoadPoint *gridPt = new RoadPoint[num_pt];
 	path_clothoid.PointsOnClothoid(rdPt, num_pt);
-
 	//
 	for (auto i = 0; i < num_pt; i++)
 	{
