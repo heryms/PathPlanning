@@ -52,9 +52,15 @@ private:
 	void VeloGridRecvOperation(const VeloGrid_t* msg, void*);
 	/*triggered while receiving Cloud */
 	void CurbRecvOperation(const cloudHandler* msg, void*);
-public:
+protected:
 	DataCenter();
 	~DataCenter();
+public:
+	static DataCenter& GetInstance();
+	DataCenter(DataCenter const&) = delete;             
+	DataCenter(DataCenter&&) = delete;                  
+	DataCenter& operator=(DataCenter const&) = delete;  
+	DataCenter& operator=(DataCenter &&) = delete;
 	/*start all sensors*/
 	void StartAllSensor();
 	/*end all sensors*/

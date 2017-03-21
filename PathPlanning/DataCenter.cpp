@@ -17,6 +17,12 @@ DataCenter::DataCenter()
 
 DataCenter::~DataCenter()
 {
+	EndAllSensor();
+}
+
+DataCenter& DataCenter::GetInstance() {
+	static DataCenter dataCenter;
+	return dataCenter;
 }
 
 void DataCenter::LocationRecvOperation(const Location_t* msg, void*){
