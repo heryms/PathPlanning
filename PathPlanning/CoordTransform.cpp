@@ -109,3 +109,28 @@ int CoordTransform::LocaltoWorld(PosPoint org, double xIn, double yIn, double &x
 	yOut = dstY + org.Y;
 	return 1;
 }
+
+bool CoordTransform::LocaltoGrid(PosPoint org, int &xOut, int &yOut)
+{
+	xOut = (int)((org.X - X_START) / Grid);
+	yOut = (int)((org.Y - Y_START) / Grid);
+	if (xOut>=0 && xOut <= Grid_NUM_X && yOut >=0 && yOut<=Grid_NUM_Y)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+bool CoordTransform::GridtoLocal(int xIn, int yIn, double &xOut, double &yOut){
+	xOut = xIn * Grid;
+	yOut = yIn * Grid;
+	if (xOut >= X_START && xOut <= MAP_WIDTH && yOut >= Y_START && yOut <= MAP_HEIGHT)
+	{
+		return true;
+	}
+	else{
+		return false;
+	}
+}
