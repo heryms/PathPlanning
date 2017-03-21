@@ -137,8 +137,8 @@ void PathGenerate::path_generate(){
 	int delta_Grid_start = 4;
 	int delta_Grid_end = 8;
 	PosPoint startPt, endPt;
-	startPt.x = 200;
-	startPt.y = 75;
+	startPt.x = 75;
+	startPt.y = 200;
 	startPt.angle = 90 / 180.0 * PI;
 	bool send_succeed=false;
 	for (int i = delta_Grid_start; i < delta_Grid_end;i++)
