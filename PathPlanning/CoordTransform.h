@@ -1,11 +1,12 @@
 #pragma once
 #include "BaseType.h"
+#include "Variables.h"
 /************************************************************************/
 /*  class for coordinate transform
     created:2017/3/19 
 	created by heryms zjm
 	remain tested
-	untested
+	
 */
 /************************************************************************/
 
@@ -23,7 +24,8 @@ class CoordTransform
 public:
 	static int WorldtoLocal(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
 	static int LocaltoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
-
+	static bool LocaltoGrid(PosPoint org, int &xOut, int &yOut);
+	static bool GridtoLocal(int xIn, int yIn, double &xOut, double &yOut);
 	// image to road
 	static int ImageToRoad(CamParam *pCamParam, int iIimage, int iJimage, double *pdIRoad, double *pdJRoad);
 	static double calcYcameraFromUimage(CamParam *pCamParam, double dUimage);

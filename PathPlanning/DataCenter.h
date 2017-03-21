@@ -52,6 +52,10 @@ public:
 	bool HasVeloGrid();
 	/*@return if having curb during 500ms*/
 	bool HasCurb();
+	//return Lidar Data
+	VeloGrid_t GetLidarData();
+
+
 private:
 
 };

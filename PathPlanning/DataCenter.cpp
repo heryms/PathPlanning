@@ -31,7 +31,7 @@ void DataCenter::StatusBodyRecvOperation(const StatusBody_t* msg, void*){
 }
 
 void DataCenter::VeloGridRecvOperation(const VeloGrid_t* msg, void*){
-
+	m_lcmMsgVeloGrid = *msg;
 }
 
 void DataCenter::CurbRecvOperation(const cloudHandler* msg, void*){
@@ -73,5 +73,10 @@ bool DataCenter::HasVeloGrid(){
 }
 
 bool DataCenter::HasCurb(){
-	return m_lcmCurb.HasLcmMessage()
+	return m_lcmCurb.HasLcmMessage();
+}
+
+VeloGrid_t DataCenter::GetLidarData()
+{
+	return m_lcmMsgVeloGrid;
 }
