@@ -21,7 +21,8 @@ private:
 public:
 
 	~LcmHandler() {
-			delete _lcm;
+		uninitialLcm();
+		//delete _lcm;
 	}
 	LcmHandler()
 	{
@@ -108,7 +109,7 @@ public:
 		//std::this_thread::sleep_for(std::chrono::milliseconds(20));
 		delete _lcm;
 		_channel = " ";
-		_rcvMsg = NULL;
+		_rcvMsg = nullptr;
 		_lcm = nullptr;
 		_lpParam = nullptr;
 	}

@@ -10,7 +10,7 @@ private:
 	steady_clock::time_point endTime;
 	bool hasMsg;
 public:
-	LcmRecvHelper() :LcmHandler(), hasMsg(false){
+	LcmRecvHelper() :LcmHandler<T>(), hasMsg(false){
 
 	}
 
@@ -54,7 +54,7 @@ public:
 
 	void uninitialLcm(){
 		std::cout << typeid(T).name() << " Stoping..." << std::endl;
-		LcmHandler<T>::uninitialLcm();
+		//__super::uninitialLcm();
 		hasMsg = false;
 		std::cout << typeid(T).name() << " Stoped" << std::endl;
 	}
