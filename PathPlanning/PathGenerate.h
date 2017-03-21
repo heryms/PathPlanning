@@ -25,7 +25,6 @@ public:
 private:
 	double target_X;
 	double target_Y;
-	double 
 };
 
 

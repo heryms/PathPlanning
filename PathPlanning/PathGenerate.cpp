@@ -111,7 +111,7 @@ bool PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
 	// step one get rightest point
 	int index = getRightestPoints(rdPt, num_pt);
 	// step two consider the car width
-	rdPt[index].x += 0.9;
+	rdPt[index].x += 0.9;   
 
 	// TODO get the a,b,c
 	double a, b, c;
@@ -148,7 +148,7 @@ void PathGenerate::path_generate(){
 		//TODO set angle
 		if (path_generate_grid(startPt, endPt)){
 			std::cout << "congratulations a successful root" << std::endl;
-			// step four send the data 
+			// TODO: step four send the data 
 			send_succeed = true;
 			break;
 
@@ -156,7 +156,7 @@ void PathGenerate::path_generate(){
 	}
 	if (!send_succeed)
 	{
-		// step five send message about how to stop
+		//TODO: step five send message about how to stop
 
 	}
 
