@@ -1,5 +1,5 @@
 #include "PathGenerate.h"
-void path_generate_grid(PosPoint startPt, PosPoint endPt){
+void PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 	
 	// 
 	int * grid_map = new int[MAP_HEIGHT*MAP_WIDTH];
@@ -63,8 +63,30 @@ void path_generate_grid(PosPoint startPt, PosPoint endPt){
 
 	}
 
+}
+void PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
+	// create clothoid curve
+	Clothoid path_clothoid(startPt.X, startPt.Y, startPt.Angle, endPt.X, endPt.Y, endPt.Angle);
 
+	// get roadPoints
+	int num_pt = 100;
+	RoadPoint *rdPt = new RoadPoint[num_pt];
+	RoadPoint *gridPt = new RoadPoint[num_pt];
+	path_clothoid.PointsOnClothoid(rdPt, num_pt);
 
-
-
+	//
+	for (auto i = 0; i < num_pt; i++)
+	{
+		int x = 0;
+		int y = 0;
+		PosPoint pt;
+		pt.X = rdPt[i].x;
+		pt.Y = rdPt[i].y;
+		pt.Angle = rdPt[i].angle;
+		CoordTransform::LocaltoGrid(pt, x, y);
+		gridPt[i].x = x;
+		gridPt[i].y = y;
+		gridPt[i].angle = rdPt[i].angle;
+		gridPt[i].changeangle = rdPt[i].changeangle;
+	}
 }
