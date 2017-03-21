@@ -463,6 +463,7 @@ void Clothoid::PointsOnClothoid(RoadPoint XY[], int npts)
 	double C[1];
 	double S[1];
 	int j = 0;
+
 #ifdef LOG_CLOTHOID
 
 	FILE *fp=fopen("clothoid.txt","a+");
