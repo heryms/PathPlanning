@@ -92,6 +92,7 @@
     <ClCompile Include="GaussProjection.cpp" />
     <ClCompile Include="LoopThread.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PathGenerate.cpp" />
     <ClCompile Include="testGit.cpp" />
     <ClCompile Include="testModule.cpp" />
     <ClCompile Include="Topology.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="lcmtype\StatusBody_t.hpp" />
     <ClInclude Include="lcmtype\VeloGrid_t.hpp" />
     <ClInclude Include="LoopThread.h" />
+    <ClInclude Include="PathGenerate.h" />
     <ClInclude Include="testGit.h" />
     <ClInclude Include="testModule.h" />
     <ClInclude Include="Topology.h" />

@@ -57,6 +57,9 @@
     <ClCompile Include="CoordTransform.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="PathGenerate.cpp">
+      <Filter>PathGenerate</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataCenter.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="lcmtype\VeloGrid_t.hpp">
       <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="PathGenerate.h">
+      <Filter>PathGenerate</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
