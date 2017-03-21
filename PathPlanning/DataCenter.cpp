@@ -101,8 +101,7 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 			pt.X = x;
 		}
 
-		double angle = atan(y / x);
-		pt.Angle = angle;
+		pt.Angle = atan(y / x);
 		break;
 	case RIGHT:
 		if (m_lcmMsgCurb.cloud[1].x)
