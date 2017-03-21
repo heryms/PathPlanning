@@ -71,7 +71,7 @@ public:
 	bool WaitForLocation(unsigned int milliseconds);
 	/*continue while StatusBody Processing completed*/
 	bool WaitForStatusBody(unsigned int milliseconds);
-	/*continue whileVeloGrid Processing completed*/
+	/*continue while VeloGrid Processing completed*/
 	bool WaitForVeloGrid(unsigned int milliseconds);
 	/*continue while Curb Processing completed*/
 	bool WaitForCurb(unsigned int milliseconds);
