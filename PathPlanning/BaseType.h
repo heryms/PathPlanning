@@ -27,9 +27,27 @@ typedef struct
 	RadAngle  angle;
 }PosPoint;
 
+enum EGear {
+	UNKNOWN = 0,
+	N = 1,
+	D = 2,
+	R = 3,
+	P = 4,
+	L = 5
+};
+
+enum ERunState {
+	IDLE=0,
+	START=1,
+	STOP=2,
+	E_STOP=3
+};
+
 typedef struct {
 	double speed;
 	double steerAngle;
+	EGear gear;
+	ERunState state;
 }CarInfo;
 
 typedef struct tagRoadPoint : public PosPoint
