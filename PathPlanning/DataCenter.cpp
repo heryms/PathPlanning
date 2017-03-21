@@ -13,6 +13,7 @@ typedef std::unique_lock<std::mutex> QuickLock;
 
 DataCenter::DataCenter()
 {
+
 }
 
 DataCenter::~DataCenter()
@@ -102,8 +103,6 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 			pt.Y = -m_lcmMsgCurb.cloud[0].z / m_lcmMsgCurb.cloud[0].y;
 			pt.X = x;
 		}
-
-		pt.Angle = atan(y / x);
 		break;
 	case RIGHT:
 		if (m_lcmMsgCurb.cloud[1].x)
