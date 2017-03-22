@@ -24,6 +24,7 @@ public:
 	}
 	bool path_generate_grid(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids,std::vector<RoadPoint>& genPoints);
 	bool path_generate_local(PosPoint startPt, PosPoint endPt);
+	bool path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& genPoints);
 	void path_generate();
 	int getRightestPoints(RoadPoint *rdPt, int num_Pt);
 	double getTargetDirection();
