@@ -175,7 +175,12 @@ void PathGenerate::path_generate(){
 	if (!send_succeed)
 	{
 		//TODO: step five send message about how to stop
-
+		CarInfo info;
+		info.speed = 0;
+		info.state = E_STOP;
+		info.steerAngle = 0;
+		info.gear = D;
+		m_sendControl.SendCommand(info);
 	}
 
 }

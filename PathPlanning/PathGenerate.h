@@ -6,10 +6,12 @@
 #include "DataCenter.h"
 #include <vector>
 #include "PathDraw.h"
+#include "CarControl.h"
 class PathGenerate
 {
 private:
 	PathDraw m_sendPath;
+	CarControl m_sendControl;
 public:
 	PathGenerate()
 	{

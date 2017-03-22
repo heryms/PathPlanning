@@ -9,13 +9,22 @@
 #include <fstream>
 #include "testModule.h"
 #include <vector>
+#include "DataCenter.h"
+#include "PathGenerate.h"
 int main()
 {
 	//CoordTransform transform;
 	//test_Clothoid();
-	std::vector<int> b;
-	b.resize(100);
-	test_Array(b._Myfirst, 100);
-
+	DataCenter::GetInstance().StartAllSensor();
+	__thread_sleep_for(1000);
+	PathGenerate pathGen;
+	while (true)
+	{
+		if (!DataCenter::GetInstance().WaitForVeloGrid(20)) {
+			return;
+		}
+		pathGen.path_generate();
+	}
+	DataCenter::GetInstance().EndAllSensor();
 	return 0;
 }
