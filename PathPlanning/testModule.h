@@ -12,5 +12,5 @@ void test_To_Guassian(
 	double lon, double lat
 	);
 void test_Clothoid();
-
+void test_Array(int a[], int length);
 #endif

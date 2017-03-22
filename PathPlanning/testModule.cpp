@@ -38,3 +38,10 @@ void test_Clothoid()
 	Clothoid clo(0.0, 0.0, 0.0, 50.0, 50.0, PI / 2.0);
 	clo.PointsOnClothoid(rdPt, 100);
 }
+
+void test_Array(int a[], int length)
+{
+	for (int i = 0; i < length; i++) {
+		a[i] = i;
+	}
+}

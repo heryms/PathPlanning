@@ -103,7 +103,7 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 			pt.x = x;
 		}
 
-		pt.Angle = atan(y / x);
+		pt.angle = atan(y / x);
 		break;
 	case RIGHT:
 		if (m_lcmMsgCurb.cloud[1].x)
@@ -125,6 +125,24 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 	double angle = atan(y / x);
 	pt.angle = RadAngle::Normalize(angle);
 	return pt;
+}
+
+laserCurbs::pointXYZI DataCenter::GetRoadEdgeCoefficient(CurbDirection dir)
+{
+	QuickLock lk(m_lockCurb);
+	laserCurbs::pointXYZI coeff;
+	switch (dir)
+	{
+	case LEFT:
+		coeff = m_lcmMsgCurb.cloud[0];
+		break;
+	case RIGHT:
+		coeff = m_lcmMsgCurb.cloud[1];
+		break;
+	default:
+		break;
+	}
+	return laserCurbs::pointXYZI();
 }
 
 bool DataCenter::WaitForLocation(unsigned int milliseconds){

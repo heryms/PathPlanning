@@ -73,6 +73,8 @@ public:
 	VeloGrid_t GetLidarData();
 	//return a point on road edge
 	PosPoint GetRoadEdgePoint(double y, CurbDirection dir);
+	/*@return The Coefficient of Road Edge Line*/ 
+	laserCurbs::pointXYZI GetRoadEdgeCoefficient(CurbDirection dir);
 	/*continue while Location Processing completed*/
 	bool WaitForLocation(unsigned int milliseconds);
 	/*continue while StatusBody Processing completed*/

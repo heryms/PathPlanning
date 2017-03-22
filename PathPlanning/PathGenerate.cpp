@@ -1,8 +1,8 @@
 #include "PathGenerate.h"
-#include "DataCenter.h"
-bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 
-	VeloGrid_t veloGrids=DataCenter::GetInstance().GetLidarData();
+bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmType::VeloGrid_t& veloGrids,std::vector<RoadPoint>& rdPt ){
+
+	//VeloGrid_t veloGrids=DataCenter::GetInstance().GetLidarData();
 
 	// 
 	int * grid_map_start = new int[MAP_HEIGHT];
@@ -20,8 +20,8 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt){
 
 	// get roadPoints
 	int num_pt = 100;
-	RoadPoint *rdPt = new RoadPoint[num_pt];
-	path_clothoid.PointsOnClothoid(rdPt, num_pt);
+	rdPt.resize(num_pt);// = new RoadPoint[num_pt];
+	path_clothoid.PointsOnClothoid(rdPt._Myfirst, num_pt);
 
 	//
 	for (int i = 0; i < num_pt;i++)
@@ -114,7 +114,11 @@ bool PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
 	rdPt[index].x += 0.9;   
 
 	// TODO get the a,b,c
+	laserCurbs::pointXYZI coeff = DataCenter::GetInstance().GetRoadEdgeCoefficient(RIGHT);
 	double a, b, c;
+	a = coeff.x;
+	b = coeff.y;
+	c = coeff.z;
 	double distance = abs(a*rdPt[index].x + b*rdPt[index].y + c) / sqrtf(a*a + b*b);
 	if (distance<0.3)
 	{
@@ -130,7 +134,11 @@ bool PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
 void PathGenerate::path_generate(){
 
 	// step one receive data
-
+	if (!DataCenter::GetInstance().HasVeloGrid()) {
+		std::cout << "Warning::not velogrid message" << std::endl;
+		return;
+	}
+	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 	// step two get the target points and target direction
 
 	// step three generate the path
@@ -146,9 +154,19 @@ void PathGenerate::path_generate(){
 		endPt.y = target_Y;
 		endPt.x = target_X - i;
 		//TODO set angle
-		if (path_generate_grid(startPt, endPt)){
+		std::vector<RoadPoint> rdpt;
+		if (path_generate_grid(startPt, endPt, veloGrids,rdpt)){
 			std::cout << "congratulations a successful root" << std::endl;
-			// TODO: step four send the data 
+			// TODO: step four send the data
+			ckLcmType::DecisionDraw_t draw;
+			draw.num = rdpt.size();
+			draw.Path_x.resize(rdpt.size());
+			draw.Path_y.resize(rdpt.size());
+			for (RoadPoint pt : rdpt) {
+				draw.Path_x.push_back(pt.x);
+				draw.Path_y.push_back(pt.y);
+			}
+			m_sendPath.SendDraw(draw);
 			send_succeed = true;
 			break;
 
@@ -162,7 +180,7 @@ void PathGenerate::path_generate(){
 
 }
 double PathGenerate::getTargetDirection(){
-
+	return 0.0;
 }
 int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt){
 
