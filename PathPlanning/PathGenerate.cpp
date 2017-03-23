@@ -1,5 +1,5 @@
 #include "PathGenerate.h"
-
+#define LOG_CLOTHOID
 bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmType::VeloGrid_t& veloGrids,std::vector<RoadPoint>& rdPt ){
 
 	//VeloGrid_t veloGrids=DataCenter::GetInstance().GetLidarData();
@@ -21,7 +21,7 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmTyp
 	// get roadPoints
 	int num_pt = 100;
 	rdPt.resize(num_pt);// = new RoadPoint[num_pt];
-	path_clothoid.PointsOnClothoid(rdPt._Myfirst, num_pt);
+	path_clothoid.PointsOnClothoid(rdPt, num_pt);
 
 	//
 	
@@ -75,7 +75,7 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmTyp
 	}
 #endif // !TEST
 
-	int obstacle_size;
+	//int obstacle_size;
 	for (size_t i = 0; i < veloGrids.height; i++)
 	{
 		for (size_t j = 0; j < veloGrids.width; j++)
@@ -100,51 +100,51 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmTyp
 
 }
 bool PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
-	// create clothoid curve
-	Clothoid path_clothoid(startPt.x, startPt.y, startPt.angle, endPt.x, endPt.y, endPt.angle);
+	//// create clothoid curve
+	//Clothoid path_clothoid(startPt.x, startPt.y, startPt.angle, endPt.x, endPt.y, endPt.angle);
 
-	// get roadPoints
-	int num_pt = 100;
-	RoadPoint *rdPt = new RoadPoint[num_pt];
-	RoadPoint *gridPt = new RoadPoint[num_pt];
-	path_clothoid.PointsOnClothoid(rdPt, num_pt);
-	// change to grid
-	for (auto i = 0; i < num_pt; i++)
-	{
-		int x = 0;
-		int y = 0;
-		PosPoint pt;
-		pt.x = rdPt[i].x;
-		pt.y = rdPt[i].y;
-		pt.angle = rdPt[i].angle;
-		CoordTransform::LocaltoGrid(pt, x, y);
-		gridPt[i].x = x;
-		gridPt[i].y = y;
-		gridPt[i].angle = rdPt[i].angle;
-		gridPt[i].changeangle = rdPt[i].changeangle;
-	}
-	// define whether intersected or not
+	//// get roadPoints
+	//int num_pt = 100;
+	//RoadPoint *rdPt = new RoadPoint[num_pt];
+	//RoadPoint *gridPt = new RoadPoint[num_pt];
+	//path_clothoid.PointsOnClothoid(rdPt, num_pt);
+	//// change to grid
+	//for (auto i = 0; i < num_pt; i++)
+	//{
+	//	int x = 0;
+	//	int y = 0;
+	//	PosPoint pt;
+	//	pt.x = rdPt[i].x;
+	//	pt.y = rdPt[i].y;
+	//	pt.angle = rdPt[i].angle;
+	//	CoordTransform::LocaltoGrid(pt, x, y);
+	//	gridPt[i].x = x;
+	//	gridPt[i].y = y;
+	//	gridPt[i].angle = rdPt[i].angle;
+	//	gridPt[i].changeangle = rdPt[i].changeangle;
+	//}
+	//// define whether intersected or not
 
-	// step one get rightest point
-	int index = getRightestPoints(rdPt, num_pt);
-	// step two consider the car width
-	rdPt[index].x += 0.9;   
+	//// step one get rightest point
+	//int index = getRightestPoints(rdPt, num_pt);
+	//// step two consider the car width
+	//rdPt[index].x += 0.9;   
 
-	// TODO get the a,b,c
-	laserCurbs::pointXYZI coeff = DataCenter::GetInstance().GetRoadEdgeCoefficient(RIGHT);
-	double a, b, c;
-	a = coeff.x;
-	b = coeff.y;
-	c = coeff.z;
-	double distance = abs(a*rdPt[index].x + b*rdPt[index].y + c) / sqrtf(a*a + b*b);
-	if (distance<0.3)
-	{
-		return false;
-	}
-	else
-	{
+	//// TODO get the a,b,c
+	//laserCurbs::pointXYZI coeff = DataCenter::GetInstance().GetRoadEdgeCoefficient(RIGHT);
+	//double a, b, c;
+	//a = coeff.x;
+	//b = coeff.y;
+	//c = coeff.z;
+	//double distance = abs(a*rdPt[index].x + b*rdPt[index].y + c) / sqrtf(a*a + b*b);
+	//if (distance<0.3)
+	//{
+	//	return false;
+	//}
+	//else
+	//{
 		return true;
-	}
+	//}
 
 
 }
@@ -157,10 +157,12 @@ void PathGenerate::path_generate(){
 	}
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 	// step two get the target points and target direction
-
+	target_X = 75;
+	target_Y = 400;
+	double target_Angle = DataCenter::GetInstance().GetRoadEdgePoint(target_Y, RIGHT).angle;
 	// step three generate the path
-	int delta_Grid_start = 4;
-	int delta_Grid_end = 8;
+	int delta_Grid_start = -20;
+	int delta_Grid_end = 20;
 	PosPoint startPt, endPt;
 	startPt.x = 75;
 	startPt.y = 200;
@@ -170,19 +172,29 @@ void PathGenerate::path_generate(){
 	{
 		endPt.y = target_Y;
 		endPt.x = target_X - i;
+		endPt.angle = PI / 2;
 		//TODO set angle
 		std::vector<RoadPoint> rdpt;
 		if (path_generate_grid_obstacle(startPt, endPt, veloGrids,rdpt)){
 			std::cout << "congratulations a successful root" << std::endl;
 			// TODO: step four send the data
+
+#ifdef LOG_CLOTHOID
+
+			FILE *fp = fopen("clothoid.txt", "a+");
+#endif // LOG_CLOTHOID
 			ckLcmType::DecisionDraw_t draw;
 			draw.num = rdpt.size();
-			draw.Path_x.resize(rdpt.size());
-			draw.Path_y.resize(rdpt.size());
 			for (RoadPoint pt : rdpt) {
-				draw.Path_x.push_back(pt.x);
-				draw.Path_y.push_back(pt.y);
+				double x, y;
+				CoordTransform::GridtoLocal(pt.x+X_START, pt.y-Y_START, x, y);
+				draw.Path_x.push_back(x);
+				draw.Path_y.push_back(y);
+				fprintf(fp, "%lf %lf %lf\n", x,y, pt.angle);
 			}
+#ifdef LOG_CLOTHOID
+			fclose(fp);
+#endif // 
 			m_sendPath.SendDraw(draw);
 			send_succeed = true;
 			break;
@@ -191,6 +203,7 @@ void PathGenerate::path_generate(){
 	}
 	if (!send_succeed)
 	{
+		std::cout << "no path" << std::endl;
 		//TODO: step five send message about how to stop
 		CarInfo info;
 		info.speed = 0;
@@ -221,31 +234,30 @@ int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt){
 bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt)
 {
 	// 
-
-	int x_start = 0;
-	int y_start = 0;
-	int x_end = 0;
-	int y_end = 0;
+	int x_start = startPt.x;
+	int y_start = startPt.y;
+	int x_end = endPt.x;
+	int y_end = endPt.y;
 	// TRANSFORM TO GRID COORDINATE
-	CoordTransform::LocaltoGrid(startPt, x_start, y_start);
-	CoordTransform::LocaltoGrid(endPt, x_end, y_end);
+//	CoordTransform::LocaltoGrid(startPt, x_start, y_start);
+//	CoordTransform::LocaltoGrid(endPt, x_end, y_end);
 
 	// create clothoid curve
 	Clothoid path_clothoid(x_start, y_start, startPt.angle, x_end, y_end, endPt.angle);
 
 	// get roadPoints
 	int num_pt = 100;
+	rdPt.clear();
 	rdPt.resize(num_pt);// = new RoadPoint[num_pt];
-	path_clothoid.PointsOnClothoid(rdPt._Myfirst, num_pt);
-
+	path_clothoid.PointsOnClothoid(rdPt, num_pt);
 	for (int i = 0; i < num_pt; i++)
 	{
 		// may be a bug can be saver
 		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
 		{
-			if (((int)rdPt[i].x + j) >= 0 && ((int)rdPt[i].x + j) <= MAP_WIDTH - 1)
+			if ((int)(rdPt[i].x +0.5+ j) >= 0 && ((int)(rdPt[i].x +0.5+ j)) <= MAP_WIDTH - 1)
 			{
-				int index = MAP_WIDTH*(int)rdPt[i].y + (int)rdPt[i].x + j;
+				int index = MAP_WIDTH*(int)(rdPt[i].y+0.5) + (int)(rdPt[i].x+0.5) + j;
 				if (veloGrids.velo_grid[index]){
 					return false;
 				}

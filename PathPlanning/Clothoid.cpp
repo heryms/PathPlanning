@@ -397,13 +397,13 @@ void Clothoid::BuildClothoid(double tol /*=0.05*/)
 	// % Newton iteration
 	findA(A, Aguess, delta, phi0, tol);
 
-	double* h = new double;
-	double* g = new double;
-	memset(h, 0, sizeof(double));
-	memset(g, 0, sizeof(double));
+	double h = 0;// new double;
+	double g = 0;// new double;
+	//memset(h, 0, sizeof(double));
+	//memset(g, 0, sizeof(double));
 	//% final operation
-	intXY(h, g, 1, 2 * A, delta - A, phi0);
-	_L = r / h[0];
+	intXY(&h,&g, 1, 2 * A, delta - A, phi0);
+	_L = r / h;
 
 	if (_L > 0)
 	{
@@ -417,8 +417,8 @@ void Clothoid::BuildClothoid(double tol /*=0.05*/)
 		_L = infcon;
 	}
 
-	delete h;
-	delete g;
+	//delete h;
+	//delete g;
 }
 
 void Clothoid::findA(double &A, double Aguess, double delta, double phi0, double tol)
@@ -458,29 +458,24 @@ double Clothoid::guessA(double phi0, double phi1)
 }
 
 //XY为保存Clothoid上点的数组，npts为点的个数
-void Clothoid::PointsOnClothoid(RoadPoint XY[], int npts)
+void Clothoid::PointsOnClothoid(std::vector<RoadPoint>& XY, int npts)
 {
-	double C[1];
-	double S[1];
+	double C;
+	double S;
 	int j = 0;
 
-#ifdef LOG_CLOTHOID
-
-	FILE *fp=fopen("clothoid.txt","a+");
-#endif // LOG_CLOTHOID
-	for (double t = 0; t <= _L;)
+	for (double t = 0; t <= _L&&j < 100;)
 	{
-		intXY(C, S, 1, _dk * t * t, _k * t, _theta0);
+		intXY(&C, &S, 1, _dk * t * t, _k * t, _theta0);
 
-		XY[j].x = _x0 + t*C[0];
-		XY[j].y = _y0 + t*S[0];
+		XY[j].x = _x0 + t*C;
+		XY[j].y = _y0 + t*S;
 		XY[j].angle = _theta0 + t*_k + 0.5*t*t*_dk;
 		//clothoidpath[j].x=XY[j];
 		//clothoidpath[j].y=XY[npts+j];
 		//fprintf(fp,"%d\t%f\t%f\n",j, clothoidpath[j].x,clothoidpath[j].y);
-		t = t + _L / (double)npts;
+		t = t + _L / npts;
 
-		fprintf(fp, "%lf %lf %lf\n", XY[j].x, XY[j].y, XY[j].angle);
 
 		j++;
 
@@ -488,9 +483,6 @@ void Clothoid::PointsOnClothoid(RoadPoint XY[], int npts)
 	
 	//delete C;
 	//delete S;
-#ifdef LOG_CLOTHOID
-	fclose(fp);
-#endif // 
 
 	//	
 }

@@ -26,7 +26,7 @@ public:
 		std::chrono::milliseconds time = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 		if (time.count() > 500){
 			hasMsg = false;
-			std::cout << "Warning::May not " << typeid(T).name() << "!" << std::endl;
+			//std::cout << "Warning::May not " << typeid(T).name() << "!" << std::endl;
 		}
 		else{
 			hasMsg = true;

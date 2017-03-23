@@ -11,6 +11,7 @@
 #include "BaseType.h"
 #include <memory.h>
 #include <fstream>
+#include <vector>
 
 class Clothoid
 {
@@ -30,7 +31,7 @@ public:
 
 	}
 	void BuildClothoid(double tol = 0.05);
-	void PointsOnClothoid(RoadPoint XY[], int npts);
+	void PointsOnClothoid(std::vector<RoadPoint>& XY, int npts);
 
 protected:
 	void FresnelCS(double *FresnelC, double *FresnelS, double y);

@@ -75,6 +75,8 @@ public:
 	PosPoint GetRoadEdgePoint(double y, CurbDirection dir);
 	/*@return The Coefficient of Road Edge Line*/ 
 	laserCurbs::pointXYZI GetRoadEdgeCoefficient(CurbDirection dir);
+	/*@return The Plan Target Point*/
+	PosPoint GetTargetPoint();
 	/*continue while Location Processing completed*/
 	bool WaitForLocation(unsigned int milliseconds);
 	/*continue while StatusBody Processing completed*/

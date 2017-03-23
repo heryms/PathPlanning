@@ -33,7 +33,7 @@ void DataCenter::StatusBodyRecvOperation(const StatusBody_t* msg, void*){
 
 void DataCenter::VeloGridRecvOperation(const VeloGrid_t* msg, void*){
 	QuickLock lk(m_lockVeloGrid);
-	m_lcmMsgVeloGrid = *msg;
+	m_lcmMsgVeloGrid = *msg;	
 	m_waitVeloGrid.notify_all();
 }
 
@@ -106,9 +106,9 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 		pt.angle = atan(y / x);
 		break;
 	case RIGHT:
-		if (m_lcmMsgCurb.cloud[1].x)
+		if (m_lcmMsgCurb.cloud[3].x)
 		{
-			x = -(m_lcmMsgCurb.cloud[1].y * y + m_lcmMsgCurb.cloud[1].z) / m_lcmMsgCurb.cloud[1].x;
+			x = -(m_lcmMsgCurb.cloud[3].y * y + m_lcmMsgCurb.cloud[3].z) / m_lcmMsgCurb.cloud[3].x;
 			pt.x = x;
 		}
 		else
@@ -123,7 +123,7 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 	}
 
 	double angle = atan(y / x);
-	pt.angle = RadAngle::Normalize(angle);
+	pt.angle = PI+RadAngle::Normalize(angle);
 	return pt;
 }
 
@@ -143,6 +143,10 @@ laserCurbs::pointXYZI DataCenter::GetRoadEdgeCoefficient(CurbDirection dir)
 		break;
 	}
 	return laserCurbs::pointXYZI();
+}
+
+PosPoint DataCenter::GetTargetPoint() {
+	return PosPoint();
 }
 
 bool DataCenter::WaitForLocation(unsigned int milliseconds){

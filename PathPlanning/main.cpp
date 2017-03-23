@@ -11,6 +11,7 @@
 #include <vector>
 #include "DataCenter.h"
 #include "PathGenerate.h"
+#include <chrono>
 int main()
 {
 	//CoordTransform transform;
@@ -21,9 +22,16 @@ int main()
 	while (true)
 	{
 		if (!DataCenter::GetInstance().WaitForVeloGrid(20)) {
-			return;
+			continue;
 		}
+		std::chrono::steady_clock::time_point startTime
+			= std::chrono::steady_clock::now();
 		pathGen.path_generate();
+		std::chrono::steady_clock::time_point endTime
+			= std::chrono::steady_clock::now();
+		std::chrono::milliseconds time
+			= std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+		std::cout << time.count() << std::endl;
 	}
 	DataCenter::GetInstance().EndAllSensor();
 	return 0;

@@ -36,7 +36,7 @@ void test_Clothoid()
 	RoadPoint *rdPt = new RoadPoint[100];
 
 	Clothoid clo(0.0, 0.0, 0.0, 50.0, 50.0, PI / 2.0);
-	clo.PointsOnClothoid(rdPt, 100);
+	//clo.PointsOnClothoid(rdPt, 100);
 }
 
 void test_Array(int a[], int length)
