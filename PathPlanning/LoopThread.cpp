@@ -155,6 +155,7 @@ int ZBaseLoopThread::ThreadBody(ZBaseLoopThread * loopThread)
 				lck.unlock();
 				loopThread->suspendcv.notify_one();
 			}
+			//std::this_thread::yield();
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			continue;
 		}

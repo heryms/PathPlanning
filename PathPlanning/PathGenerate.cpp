@@ -1,7 +1,7 @@
 #include "PathGenerate.h"
 #include <assert.h>
 #define LOG_CLOTHOID
-bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmType::VeloGrid_t& veloGrids,std::vector<RoadPoint>& rdPt ){
+bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmType::VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt) {
 
 	//VeloGrid_t veloGrids=DataCenter::GetInstance().GetLidarData();
 
@@ -26,7 +26,7 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmTyp
 
 	//
 	
-	for (int i = 0; i < num_pt;i++)
+	for (int i = 0; i < num_pt; i++)
 	{
 		// may be a bug can be saver
 		/*for (int j = -4; j <= 4;j++)
@@ -42,7 +42,7 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmTyp
 				(int)rdPt[i].x + CAR_WIDTH : grid_map_end[(int)rdPt[i].y];
 			
 		}
-		else{
+		else {
 			grid_map_end[(int)rdPt[i].y] = MAP_WIDTH - 1;
 		}
 		if (((int)rdPt[i].x - CAR_WIDTH) >= 0 && ((int)rdPt[i].x - CAR_WIDTH) <= MAP_WIDTH - 1)
@@ -52,7 +52,7 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmTyp
 				?
 				(int)rdPt[i].x - CAR_WIDTH : grid_map_start[(int)rdPt[i].y];
 		}
-		else{
+		else {
 			grid_map_start[(int)rdPt[i].y] = 0;
 		}
 		
@@ -60,14 +60,14 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmTyp
 
 	//
 #ifdef TEST
-	for (int i=0; i<num_pt;i++){
+	for (int i = 0; i < num_pt; i++) {
 
-		for (int j = -CAR_WIDTH; j <= CAR_WIDTH;j++)
+		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
 		{
 			if (((int)rdPt[i].x + j) >= 0 && ((int)rdPt[i].x + j) <= MAP_WIDTH - 1)
 			{
 				index = [MAP_WIDTH*(int)rdPt[i].y + (int)rdPt[i].x + j];
-				if (veloGrids.velo_grid[index]){
+				if (veloGrids.velo_grid[index]) {
 					return false
 				}
 			}
@@ -100,7 +100,8 @@ bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmTyp
 	
 
 }
-bool PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
+
+bool PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt) {
 	//// create clothoid curve
 	//Clothoid path_clothoid(startPt.x, startPt.y, startPt.angle, endPt.x, endPt.y, endPt.angle);
 
@@ -149,11 +150,16 @@ bool PathGenerate::path_generate_local(PosPoint startPt, PosPoint endPt){
 
 
 }
-void PathGenerate::path_generate(){
+
+void PathGenerate::path_generate() {
 
 	// step one receive data
 	if (!DataCenter::GetInstance().HasVeloGrid()) {
 		std::cout << "Warning::not velogrid message" << std::endl;
+		return;
+	}
+	if (!DataCenter::GetInstance().HasCurb()) {
+		std::cout << "Warning::not curb message" << std::endl;
 		return;
 	}
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
@@ -168,15 +174,15 @@ void PathGenerate::path_generate(){
 	startPt.x = 75;
 	startPt.y = 200;
 	startPt.angle = 90 / 180.0 * PI;
-	bool send_succeed=false;
-	for (int i = delta_Grid_start; i < delta_Grid_end;i++)
+	bool send_succeed = false;
+	for (int i = delta_Grid_start; i < delta_Grid_end; i++)
 	{
 		endPt.y = target_Y;
 		endPt.x = target_X - i;
 		endPt.angle = target_Angle;
 		//TODO set angle
 		std::vector<RoadPoint> rdpt;
-		if (path_generate_grid_obstacle(startPt, endPt, veloGrids,rdpt)){
+		if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
 			std::cout << "congratulations a successful root" << std::endl;
 			// TODO: step four send the data
 
@@ -186,12 +192,14 @@ void PathGenerate::path_generate(){
 #endif // LOG_CLOTHOID
 			ckLcmType::DecisionDraw_t draw;
 			draw.num = rdpt.size();
-			for (RoadPoint pt : rdpt) {
+			draw.Path_x.reserve(draw.num);
+			draw.Path_y.reserve(draw.num);
+			for (RoadPoint& pt : rdpt) {
 				double x, y;
-				CoordTransform::GridtoLocal(pt.x+X_START, pt.y-Y_START, x, y);
+				CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
 				draw.Path_x.push_back(x);
 				draw.Path_y.push_back(y);
-				fprintf(fp, "%lf %lf %lf\n", x,y, pt.angle);
+				fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
 			}
 #ifdef LOG_CLOTHOID
 			fclose(fp);
@@ -215,14 +223,16 @@ void PathGenerate::path_generate(){
 	}
 
 }
-double PathGenerate::getTargetDirection(){
+
+double PathGenerate::getTargetDirection() {
 	return 0.0;
 }
-int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt){
+
+int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt) {
 
 	int maxVal_x = rdPt[0].x;
 	int index = 0;
-	for (int i = 0; i < numPt;i++)
+	for (int i = 0; i < numPt; i++)
 	{
 		if (rdPt[i].x > maxVal_x)
 		{
@@ -232,6 +242,7 @@ int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt){
 	}
 	return index;
 }
+
 bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt)
 {
 	// 
@@ -248,7 +259,7 @@ bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt,
 
 	// get roadPoints
 	int num_pt = 100;
-	rdPt.clear();
+	//rdPt.clear();
 	rdPt.resize(num_pt);// = new RoadPoint[num_pt];
 	path_clothoid.PointsOnClothoid(rdPt, num_pt);
 	for (int i = 0; i < num_pt; i++)
@@ -256,10 +267,10 @@ bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt,
 		// may be a bug can be saver
 		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
 		{
-			if ((int)(rdPt[i].x +0.5+ j) >= 0 && ((int)(rdPt[i].x +0.5+ j)) <= MAP_WIDTH - 1)
+			if ((int)(rdPt[i].x + 0.5 + j) >= 0 && ((int)(rdPt[i].x + 0.5 + j)) <= MAP_WIDTH - 1)
 			{
-				int index = MAP_WIDTH*(int)(rdPt[i].y+0.5) + (int)(rdPt[i].x+0.5) + j;
-				if (veloGrids.velo_grid[index]){
+				int index = MAP_WIDTH*(int)(rdPt[i].y + 0.5) + (int)(rdPt[i].x + 0.5) + j;
+				if (veloGrids.velo_grid[index]) {
 					return false;
 				}
 			}

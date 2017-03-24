@@ -16,7 +16,8 @@ int main()
 {
 	//CoordTransform transform;
 	//test_Clothoid();
-	DataCenter::GetInstance().StartAllSensor();
+	DataCenter::GetInstance().StartVeloGrid();
+	DataCenter::GetInstance().StartCurb();
 	__thread_sleep_for(1000);
 	PathGenerate pathGen;
 	while (true)

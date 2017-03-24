@@ -10,9 +10,10 @@ template <typename T> class LcmHandler
 {
 //protected:
 	//bool recvOn;
+public:
+	typedef std::function<void(const T*, void *)> msg_output;
 private:
 	void *  _lpParam;
-	typedef std::function<void(const T*, void *)> msg_output;
 	//typedef void (*msg_output)(const T *msg, void * lpParam);
 	msg_output _rcvMsg; //callback function for output data
 	std::string _channel;  //channel  id
@@ -84,7 +85,7 @@ public:
 	int initialLcm(std::string net, std::string channel, msg_output rcv, void * lpParam)
 	{
 		if (_recvThread.Started()){
-			return 0;
+			return -1;
 		}
 		_lpParam = lpParam;
 		_rcvMsg = rcv;
