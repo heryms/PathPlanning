@@ -8,20 +8,22 @@
 #include <queue>
 #include "PathDraw.h"
 #include "CarControl.h"
+#include "ClothoidTrack.h"
 class PathGenerate
 {
 private:
+	ClothoidTrack track;
 	PathDraw m_sendPath;
-	CarControl m_sendControl;
 public:
 	PathGenerate()
 	{
 		createClothoidTable();
+		track.Start();
 	}
 
 	~PathGenerate()
 	{
-
+		track.End();
 	}
 	void createClothoidTable();
 	void generateClothoidPoints(PosPoint startPt, PosPoint endPt, std::vector<RoadPoint>& genPoints);

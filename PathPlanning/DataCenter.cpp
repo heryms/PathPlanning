@@ -1,5 +1,6 @@
 #include "DataCenter.h"
 #include "lcmtype\LcmSet.h"
+#include "LocalCarStatus.h"
 
 
 typedef std::unique_lock<std::mutex> QuickLock;
@@ -28,6 +29,8 @@ void DataCenter::LocationRecvOperation(const Location_t* msg, void*){
 void DataCenter::StatusBodyRecvOperation(const StatusBody_t* msg, void*){
 	QuickLock lk(m_lockStatusBody);
 	m_lcmMsgStatusBody = *msg;
+	LocalCarStatus::GetInstance().SetSteerAngle(msg->wheelAngle);
+	LocalCarStatus::GetInstance().SetSpeed(msg->vehicleSpeed);
 	m_waitStatusBody.notify_all();
 }
 

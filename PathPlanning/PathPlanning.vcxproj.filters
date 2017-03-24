@@ -69,6 +69,15 @@
     <ClCompile Include="filterTool.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="BaseCarStatus.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalCarStatus.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ClothoidTrack.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataCenter.h">
@@ -145,6 +154,15 @@
     </ClInclude>
     <ClInclude Include="filterTool.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseCarStatus.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LocalCarStatus.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ClothoidTrack.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

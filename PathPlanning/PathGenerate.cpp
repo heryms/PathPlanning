@@ -185,7 +185,7 @@ void PathGenerate::path_generate() {
 		if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
 			std::cout << "congratulations a successful root" << std::endl;
 			// TODO: step four send the data
-
+			track.SetPath(rdpt);
 #ifdef LOG_CLOTHOID
 
 			FILE *fp = fopen("clothoid.txt", "a+");
@@ -219,7 +219,7 @@ void PathGenerate::path_generate() {
 		info.state = E_STOP;
 		info.steerAngle = 0;
 		info.gear = D;
-		m_sendControl.SendCommand(info);
+		CarControl::GetInstance().SendCommand(info);
 	}
 
 }

@@ -18,6 +18,7 @@ int main()
 	//test_Clothoid();
 	DataCenter::GetInstance().StartVeloGrid();
 	DataCenter::GetInstance().StartCurb();
+	DataCenter::GetInstance().StartStatusBody();
 	__thread_sleep_for(1000);
 	PathGenerate pathGen;
 	while (true)
