@@ -91,6 +91,7 @@
     <ClCompile Include="BaseAngle.cpp" />
     <ClCompile Include="CoordTransform.cpp" />
     <ClCompile Include="DataCenter.cpp" />
+    <ClCompile Include="filterTool.cpp" />
     <ClCompile Include="GaussProjection.cpp" />
     <ClCompile Include="LoopThread.cpp" />
     <ClCompile Include="main.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="Clothoid.h" />
     <ClInclude Include="CoordTransform.h" />
     <ClInclude Include="DataCenter.h" />
+    <ClInclude Include="filterTool.h" />
     <ClInclude Include="GaussProjection.h" />
     <ClInclude Include="lcmtype\controlcommand_t.hpp" />
     <ClInclude Include="lcmtype\DecisionDraw_t.hpp" />
