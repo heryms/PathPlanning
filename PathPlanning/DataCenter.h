@@ -37,13 +37,13 @@ private:
 	std::mutex m_lockVeloGrid;
 	std::mutex m_lockCurb;
 	std::condition_variable m_waitLocation;
-	std::mutex m_waitLockLocation;
+	//std::mutex m_waitLockLocation;
 	std::condition_variable m_waitStatusBody;
-	std::mutex m_waitLockStatusBody;
+	//std::mutex m_waitLockStatusBody;
 	std::condition_variable m_waitVeloGrid;
-	std::mutex m_waitLockVeloGrid;
+	//std::mutex m_waitLockVeloGrid;
 	std::condition_variable m_waitCurb;
-	std::mutex m_waitLockCurb;
+	//std::mutex m_waitLockCurb;
 	/*triggered while receiving Location_t */
 	void LocationRecvOperation(const Location_t* msg, void*);
 	/*triggered while receiving StatusBody */
@@ -65,13 +65,29 @@ public:
 	void StartAllSensor();
 	/*end all sensors*/
 	void EndAllSensor();
+	/*start Location*/
+	void StartLocation();
+	/*start StatusBody*/
+	void StartStatusBody();
+	/*start VeloGrid*/
+	void StartVeloGrid();
+	/*start cloud*/
+	void StartCurb();
+	/*end location*/
+	void EndLocation();
+	/*end statusboyd*/
+	void EndStatusBody();
+	/*end velogrid*/
+	void EndVeloGrid();
+	/*end curb*/
+	void EndCurb();
 	/*@return x,y in Gauss, orientation by x*/
 	PosPoint GetCurPosition();
 	/*@return speed in km/h£¬ steerAngle in deg*/
 	CarInfo GetCarInfo();
-	//return Lidar Data
-	VeloGrid_t GetLidarData();
-	//return a point on road edge
+	/*return Lidar Data*/
+	VeloGrid_t& GetLidarData();
+	/*return a point on road edge*/
 	PosPoint GetRoadEdgePoint(double y, CurbDirection dir);
 	/*@return The Coefficient of Road Edge Line*/ 
 	laserCurbs::pointXYZI GetRoadEdgeCoefficient(CurbDirection dir);

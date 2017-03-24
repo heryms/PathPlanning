@@ -464,7 +464,7 @@ void Clothoid::PointsOnClothoid(std::vector<RoadPoint>& XY, int npts)
 	double S;
 	int j = 0;
 
-	for (double t = 0; t <= _L&&j < 100;)
+	for (double t = 0; t <= _L && j < npts;j++)
 	{
 		intXY(&C, &S, 1, _dk * t * t, _k * t, _theta0);
 
@@ -475,10 +475,6 @@ void Clothoid::PointsOnClothoid(std::vector<RoadPoint>& XY, int npts)
 		//clothoidpath[j].y=XY[npts+j];
 		//fprintf(fp,"%d\t%f\t%f\n",j, clothoidpath[j].x,clothoidpath[j].y);
 		t = t + _L / npts;
-
-
-		j++;
-
 	}
 	
 	//delete C;

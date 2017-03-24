@@ -44,20 +44,72 @@ void DataCenter::CurbRecvOperation(const cloudHandler* msg, void*){
 }
 
 void DataCenter::StartAllSensor(){
+	StartLocation();
+	StartStatusBody();
+	StartVeloGrid();
+	StartCurb();
+	//m_lcmLocation.initialLcm(LCM_NET_LOCATION, LCM_CHANNEL_LOCATION
+	//	, std::bind(&DataCenter::LocationRecvOperation, this,std::placeholders::_1,std::placeholders::_2),this);
+	//m_lcmStatusBody.initialLcm(LCM_NET_STATUS_BODY, LCM_CHANNEL_STATUS_BODY
+	//	, std::bind(&DataCenter::StatusBodyRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+	//m_lcmVeloGrid.initialLcm(LCM_NET_VELO_GRID, LCM_CHANNEL_VELO_GRID
+	//	, std::bind(&DataCenter::VeloGridRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+	//m_lcmCurb.initialLcm(LCM_NET_CLOUD, LCM_CHANNEL_CLOUD
+	//	, std::bind(&DataCenter::CurbRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+}
+
+void DataCenter::EndAllSensor(){
+	EndLocation();
+	EndStatusBody();
+	EndVeloGrid();
+	EndCurb();
+	//m_lcmLocation.uninitialLcm();
+	//m_lcmStatusBody.uninitialLcm();
+	//m_lcmVeloGrid.uninitialLcm();
+	//m_lcmCurb.uninitialLcm();
+}
+
+void DataCenter::StartLocation()
+{
 	m_lcmLocation.initialLcm(LCM_NET_LOCATION, LCM_CHANNEL_LOCATION
-		, std::bind(&DataCenter::LocationRecvOperation, this,std::placeholders::_1,std::placeholders::_2),this);
+		, std::bind(&DataCenter::LocationRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+}
+
+void DataCenter::StartStatusBody()
+{
 	m_lcmStatusBody.initialLcm(LCM_NET_STATUS_BODY, LCM_CHANNEL_STATUS_BODY
 		, std::bind(&DataCenter::StatusBodyRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+}
+
+void DataCenter::StartVeloGrid()
+{
 	m_lcmVeloGrid.initialLcm(LCM_NET_VELO_GRID, LCM_CHANNEL_VELO_GRID
 		, std::bind(&DataCenter::VeloGridRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+}
+
+void DataCenter::StartCurb()
+{
 	m_lcmCurb.initialLcm(LCM_NET_CLOUD, LCM_CHANNEL_CLOUD
 		, std::bind(&DataCenter::CurbRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
 }
 
-void DataCenter::EndAllSensor(){
+void DataCenter::EndLocation()
+{
 	m_lcmLocation.uninitialLcm();
+}
+
+void DataCenter::EndStatusBody()
+{
 	m_lcmStatusBody.uninitialLcm();
+}
+
+void DataCenter::EndVeloGrid()
+{
 	m_lcmVeloGrid.uninitialLcm();
+}
+
+void DataCenter::EndCurb()
+{
 	m_lcmCurb.uninitialLcm();
 }
 
@@ -76,7 +128,7 @@ CarInfo DataCenter::GetCarInfo(){
 	return m_curCarInfo;
 }
 
-VeloGrid_t DataCenter::GetLidarData()
+VeloGrid_t& DataCenter::GetLidarData()
 {
 	QuickLock lk(m_lockVeloGrid);
 	return m_lcmMsgVeloGrid;
@@ -103,7 +155,7 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 			pt.x = x;
 		}
 
-		pt.angle = atan(y / x);
+		//pt.angle = atan(y / x);
 		break;
 	case RIGHT:
 		if (m_lcmMsgCurb.cloud[3].x)
@@ -114,7 +166,7 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 		else
 		{
 			x = 0;
-			pt.y = -m_lcmMsgCurb.cloud[1].z / m_lcmMsgCurb.cloud[1].y;
+			pt.y = -m_lcmMsgCurb.cloud[3].z / m_lcmMsgCurb.cloud[3].y;
 		}
 
 		break;
@@ -122,8 +174,7 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 		break;
 	}
 
-	double angle = atan(y / x);
-	pt.angle = PI+RadAngle::Normalize(angle);
+	pt.angle = PI + atan(y / x);
 	return pt;
 }
 
@@ -137,7 +188,7 @@ laserCurbs::pointXYZI DataCenter::GetRoadEdgeCoefficient(CurbDirection dir)
 		coeff = m_lcmMsgCurb.cloud[0];
 		break;
 	case RIGHT:
-		coeff = m_lcmMsgCurb.cloud[1];
+		coeff = m_lcmMsgCurb.cloud[3];
 		break;
 	default:
 		break;
@@ -150,22 +201,22 @@ PosPoint DataCenter::GetTargetPoint() {
 }
 
 bool DataCenter::WaitForLocation(unsigned int milliseconds){
-	QuickLock lk(m_waitLockLocation);
-	return m_waitLocation.wait_for(lk,std::chrono::milliseconds(milliseconds))==std::cv_status::no_timeout;
+	QuickLock lk(m_lockLocation);
+	return m_waitLocation.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
 }
 
 bool DataCenter::WaitForStatusBody(unsigned int milliseconds){
-	QuickLock lk(m_waitLockStatusBody);
+	QuickLock lk(m_lockStatusBody);
 	return m_waitStatusBody.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
 }
 
 bool DataCenter::WaitForVeloGrid(unsigned int milliseconds){
-	QuickLock lk(m_waitLockVeloGrid);
+	QuickLock lk(m_lockVeloGrid);
 	return m_waitVeloGrid.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
 }
 
 bool DataCenter::WaitForCurb(unsigned int milliseconds){
-	QuickLock lk(m_waitLockCurb);
+	QuickLock lk(m_lockCurb);
 	return m_waitCurb.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
 }
 
