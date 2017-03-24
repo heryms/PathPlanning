@@ -1,4 +1,5 @@
 #include "PathGenerate.h"
+#include <assert.h>
 #define LOG_CLOTHOID
 bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmType::VeloGrid_t& veloGrids,std::vector<RoadPoint>& rdPt ){
 
@@ -172,7 +173,7 @@ void PathGenerate::path_generate(){
 	{
 		endPt.y = target_Y;
 		endPt.x = target_X - i;
-		endPt.angle = PI / 2;
+		endPt.angle = target_Angle;
 		//TODO set angle
 		std::vector<RoadPoint> rdpt;
 		if (path_generate_grid_obstacle(startPt, endPt, veloGrids,rdpt)){
@@ -269,4 +270,51 @@ bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt,
 
 	
 	return true;
+}
+void PathGenerate::createClothoidTable(){
+
+
+	// step one define the start point and its directions
+	PosPoint start_pt, endPt;
+	start_pt.x = 75;
+	start_pt.y = 200;
+	start_pt.angle = PI / 2;
+
+	clothoidMap.clear();
+	clothoidMap.resize((GRID_END - GRID_START) *(ANGLE_END - ANGLE_START));
+	// step two define the end point and create some directions
+	
+	for (int i = GRID_START; i < GRID_END; i++)
+	{
+
+		endPt.y = target_Y;
+		endPt.x = target_X - i;
+		for (int angle = ANGLE_START; angle < ANGLE_END;angle++)
+		{
+			endPt.angle = angle / 180.0 *PI;
+			std::vector<RoadPoint> rdPt;
+			generateClothoidPoints(start_pt, endPt, rdPt);
+			clothoidMap[(GRID_END - GRID_START)* (i - GRID_START) + (angle - ANGLE_START)] = rdPt;
+		}
+		
+	}
+
+
+}
+void PathGenerate::generateClothoidPoints(PosPoint startPt, PosPoint endPt, std::vector<RoadPoint>& rdPt){
+	
+	// create clothoid curve
+	Clothoid path_clothoid(startPt.x, startPt.y, startPt.angle, endPt.x, endPt.y, endPt.angle);
+
+	// get roadPoints
+	int num_pt = 100;
+	rdPt.clear();
+	rdPt.resize(num_pt);// = new RoadPoint[num_pt];
+	path_clothoid.PointsOnClothoid(rdPt, num_pt);
+}
+std::vector<RoadPoint> PathGenerate::getRdPtFromTable(int grid, int angle){
+
+	int index = grid*(GRID_END - GRID_START) + angle;
+	assert(index >= 0 && index <= clothoidMap.size());
+	return clothoidMap[index];
 }

@@ -13,4 +13,13 @@
 #define Y_START MAP_HEIGHT / 2
 #define CAR_WIDTH 4
 #define CAR_HEIGHT 9
+
+
+//for grid clothoid search map
+#define GRID_START -20
+#define GRID_END 20
+#define ANGLE_START 70
+#define ANGLE_END 110
+
+
 #endif
