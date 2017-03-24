@@ -11,7 +11,7 @@
 #define Grid_NUM_Y MAP_WIDTH / Grid
 #define X_START -MAP_WIDTH / 2
 #define Y_START MAP_HEIGHT / 2
-#define CAR_WIDTH 4
+#define CAR_WIDTH 3
 #define CAR_HEIGHT 9
 
 

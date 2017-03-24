@@ -168,7 +168,7 @@ void PathGenerate::path_generate() {
 	target_Y = 400;
 	double target_Angle = DataCenter::GetInstance().GetRoadEdgePoint(target_Y, RIGHT).angle;
 	// step three generate the path
-	int delta_Grid_start = -20;
+	int delta_Grid_start = -5;
 	int delta_Grid_end = 20;
 	PosPoint startPt, endPt;
 	startPt.x = 75;
@@ -213,6 +213,7 @@ void PathGenerate::path_generate() {
 	if (!send_succeed)
 	{
 		std::cout << "no path" << std::endl;
+		track.SetPath(std::vector<RoadPoint>());
 		//TODO: step five send message about how to stop
 		CarInfo info;
 		info.speed = 0;

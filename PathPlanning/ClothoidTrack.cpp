@@ -19,6 +19,7 @@ public:
 		std::unique_lock<std::mutex> lk(track->m_lock);
 		if (track->path.size() <= 10) return true;
 		track->Track(FindCurv(LocalCarStatus::GetInstance().GetPosition()));
+		return true;
 	}
 
 	double FindCurv(PosPoint cur) {
@@ -80,7 +81,7 @@ void ClothoidTrack::Track(double k)
 	info.gear = D;
 	info.state = START;
 	info.speed = 5;
-	info.steerAngle = atan(-k*2.34) * 18 * 180 / PI;
+	info.steerAngle = atan(-k*2.34) * 18 * 180 / PI-8;
 	CarControl::GetInstance().SendCommand(info);
 }
 

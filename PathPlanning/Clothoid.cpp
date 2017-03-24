@@ -471,6 +471,7 @@ void Clothoid::PointsOnClothoid(std::vector<RoadPoint>& XY, int npts)
 		XY[j].x = _x0 + t*C;
 		XY[j].y = _y0 + t*S;
 		XY[j].angle = _theta0 + t*_k + 0.5*t*t*_dk;
+		XY[j].k = _k+_dk*t;
 		//clothoidpath[j].x=XY[j];
 		//clothoidpath[j].y=XY[npts+j];
 		//fprintf(fp,"%d\t%f\t%f\n",j, clothoidpath[j].x,clothoidpath[j].y);
