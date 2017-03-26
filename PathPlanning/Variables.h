@@ -22,4 +22,6 @@
 #define ANGLE_END 110
 
 
+#define MAX_INT 1<<16-1;
+
 #endif

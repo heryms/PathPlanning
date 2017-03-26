@@ -37,6 +37,7 @@ public:
 	
 
 private:
+	std::vector<RoadPoint> pre_Map;
 	std::vector<std::vector<RoadPoint>> clothoidMap;
 	double target_X;
 	double target_Y;
