@@ -78,6 +78,9 @@
     <ClCompile Include="ClothoidTrack.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="CostFunc.cpp">
+      <Filter>PathGenerate</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataCenter.h">
@@ -163,6 +166,9 @@
     </ClInclude>
     <ClInclude Include="ClothoidTrack.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CostFunc.h">
+      <Filter>PathGenerate</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
