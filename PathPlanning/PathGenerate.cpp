@@ -275,8 +275,6 @@ bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt,
 				}
 			}
 		}
-		
-
 	}
 
 	
