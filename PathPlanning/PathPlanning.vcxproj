@@ -86,13 +86,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BaseCarStatus.cpp" />
+    <ClCompile Include="ClothoidTrack.cpp" />
     <ClCompile Include="CarControl.cpp" />
     <ClCompile Include="Clothoid.cpp" />
     <ClCompile Include="BaseAngle.cpp" />
     <ClCompile Include="CoordTransform.cpp" />
+    <ClCompile Include="CostFunc.cpp" />
     <ClCompile Include="DataCenter.cpp" />
     <ClCompile Include="filterTool.cpp" />
     <ClCompile Include="GaussProjection.cpp" />
+    <ClCompile Include="LocalCarStatus.cpp" />
     <ClCompile Include="LoopThread.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PathDraw.cpp" />
@@ -103,10 +107,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAngle.h" />
+    <ClInclude Include="BaseCarStatus.h" />
+    <ClInclude Include="ClothoidTrack.h" />
     <ClInclude Include="BaseType.h" />
     <ClInclude Include="CarControl.h" />
     <ClInclude Include="Clothoid.h" />
     <ClInclude Include="CoordTransform.h" />
+    <ClInclude Include="CostFunc.h" />
     <ClInclude Include="DataCenter.h" />
     <ClInclude Include="filterTool.h" />
     <ClInclude Include="GaussProjection.h" />
@@ -120,6 +127,7 @@
     <ClInclude Include="lcmtype\pointXYZI.hpp" />
     <ClInclude Include="lcmtype\StatusBody_t.hpp" />
     <ClInclude Include="lcmtype\VeloGrid_t.hpp" />
+    <ClInclude Include="LocalCarStatus.h" />
     <ClInclude Include="LoopThread.h" />
     <ClInclude Include="PathDraw.h" />
     <ClInclude Include="PathGenerate.h" />

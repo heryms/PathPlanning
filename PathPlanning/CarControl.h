@@ -8,10 +8,12 @@
 using ckLcmType::ControlCommand_t;
 class CarControl
 {
-public:
+protected:
 	CarControl();
 	~CarControl();
 	LcmHandler<ControlCommand_t> m_lcmControl;
+public:
+	static CarControl& GetInstance();
 	void SendCommand(CarInfo info);
 };
 

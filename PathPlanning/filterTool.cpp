@@ -19,3 +19,13 @@ double getMean(std::vector<double> angle){
 	}
 	return std::accumulate(angle.begin(), angle.end(), 0) / angle.size();
 }
+std::vector<double> getNormalDistribution(int sigma, int mean, int num){
+	std::vector<double> guassian_prob;
+	guassian_prob.resize(num);
+	double s = 1.0 / (sigma*sqrtf(2 * PI));
+	for (int i = 0; i < num; i++)
+	{
+		guassian_prob[i] = s*exp(-(i - mean)*(i - mean) / (2 * sigma));
+	}
+	return guassian_prob;
+}

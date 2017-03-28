@@ -4,6 +4,9 @@
 #include "Variables.h"
 #include <cmath>
 #include <algorithm>
+#include <vector>
+#include <assert.h>
+#include "DataCenter.h"
 class Topology
 {
 public:
@@ -20,5 +23,6 @@ public:
 	static bool Line_Seg_Intersect(double x1, double y1, double x2, double y2, double a, double b, double c);//判断线段和直线是否相交
 	static bool LineIntersection(double a1, double b1, double c1, double a2, double b2, double c2, RoadPoint &p);//求直线和直线的交点
 	static bool Angle_Bisector_Intersect(RoadPoint p1, RoadPoint p2, RoadPoint p3, RoadPoint &p);//求三角形角平分线和对边的交点(角是p1所在的角）
+	static bool check_velogrid_rdPt_intersected(VeloGrid_t& veloGrids, std::vector<RoadPoint>& genPoints);
 };
 #endif

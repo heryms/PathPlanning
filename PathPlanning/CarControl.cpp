@@ -11,6 +11,12 @@ CarControl::~CarControl()
 
 }
 
+CarControl & CarControl::GetInstance()
+{
+	static CarControl instance;
+	return instance;
+}
+
 void CarControl::SendCommand(CarInfo info)
 {
 	ControlCommand_t msg;
