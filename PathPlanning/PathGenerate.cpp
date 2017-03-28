@@ -326,7 +326,113 @@ void PathGenerate::generateClothoidPoints(PosPoint startPt, PosPoint endPt, std:
 }
 std::vector<RoadPoint> PathGenerate::getRdPtFromTable(int grid, int angle){
 
-	int index = grid*(GRID_END - GRID_START) + angle;
+	int index = grid*(GRID_END - GRID_START) + angle - ANGLE_START;
 	assert(index >= 0 && index <= clothoidMap.size());
 	return clothoidMap[index];
+}
+void PathGenerate::path_generate_using_bug()
+{
+	// step one receive data
+	if (!DataCenter::GetInstance().HasVeloGrid()) {
+		std::cout << "Warning::not velogrid message" << std::endl;
+		return;
+	}
+	if (!DataCenter::GetInstance().HasCurb()) {
+		std::cout << "Warning::not curb message" << std::endl;
+		return;
+	}
+	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+	// step two get the target points and target direction
+	target_X = 75;
+	target_Y = 400;
+	double target_Angle = DataCenter::GetInstance().GetRoadEdgePoint(target_Y, RIGHT).angle;
+	// step three generate the path
+	int delta_Grid_start = -5;
+	int delta_Grid_end = 20;
+	PosPoint startPt, endPt;
+	startPt.x = 75;
+	startPt.y = 200;
+	startPt.angle = 90 / 180.0 * PI;
+	std::vector<std::vector<RoadPoint>> success_root;
+	for (int i = GRID_START; i < GRID_END; i++)
+	{
+
+		endPt.y = target_Y;
+		endPt.x = target_X - i;
+		for (int angle = ANGLE_START; angle < ANGLE_END; angle++)
+		{
+			
+			std::vector<RoadPoint> rdPt;
+			rdPt = getRdPtFromTable(i, angle);
+			if (Topology::check_velogrid_rdPt_intersected(veloGrids, rdPt))
+			{
+				success_root.push_back(rdPt);
+			}
+			
+		}
+	}
+
+	//store and compare the difference of the road
+	if (pre_Root.size() == 0)
+	{
+		if (success_root.size() == 0)
+		{
+			return;
+		}
+		else
+		{
+			// random choose first one
+			// or you can give a direction 
+			// then i can compute the cost
+			// then choose a better one
+			// random choose may cause a problem
+			pre_Root = success_root[0];
+		}
+		
+	}
+	else
+	{
+		if (success_root.size() == 0 )
+		{
+			// choice using the pre the go 
+			// or stop
+			std::cout << "no path" << std::endl;
+			track.SetPath(std::vector<RoadPoint>());
+			//TODO: step five send message about how to stop
+			CarInfo info;
+			info.speed = 0;
+			info.state = E_STOP;
+			info.steerAngle = 0;
+			info.gear = D;
+			CarControl::GetInstance().SendCommand(info);
+		}
+		else{
+			int simi_max = -1000;
+			std::vector<RoadPoint> path;
+			for (auto root : success_root)
+			{
+				double simi = similarity(pre_Root, root);
+				if (simi > simi_max){
+					simi_max = simi;
+					path = root;
+				}
+			}
+			// send the data
+			ckLcmType::DecisionDraw_t draw;
+			draw.num = path.size();
+			draw.Path_x.reserve(draw.num);
+			draw.Path_y.reserve(draw.num);
+			for (RoadPoint& pt : path) {
+				double x, y;
+				CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
+				draw.Path_x.push_back(x);
+				draw.Path_y.push_back(y);
+				//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
+			}
+			m_sendPath.SendDraw(draw);
+			
+		}
+		
+	}
+
 }

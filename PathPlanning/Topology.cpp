@@ -170,5 +170,24 @@ bool Topology::Angle_Bisector_Intersect(RoadPoint p1, RoadPoint p2, RoadPoint p3
 
 	return true;
 }
+bool Topology::check_velogrid_rdPt_intersected(VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt){
+	assert(rdPt.size() >= 0);
+	int num_pt = rdPt.size();
+	for (int i = 0; i < num_pt; i++)
+	{
+		// may be a bug can be saver
+		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
+		{
+			if ((int)(rdPt[i].x + 0.5 + j) >= 0 && ((int)(rdPt[i].x + 0.5 + j)) <= MAP_WIDTH - 1)
+			{
+				int index = MAP_WIDTH*(int)(rdPt[i].y + 0.5) + (int)(rdPt[i].x + 0.5) + j;
+				if (veloGrids.velo_grid[index]) {
+					return false;
+				}
+			}
+		}
 
+
+	}
+}
 
