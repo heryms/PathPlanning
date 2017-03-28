@@ -10,11 +10,11 @@
 #include <queue>
 #include "PathDraw.h"
 #include "CarControl.h"
-#include "ClothoidTrack.h"
+#include "TrackHelper.h"
 class PathGenerate
 {
 private:
-	ClothoidTrack track;
+	TrackHelper track;
 	PathDraw m_sendPath;
 public:
 	PathGenerate()

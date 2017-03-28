@@ -1,22 +1,19 @@
-#include "ClothoidTrack.h"
+#include "PureTrack.h"
 #include "TrackFinder.h"
 #include "LocalCarStatus.h"
 #include "Topology.h"
 #include "CarControl.h"
-#include "Clothoid.h"
-
-
-
-ClothoidTrack::ClothoidTrack()
+PureTrack::PureTrack()
 {
 }
 
 
-ClothoidTrack::~ClothoidTrack()
+PureTrack::~PureTrack()
 {
 }
 
-void ClothoidTrack::Track()
+
+void PureTrack::Track()
 {
 	if (path.size() < 10) return;
 	CarInfo info;
@@ -42,13 +39,11 @@ void ClothoidTrack::Track()
 		}
 		info.gear = D;
 		info.state = START;
-		Clothoid clothoid(curX.x, curX.y, curX.angle, refX.x, refX.y, refX.angle);
-		std::vector<RoadPoint> rdpt;
-		rdpt.reserve(100);
-		clothoid.PointsOnClothoid(rdpt, 100);
-		info.steerAngle = atan(-rdpt[0].k*LocalCarStatus::GetInstance().GetL())
-			*LocalCarStatus::GetInstance().GetSteerRatio()
-			* 180 / PI;
+		RadAngle alpha = curX.angle - atan2(refX.y - curX.y, refX.x - refX.x);
+		double ld = sqrt(Topology::Distance2(refX, curX));
+		info.steerAngle =
+			atan(2 * LocalCarStatus::GetInstance().GetL()*sin(alpha) / ld)
+			*LocalCarStatus::GetInstance().GetSteerRatio()*180.0 / PI;
 	} while (false);
 	CarControl::GetInstance().SendCommand(info);
 }

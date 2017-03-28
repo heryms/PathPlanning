@@ -20,12 +20,6 @@ typedef struct {
 
 }CamParam, *ptrCamParam;
 
-typedef struct
-{
-	double  x;
-	double  y;
-	RadAngle  angle;
-}PosPoint;
 
 enum EGear {
 	UNKNOWN = 0,
@@ -50,14 +44,30 @@ typedef struct {
 	ERunState state;
 }CarInfo;
 
-typedef struct tagRoadPoint : public PosPoint
+struct PosPoint
+{
+	double  x;
+	double  y;
+	RadAngle  angle;
+
+};
+
+struct RoadPoint : public PosPoint
 {
 	//double x;
 	//double y;
 	//double angle;
 	double changeangle;
 	double k;
-}RoadPoint;
+
+	static RoadPoint toRoadPoint(PosPoint p) {
+		RoadPoint rp;
+		rp.x = p.x;
+		rp.y = p.y;
+		rp.angle = p.angle;
+		return rp;
+	}
+};
 
 struct LINESEG
 {

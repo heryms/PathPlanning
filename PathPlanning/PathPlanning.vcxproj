@@ -87,7 +87,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseCarStatus.cpp" />
+    <ClCompile Include="BaseTrack.cpp" />
     <ClCompile Include="ClothoidTrack.cpp" />
+    <ClCompile Include="ForMPC\Array.cc" />
+    <ClCompile Include="ForMPC\QuadProg++.cc" />
+    <ClCompile Include="MPCTrack.cpp" />
+    <ClCompile Include="TrackHelper.cpp" />
     <ClCompile Include="CarControl.cpp" />
     <ClCompile Include="Clothoid.cpp" />
     <ClCompile Include="BaseAngle.cpp" />
@@ -101,14 +106,22 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PathDraw.cpp" />
     <ClCompile Include="PathGenerate.cpp" />
+    <ClCompile Include="PureTrack.cpp" />
     <ClCompile Include="testGit.cpp" />
     <ClCompile Include="testModule.cpp" />
     <ClCompile Include="Topology.cpp" />
+    <ClCompile Include="TrackFinder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseAngle.h" />
     <ClInclude Include="BaseCarStatus.h" />
+    <ClInclude Include="BaseTrack.h" />
     <ClInclude Include="ClothoidTrack.h" />
+    <ClInclude Include="ForMPC\Array.hh" />
+    <ClInclude Include="ForMPC\MMatrix.h" />
+    <ClInclude Include="ForMPC\QuadProg++.hh" />
+    <ClInclude Include="MPCTrack.h" />
+    <ClInclude Include="TrackHelper.h" />
     <ClInclude Include="BaseType.h" />
     <ClInclude Include="CarControl.h" />
     <ClInclude Include="Clothoid.h" />
@@ -131,9 +144,11 @@
     <ClInclude Include="LoopThread.h" />
     <ClInclude Include="PathDraw.h" />
     <ClInclude Include="PathGenerate.h" />
+    <ClInclude Include="PureTrack.h" />
     <ClInclude Include="testGit.h" />
     <ClInclude Include="testModule.h" />
     <ClInclude Include="Topology.h" />
+    <ClInclude Include="TrackFinder.h" />
     <ClInclude Include="Variables.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

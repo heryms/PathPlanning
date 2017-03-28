@@ -185,7 +185,6 @@ void PathGenerate::path_generate() {
 		if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
 			std::cout << "congratulations a successful root" << std::endl;
 			// TODO: step four send the data
-			track.SetPath(rdpt);
 #ifdef LOG_CLOTHOID
 
 			FILE *fp = fopen("clothoid.txt", "a+");
@@ -194,7 +193,7 @@ void PathGenerate::path_generate() {
 			draw.num = rdpt.size();
 			draw.Path_x.reserve(draw.num);
 			draw.Path_y.reserve(draw.num);
-			for (RoadPoint& pt : rdpt) {
+			for (RoadPoint pt : rdpt) {
 				double x, y;
 				CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
 				draw.Path_x.push_back(x);
@@ -205,6 +204,7 @@ void PathGenerate::path_generate() {
 			fclose(fp);
 #endif // 
 			m_sendPath.SendDraw(draw);
+			track.SetPath(rdpt);
 			send_succeed = true;
 			break;
 
