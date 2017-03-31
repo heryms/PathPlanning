@@ -9,7 +9,7 @@ public:
 	TrackFinder();
 	~TrackFinder();
 	static int FindPointIndex(std::vector<RoadPoint>& path, RoadPoint curX);
-	static int AnchorPoint(std::vector<RoadPoint>& path, RoadPoint curX, int cuIndex = -1, int distance = 5);
+	static int AnchorPoint(std::vector<RoadPoint>& path, RoadPoint curX, int cuIndex = -1, double distance = 5);
 	static bool InCurve(bool isInCurve, std::vector<RoadPoint>& path, RoadPoint curX, int curIndex);
 };
 

@@ -55,6 +55,8 @@ public:
 TrackHelper::TrackHelper()
 {
 	track = new PureTrack();
+	//track = new ClothoidTrack();
+	//track = new MPCTrack();
 	thread = new TrackThread(this);
 }
 

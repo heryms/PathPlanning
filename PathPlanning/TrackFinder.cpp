@@ -45,7 +45,7 @@ int TrackFinder::FindPointIndex(std::vector<RoadPoint>& path, RoadPoint curX)
 	return minIndex;
 }
 
-int TrackFinder::AnchorPoint(std::vector<RoadPoint>& path, RoadPoint curX, int curIndex, int distance)
+int TrackFinder::AnchorPoint(std::vector<RoadPoint>& path, RoadPoint curX, int curIndex, double distance)
 {
 	if (curIndex < 0) {
 		curIndex = FindPointIndex(path, curX);
@@ -56,6 +56,7 @@ int TrackFinder::AnchorPoint(std::vector<RoadPoint>& path, RoadPoint curX, int c
 	if (curIndex >= path.size()) {
 		return -1;
 	}
+	distance /= 0.2;
 	double dis = sqrt(Topology::Distance2(path[curIndex], curX));
 	for (int i = curIndex + 1; i < path.size(); i++) {
 		dis += sqrt(Topology::Distance2(path[i], path[i - 1]));
@@ -68,7 +69,7 @@ int TrackFinder::AnchorPoint(std::vector<RoadPoint>& path, RoadPoint curX, int c
 
 bool TrackFinder::InCurve(bool isInCurve, std::vector<RoadPoint>& path, RoadPoint curX, int curIndex)
 {
-	double anchorDis = 20;
+	double anchorDis = 20 / 0.2;
 	int anchorIndex = AnchorPoint(path, curX, curIndex, anchorDis);
 	if(anchorIndex<0){
 		return isInCurve;

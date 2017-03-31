@@ -30,11 +30,11 @@ void PureTrack::Track()
 		inCurve = TrackFinder::InCurve(inCurve, path, curX, curIndex);
 		RoadPoint refX;
 		if (inCurve) {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 5/0.2)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 5)];
 			info.speed = refSpeedCurve;
 		}
 		else {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 10/0.2)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 10)];
 			info.speed = refSpeedStraight;
 		}
 		info.gear = D;
