@@ -30,17 +30,17 @@ void PureTrack::Track()
 		inCurve = TrackFinder::InCurve(inCurve, path, curX, curIndex);
 		RoadPoint refX;
 		if (inCurve) {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 5)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 5/0.2)];
 			info.speed = refSpeedCurve;
 		}
 		else {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 10)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 10/0.2)];
 			info.speed = refSpeedStraight;
 		}
 		info.gear = D;
 		info.state = START;
-		RadAngle alpha = curX.angle - atan2(refX.y - curX.y, refX.x - refX.x);
-		double ld = sqrt(Topology::Distance2(refX, curX));
+		RadAngle alpha = curX.angle - atan2(refX.y - curX.y, refX.x - curX.x);
+		double ld = sqrt(Topology::Distance2(refX, curX))*0.2;
 		info.steerAngle =
 			atan(2 * LocalCarStatus::GetInstance().GetL()*sin(alpha) / ld)
 			*LocalCarStatus::GetInstance().GetSteerRatio()*180.0 / PI;

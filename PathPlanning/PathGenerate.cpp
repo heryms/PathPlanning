@@ -295,7 +295,8 @@ void PathGenerate::createClothoidTable(){
 	clothoidMap.clear();
 	clothoidMap.resize((GRID_END - GRID_START) *(ANGLE_END - ANGLE_START));
 	// step two define the end point and create some directions
-	
+	target_Y = 250;
+	target_X = 75;
 	for (int i = GRID_START; i < GRID_END; i++)
 	{
 
@@ -306,7 +307,7 @@ void PathGenerate::createClothoidTable(){
 			endPt.angle = angle / 180.0 *PI;
 			std::vector<RoadPoint> rdPt;
 			generateClothoidPoints(start_pt, endPt, rdPt);
-			clothoidMap[(GRID_END - GRID_START)* (i - GRID_START) + (angle - ANGLE_START)] = rdPt;
+			clothoidMap[(GRID_END - GRID_START)* (angle - ANGLE_START)+ (i - GRID_START)] = rdPt;
 		}
 		
 	}
@@ -326,7 +327,7 @@ void PathGenerate::generateClothoidPoints(PosPoint startPt, PosPoint endPt, std:
 }
 std::vector<RoadPoint> PathGenerate::getRdPtFromTable(int grid, int angle){
 
-	int index = grid*(GRID_END - GRID_START) + angle - ANGLE_START;
+	int index = (GRID_END - GRID_START) * (angle - ANGLE_START)+ grid - GRID_START;
 	assert(index >= 0 && index <= clothoidMap.size());
 	return clothoidMap[index];
 }
@@ -344,7 +345,7 @@ void PathGenerate::path_generate_using_bug()
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 	// step two get the target points and target direction
 	target_X = 75;
-	target_Y = 400;
+	target_Y = 250;
 	double target_Angle = DataCenter::GetInstance().GetRoadEdgePoint(target_Y, RIGHT).angle;
 	// step three generate the path
 	int delta_Grid_start = -5;
@@ -377,6 +378,15 @@ void PathGenerate::path_generate_using_bug()
 	{
 		if (success_root.size() == 0)
 		{
+			std::cout << "no path" << std::endl;
+			track.SetPath(std::vector<RoadPoint>());
+			//TODO: step five send message about how to stop
+			CarInfo info;
+			info.speed = 0;
+			info.state = E_STOP;
+			info.steerAngle = 0;
+			info.gear = D;
+			CarControl::GetInstance().SendCommand(info);
 			return;
 		}
 		else
@@ -408,7 +418,7 @@ void PathGenerate::path_generate_using_bug()
 		}
 		else{
 			int simi_max = -1000;
-			std::vector<RoadPoint> path;
+			std::vector<RoadPoint> path=success_root[0];
 			for (auto root : success_root)
 			{
 				double simi = similarity(pre_Root, root);
@@ -429,6 +439,8 @@ void PathGenerate::path_generate_using_bug()
 				draw.Path_y.push_back(y);
 				//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
 			}
+			pre_Root = path;
+			track.SetPath(path);
 			m_sendPath.SendDraw(draw);
 			
 		}

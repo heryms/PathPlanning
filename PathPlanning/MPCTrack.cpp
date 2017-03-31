@@ -70,6 +70,7 @@ void MPCTrack::RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, d
 	double phi = theta;
 	double Tsample = Tctrl;
 	int Nq = Nx;
+	double L = LocalCarStatus::GetInstance().GetL();
 	//CMatrix<double> Cm(Nq, Nx);
 	CMatrix<double> Cm = CMatrix<double>::Identity(Nq);
 	Cm(2, 2) = 0.01;
@@ -154,8 +155,8 @@ void MPCTrack::RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, d
 
 	CMatrix<double> X = QuadProg(E, f, Acoff, bcoff, CMatrix<double>(0, Nc*Tc), CMatrix<double>(0, 1));//, lb, ub);
 
-	info.speed = (v + X(0, 0))*3.6;
-	info.steerAngle = (delta + X(1, 0))*LocalCarStatus::GetInstance().GetL()*180.0 / PI;
+	info.speed = 5;// (v + X(0, 0))*3.6;
+	info.steerAngle = (delta + X(1, 0))*LocalCarStatus::GetInstance().GetSteerRatio()*180.0 / PI;
 }
 
 inline Matrix<double> MPCTrack::ToMat(CMatrix<double> H)

@@ -54,7 +54,7 @@ public:
 
 TrackHelper::TrackHelper()
 {
-	track = new MPCTrack();
+	track = new PureTrack();
 	thread = new TrackThread(this);
 }
 
@@ -73,8 +73,8 @@ void TrackHelper::SetPath(std::vector<RoadPoint>& path)
 	thread->Suspend();
 	//this->path = path;
 	PosPoint p;
-	p.x = 0;
-	p.y = 0;
+	p.x = 75;
+	p.y = 200;
 	p.angle = PI / 2;
 	thread->Reset();
 	LocalCarStatus::GetInstance().SetCurPosition(p);

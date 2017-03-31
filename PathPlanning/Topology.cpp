@@ -181,7 +181,7 @@ bool Topology::check_velogrid_rdPt_intersected(VeloGrid_t& veloGrids, std::vecto
 			if ((int)(rdPt[i].x + 0.5 + j) >= 0 && ((int)(rdPt[i].x + 0.5 + j)) <= MAP_WIDTH - 1)
 			{
 				int index = MAP_WIDTH*(int)(rdPt[i].y + 0.5) + (int)(rdPt[i].x + 0.5) + j;
-				if (veloGrids.velo_grid[index]) {
+				if (veloGrids.velo_grid[index]!=0){//&&veloGrids.velo_grid[index]!=110) {
 					return false;
 				}
 			}
@@ -189,5 +189,6 @@ bool Topology::check_velogrid_rdPt_intersected(VeloGrid_t& veloGrids, std::vecto
 
 
 	}
+	return true;
 }
 
