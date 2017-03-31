@@ -55,11 +55,7 @@ void MPCTrack::Track()
 			(path, curX, curIndex,
 				i * fmax(curSpeed - 1.2,
 					fmin(info.speed, curSpeed + 1)) / 3.6 * microseconds.count() / 1000000.0)];
-			refXs[i].x *= 0.2;
-			refXs[i].y *= 0.2;
 		}
-		curX.x *= 0.2;
-		curX.y *= 0.2;
 		RealTrack(info, curSpeed, LocalCarStatus::GetInstance().GetSteerAngle(), microseconds.count() / 1000000.0,curX);
 		lastX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
 		start = std::chrono::high_resolution_clock::now();

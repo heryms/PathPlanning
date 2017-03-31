@@ -78,9 +78,6 @@
     <ClCompile Include="CostFunc.cpp">
       <Filter>PathGenerate</Filter>
     </ClCompile>
-    <ClCompile Include="TrackFinder.cpp">
-      <Filter>Utils</Filter>
-    </ClCompile>
     <ClCompile Include="ForMPC\Array.cc">
       <Filter>Track\ForMPC</Filter>
     </ClCompile>
@@ -106,6 +103,9 @@
       <Filter>Track</Filter>
     </ClCompile>
     <ClCompile Include="TrackHelper.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackFinder.cpp">
       <Filter>Track</Filter>
     </ClCompile>
   </ItemGroup>
@@ -188,9 +188,6 @@
     <ClInclude Include="CostFunc.h">
       <Filter>PathGenerate</Filter>
     </ClInclude>
-    <ClInclude Include="TrackFinder.h">
-      <Filter>Utils</Filter>
-    </ClInclude>
     <ClInclude Include="ForMPC\Array.hh">
       <Filter>Track\ForMPC</Filter>
     </ClInclude>
@@ -219,6 +216,9 @@
       <Filter>Track</Filter>
     </ClInclude>
     <ClInclude Include="TrackHelper.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackFinder.h">
       <Filter>Track</Filter>
     </ClInclude>
   </ItemGroup>

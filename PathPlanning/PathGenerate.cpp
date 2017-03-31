@@ -193,11 +193,13 @@ void PathGenerate::path_generate() {
 			draw.num = rdpt.size();
 			draw.Path_x.reserve(draw.num);
 			draw.Path_y.reserve(draw.num);
-			for (RoadPoint pt : rdpt) {
+			for (RoadPoint& pt : rdpt) {
 				double x, y;
 				CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
 				draw.Path_x.push_back(x);
 				draw.Path_y.push_back(y);
+				pt.x = x;
+				pt.y = y;
 				fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
 			}
 #ifdef LOG_CLOTHOID

@@ -40,7 +40,7 @@ void PureTrack::Track()
 		info.gear = D;
 		info.state = START;
 		RadAngle alpha = curX.angle - atan2(refX.y - curX.y, refX.x - curX.x);
-		double ld = sqrt(Topology::Distance2(refX, curX))*0.2;
+		double ld = sqrt(Topology::Distance2(refX, curX));
 		info.steerAngle =
 			atan(2 * LocalCarStatus::GetInstance().GetL()*sin(alpha) / ld)
 			*LocalCarStatus::GetInstance().GetSteerRatio()*180.0 / PI;
