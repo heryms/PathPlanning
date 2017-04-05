@@ -27,4 +27,7 @@
 
 #define MAX_INT 1<<16-1;
 
+#define SAFE_REGION_START 4
+#define SAFE_REGION_END 6
+
 #endif
