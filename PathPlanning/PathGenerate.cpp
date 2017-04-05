@@ -245,7 +245,44 @@ int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt) {
 	}
 	return index;
 }
+bool path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& genPoints, int *y, int *x){
+	// 
+	int x_start = startPt.x;
+	int y_start = startPt.y;
+	int x_end = endPt.x;
+	int y_end = endPt.y;
+	// TRANSFORM TO GRID COORDINATE
+	//	CoordTransform::LocaltoGrid(startPt, x_start, y_start);
+	//	CoordTransform::LocaltoGrid(endPt, x_end, y_end);
 
+	// create clothoid curve
+	Clothoid path_clothoid(x_start, y_start, startPt.angle, x_end, y_end, endPt.angle);
+
+	// get roadPoints
+	int num_pt = 100;
+	//rdPt.clear();
+	rdPt.resize(num_pt);// = new RoadPoint[num_pt];
+	path_clothoid.PointsOnClothoid(rdPt, num_pt);
+	for (int i = 0; i < num_pt; i++)
+	{
+		// may be a bug can be saver
+		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
+		{
+			if ((int)(rdPt[i].x + 0.5 + j) >= 0 && ((int)(rdPt[i].x + 0.5 + j)) <= MAP_WIDTH - 1)
+			{
+				int index = MAP_WIDTH*(int)(rdPt[i].y + 0.5) + (int)(rdPt[i].x + 0.5) + j;
+				if (veloGrids.velo_grid[index]) {
+					*y = (int)rdPt[i].y;
+					*x = (int)(rdPt[i].x + 0.5) + j;
+					return false;
+				}
+			}
+		}
+
+
+	}
+	return true;
+}
 bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt)
 {
 	// 
@@ -549,4 +586,47 @@ bool PathGenerate::path_generate_for_fun(){
 		// some questions remain to be solved
 
 	}
+}
+bool PathGenerate::path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, std::vector<PosPoint> &root, int count){
+
+	// first generate a path
+	if (count>5)
+	{
+		return false;
+	}
+	std::vector<RoadPoint> rdPt;
+	int obstacle_y = -1, obstacle_x = -1;
+
+	// search Left
+	for (int i = SAFE_REGION_START; i <= SAFE_REGION_END;i++)
+	{
+		endPt.x = endPt.x - i;
+		if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdPt, &obstacle_y, &obstacle_x))
+		{
+			root.push_back(endPt);
+			if (endPt.y != target_Y)
+			{
+				PosPoint startPt_tmp = endPt;
+				endPt.x = target_X;
+				endPt.y = target_Y;
+				path_generate_recursive(startPt_tmp, endPt, veloGrids, root, count + 1);
+				root.pop_back();
+			}
+			else
+			{
+				// reach the target point;
+				posPtOnRoot.push_back(root);
+			}
+			return true;
+		}
+		else
+		{
+			endPt.y = obstacle_y;
+			endPt.x = obstacle_x;
+			root.push_back(endPt);
+			path_generate_recursive(startPt, endPt, veloGrids, root, count+1);
+			root.pop_back();
+		}
+	}
+
 }
