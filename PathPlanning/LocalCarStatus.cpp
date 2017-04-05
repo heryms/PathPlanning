@@ -31,7 +31,7 @@ public:
 		double seconds = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count() / 1000000;
 		pos.x += speed*cos(pos.angle)*seconds;
 		pos.y += speed*sin(pos.angle)*seconds;
-		pos.angle -= tan(angle) * speed / L *seconds;
+		pos.angle -= tan(angle) * speed / status->L *seconds;
 		status->m_curPos = pos;
 		startTime = std::chrono::high_resolution_clock::now();
 		return true;

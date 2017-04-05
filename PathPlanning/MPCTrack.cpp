@@ -54,9 +54,9 @@ void MPCTrack::Track()
 			refXs[i] = path[TrackFinder::AnchorPoint
 			(path, curX, curIndex,
 				i * fmax(curSpeed - 1.2,
-					fmin(info.speed, curSpeed + 1)) / 3.6 * microseconds.count() / 1000000)];
+					fmin(info.speed, curSpeed + 1)) / 3.6 * microseconds.count() / 1000000.0)];
 		}
-		RealTrack(info, curSpeed, LocalCarStatus::GetInstance().GetSteerAngle(), microseconds.count() / 1000000,curX);
+		RealTrack(info, curSpeed, LocalCarStatus::GetInstance().GetSteerAngle(), microseconds.count() / 1000000.0,curX);
 		lastX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
 		start = std::chrono::high_resolution_clock::now();
 	} while (false);
@@ -70,6 +70,7 @@ void MPCTrack::RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, d
 	double phi = theta;
 	double Tsample = Tctrl;
 	int Nq = Nx;
+	double L = LocalCarStatus::GetInstance().GetL();
 	//CMatrix<double> Cm(Nq, Nx);
 	CMatrix<double> Cm = CMatrix<double>::Identity(Nq);
 	Cm(2, 2) = 0.01;
@@ -155,10 +156,10 @@ void MPCTrack::RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, d
 	CMatrix<double> X = QuadProg(E, f, Acoff, bcoff, CMatrix<double>(0, Nc*Tc), CMatrix<double>(0, 1));//, lb, ub);
 
 	info.speed = (v + X(0, 0))*3.6;
-	info.steerAngle = (delta + X(1, 0))*LocalCarStatus::GetInstance().GetL()*180.0 / PI;
+	info.steerAngle = (delta + X(1, 0))*LocalCarStatus::GetInstance().GetSteerRatio()*180.0 / PI;
 }
 
-inline Matrix<double> MPCTrack::ToMat(CMatrix<double> H)
+inline Matrix<double> MPCTrack::ToMat(CMatrix<double>& H)
 {
 	Matrix<double> G;
 	G.resize(H.RowCount(), H.ColumnCount());
@@ -170,7 +171,7 @@ inline Matrix<double> MPCTrack::ToMat(CMatrix<double> H)
 	return G;
 }
 
-inline Vector<double> MPCTrack::ToVec(CMatrix<double> f)
+inline Vector<double> MPCTrack::ToVec(CMatrix<double>& f)
 {
 	Vector<double> g;
 	g.resize(f.Size());
@@ -180,7 +181,7 @@ inline Vector<double> MPCTrack::ToVec(CMatrix<double> f)
 	return g;
 }
 
-inline CMatrix<double> MPCTrack::FromVec(Vector<double> x)
+inline CMatrix<double> MPCTrack::FromVec(Vector<double>& x)
 {
 	CMatrix<double> d(x.size(), 1);
 	for (unsigned int i = 0; i < x.size(); i++) {
@@ -191,7 +192,7 @@ inline CMatrix<double> MPCTrack::FromVec(Vector<double> x)
 
 CMatrix<double> MPCTrack::QuadProg(CMatrix<double>& H, CMatrix<double>& f, CMatrix<double>& A, CMatrix<double>& b, CMatrix<double>& Aeq, CMatrix<double>& beq)//, CMatrix<double> lb, CMatrix<double> ub)
 {
-	Matrix<double> G = ToMat(H);
+	Matrix<double> G = ToMat(H.Transpose());
 	Vector<double> g0 = ToVec(f);
 	Matrix<double> CE = ToMat(Aeq.Transpose());
 	Vector<double> Ce0 = ToVec(beq);

@@ -45,7 +45,7 @@ int TrackFinder::FindPointIndex(std::vector<RoadPoint>& path, RoadPoint curX)
 	return minIndex;
 }
 
-int TrackFinder::AnchorPoint(std::vector<RoadPoint>& path, RoadPoint curX, int curIndex, int distance)
+int TrackFinder::AnchorPoint(std::vector<RoadPoint>& path, RoadPoint curX, int curIndex, double distance)
 {
 	if (curIndex < 0) {
 		curIndex = FindPointIndex(path, curX);

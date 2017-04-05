@@ -17,9 +17,9 @@ private:
 	const static int simPeriod = 60;
 	RoadPoint refXs[simPeriod];
 	void RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, double Tctrl, RoadPoint curX);
-	inline Matrix<double> ToMat(CMatrix<double> H);
-	inline Vector<double> ToVec(CMatrix<double> f);
-	inline CMatrix<double> FromVec(Vector<double> x);
+	inline Matrix<double> ToMat(CMatrix<double>& H);
+	inline Vector<double> ToVec(CMatrix<double>& f);
+	inline CMatrix<double> FromVec(Vector<double>& x);
 	CMatrix<double> QuadProg(CMatrix<double>& H, CMatrix<double>& f, CMatrix<double>& A, CMatrix<double>& b, CMatrix<double>& Aeq, CMatrix<double>& beq);// , CMatrix<double> lb, CMatrix<double> ub);
 	RoadPoint lastX;
 public:

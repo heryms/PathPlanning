@@ -8,8 +8,8 @@ class BaseTrack
 {
 protected:
 	std::vector<RoadPoint> path;
-	double refSpeedStraight = 20;
-	double refSpeedCurve = 10;
+	double refSpeedStraight = 10;
+	double refSpeedCurve = 5;
 	bool inCurve = false;
 public:
 	BaseTrack();
