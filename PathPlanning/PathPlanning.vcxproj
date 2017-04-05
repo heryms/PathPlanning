@@ -92,6 +92,7 @@
     <ClCompile Include="ForMPC\Array.cc" />
     <ClCompile Include="ForMPC\QuadProg++.cc" />
     <ClCompile Include="MPCTrack.cpp" />
+    <ClCompile Include="PathGenerateTool.cpp" />
     <ClCompile Include="TrackHelper.cpp" />
     <ClCompile Include="CarControl.cpp" />
     <ClCompile Include="Clothoid.cpp" />
@@ -121,6 +122,7 @@
     <ClInclude Include="ForMPC\MMatrix.h" />
     <ClInclude Include="ForMPC\QuadProg++.hh" />
     <ClInclude Include="MPCTrack.h" />
+    <ClInclude Include="PathGenerateTool.h" />
     <ClInclude Include="TrackHelper.h" />
     <ClInclude Include="BaseType.h" />
     <ClInclude Include="CarControl.h" />

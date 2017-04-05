@@ -436,3 +436,103 @@ void PathGenerate::path_generate_using_bug()
 	}
 
 }
+bool PathGenerate::path_generate_turning(VeloGrid_t& veloGrids){
+	// define search region
+	// lane width 3 so 6 grid
+	int RegionWidth = 0;
+	int RegionHeight = 0;
+	int RegionStartX = 0;
+	int RegionStartY = 0;
+
+	PosPoint endPt, startPt;
+	startPt.x = 75;
+	startPt.y = 200;
+	startPt.angle = PI / 2.;
+
+
+	if (PreDirection == TURN_LEFT)
+	{
+		RegionStartX = 75 - 12;
+		RegionStartY = 200 + 12;
+		RegionWidth = 4;
+		RegionHeight = 4;
+		endPt.angle = PI;
+
+	}
+	else if (PreDirection == TUN_RIGHT)
+	{
+		RegionStartX = 75 + 6;
+		RegionStartY = 200 + 12;
+		RegionWidth = 4;
+		RegionHeight = 4;
+		endPt.angle = 0;
+	}
+	else
+	{
+		return false;
+	}
+
+	//
+	
+
+
+	for (int i = 0; i < RegionWidth;i++)
+	{
+		for (int j = 0; j < RegionHeight;j++)
+		{
+			endPt.x = RegionStartX + i;
+			endPt.y = RegionStartY + j;
+			std::vector<RoadPoint> rdpt;
+			if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
+				std::cout << "congratulations a successful root" << std::endl;
+
+				// pass the data
+			}
+
+		}
+	}
+	
+}
+bool PathGenerate::path_generate_for_fun(){
+	// step one receive data
+	if (!DataCenter::GetInstance().HasVeloGrid()) {
+		std::cout << "Warning::not velogrid message" << std::endl;
+		return;
+	}
+	if (!DataCenter::GetInstance().HasCurb()) {
+		std::cout << "Warning::not curb message" << std::endl;
+		return;
+	}
+	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+	// step two get the target points and target direction
+	target_X = 75;
+	target_Y = 400;
+	double target_Angle = DataCenter::GetInstance().GetRoadEdgePoint(target_Y, RIGHT).angle;
+
+	//
+	std::vector<PosPoint> obstacles;
+	PosPoint startPt;
+	PosPoint endPt;
+	std::vector<PosPoint> nodePt;
+	nodePt.push_back(startPt);
+
+	while (true)
+	{
+		// recursive to avoid the obstacles
+		endPt = obstacles[0];
+		std::vector<RoadPoint> rdPt;
+		if (path_generate_grid_obstacle(startPt, endPt, veloGrids,rdPt))
+		{
+			// you can consider only store the root point rather than the rdPt
+			nodePt.push_back(endPt);
+
+		}
+		startPt = endPt;
+		endPt.x = target_X;
+		endPt.y = target_Y;
+		endPt.angle = target_Angle;
+
+		// some questions remain to be solved
+
+	}
+}

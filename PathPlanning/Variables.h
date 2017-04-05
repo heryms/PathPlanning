@@ -21,6 +21,9 @@
 #define ANGLE_START 70
 #define ANGLE_END 110
 
+//define the direction
+#define TURN_LEFT -1
+#define TUN_RIGHT 1
 
 #define MAX_INT 1<<16-1;
 

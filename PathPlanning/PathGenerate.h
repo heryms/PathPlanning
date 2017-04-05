@@ -37,11 +37,13 @@ public:
 	std::vector<RoadPoint> getRdPtFromTable(int grid, int angle);
 	int getRightestPoints(RoadPoint *rdPt, int num_Pt);
 	double getTargetDirection();
-	
+	bool path_generate_turning(VeloGrid_t& veloGrids);
+	bool path_generate_for_fun();
 
 private:
 	std::vector<RoadPoint> pre_Root;
 	std::vector<std::vector<RoadPoint>> clothoidMap;
+	double PreDirection;
 	double target_X;
 	double target_Y;
 	std::queue<double> recAngle;
