@@ -245,7 +245,7 @@ int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt) {
 	}
 	return index;
 }
-bool path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& genPoints, int *y, int *x){
+bool path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt, int *y, int *x){
 	// 
 	int x_start = startPt.x;
 	int y_start = startPt.y;
@@ -564,28 +564,52 @@ bool PathGenerate::path_generate_for_fun(){
 	std::vector<PosPoint> obstacles;
 	PosPoint startPt;
 	PosPoint endPt;
-	std::vector<PosPoint> nodePt;
-	nodePt.push_back(startPt);
 
-	while (true)
+	startPt.x = 75;
+	startPt.y = 200;
+	startPt.angle = 90 / 180.0 * PI;
+	endPt.angle = startPt.angle;
+	endPt.x = 75;
+	endPt.y = 300;
+	std::vector<PosPoint> root;
+	path_generate_recursive(startPt, endPt, veloGrids,root, 0);
+	if (posPtOnRoot.size() == 0)
 	{
-		// recursive to avoid the obstacles
-		endPt = obstacles[0];
-		std::vector<RoadPoint> rdPt;
-		if (path_generate_grid_obstacle(startPt, endPt, veloGrids,rdPt))
+		return false;
+	}
+	else
+	{
+		std::cout << "we have roads number" << posPtOnRoot.size() << std::endl;
+		// how to choose one ?
+		for (int i = 0; i < posPtOnRoot[0].size();i++)
+
 		{
-			// you can consider only store the root point rather than the rdPt
-			nodePt.push_back(endPt);
+			endPt = posPtOnRoot[0][i];
+			std::vector<RoadPoint> rdpt;
+			if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
+				std::cout << "congratulations a successful root" << std::endl;
 
+				ckLcmType::DecisionDraw_t draw;
+				draw.num = rdpt.size();
+				draw.Path_x.reserve(draw.num);
+				draw.Path_y.reserve(draw.num);
+				for (RoadPoint& pt : rdpt) {
+					double x, y;
+					CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
+					draw.Path_x.push_back(x);
+					draw.Path_y.push_back(y);
+					pt.x = x;
+					pt.y = y;
+
+				}
+			}
+			startPt = endPt;
 		}
-		startPt = endPt;
-		endPt.x = target_X;
-		endPt.y = target_Y;
-		endPt.angle = target_Angle;
-
-		// some questions remain to be solved
 
 	}
+
+
+	
 }
 bool PathGenerate::path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, std::vector<PosPoint> &root, int count){
 
