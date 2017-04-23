@@ -185,7 +185,6 @@ void PathGenerate::path_generate() {
 		if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
 			std::cout << "congratulations a successful root" << std::endl;
 			// TODO: step four send the data
-			track.SetPath(rdpt);
 #ifdef LOG_CLOTHOID
 
 			FILE *fp = fopen("clothoid.txt", "a+");
@@ -199,12 +198,15 @@ void PathGenerate::path_generate() {
 				CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
 				draw.Path_x.push_back(x);
 				draw.Path_y.push_back(y);
+				pt.x = x;
+				pt.y = y;
 				fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
 			}
 #ifdef LOG_CLOTHOID
 			fclose(fp);
 #endif // 
 			m_sendPath.SendDraw(draw);
+			track.SetPath(rdpt);
 			send_succeed = true;
 			break;
 
@@ -243,7 +245,44 @@ int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt) {
 	}
 	return index;
 }
+bool path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt, int *y, int *x){
+	// 
+	int x_start = startPt.x;
+	int y_start = startPt.y;
+	int x_end = endPt.x;
+	int y_end = endPt.y;
+	// TRANSFORM TO GRID COORDINATE
+	//	CoordTransform::LocaltoGrid(startPt, x_start, y_start);
+	//	CoordTransform::LocaltoGrid(endPt, x_end, y_end);
 
+	// create clothoid curve
+	Clothoid path_clothoid(x_start, y_start, startPt.angle, x_end, y_end, endPt.angle);
+
+	// get roadPoints
+	int num_pt = 100;
+	//rdPt.clear();
+	rdPt.resize(num_pt);// = new RoadPoint[num_pt];
+	path_clothoid.PointsOnClothoid(rdPt, num_pt);
+	for (int i = 0; i < num_pt; i++)
+	{
+		// may be a bug can be saver
+		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
+		{
+			if ((int)(rdPt[i].x + 0.5 + j) >= 0 && ((int)(rdPt[i].x + 0.5 + j)) <= MAP_WIDTH - 1)
+			{
+				int index = MAP_WIDTH*(int)(rdPt[i].y + 0.5) + (int)(rdPt[i].x + 0.5) + j;
+				if (veloGrids.velo_grid[index]) {
+					*y = (int)rdPt[i].y;
+					*x = (int)(rdPt[i].x + 0.5) + j;
+					return false;
+				}
+			}
+		}
+
+
+	}
+	return true;
+}
 bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt)
 {
 	// 
@@ -293,7 +332,8 @@ void PathGenerate::createClothoidTable(){
 	clothoidMap.clear();
 	clothoidMap.resize((GRID_END - GRID_START) *(ANGLE_END - ANGLE_START));
 	// step two define the end point and create some directions
-	
+	target_Y = 250;
+	target_X = 75;
 	for (int i = GRID_START; i < GRID_END; i++)
 	{
 
@@ -304,7 +344,7 @@ void PathGenerate::createClothoidTable(){
 			endPt.angle = angle / 180.0 *PI;
 			std::vector<RoadPoint> rdPt;
 			generateClothoidPoints(start_pt, endPt, rdPt);
-			clothoidMap[(GRID_END - GRID_START)* (i - GRID_START) + (angle - ANGLE_START)] = rdPt;
+			clothoidMap[(GRID_END - GRID_START)* (angle - ANGLE_START)+ (i - GRID_START)] = rdPt;
 		}
 		
 	}
@@ -324,7 +364,7 @@ void PathGenerate::generateClothoidPoints(PosPoint startPt, PosPoint endPt, std:
 }
 std::vector<RoadPoint> PathGenerate::getRdPtFromTable(int grid, int angle){
 
-	int index = grid*(GRID_END - GRID_START) + angle - ANGLE_START;
+	int index = (GRID_END - GRID_START) * (angle - ANGLE_START)+ grid - GRID_START;
 	assert(index >= 0 && index <= clothoidMap.size());
 	return clothoidMap[index];
 }
@@ -342,7 +382,7 @@ void PathGenerate::path_generate_using_bug()
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 	// step two get the target points and target direction
 	target_X = 75;
-	target_Y = 400;
+	target_Y = 250;
 	double target_Angle = DataCenter::GetInstance().GetRoadEdgePoint(target_Y, RIGHT).angle;
 	// step three generate the path
 	int delta_Grid_start = -5;
@@ -375,6 +415,15 @@ void PathGenerate::path_generate_using_bug()
 	{
 		if (success_root.size() == 0)
 		{
+			std::cout << "no path" << std::endl;
+			track.SetPath(std::vector<RoadPoint>());
+			//TODO: step five send message about how to stop
+			CarInfo info;
+			info.speed = 0;
+			info.state = E_STOP;
+			info.steerAngle = 0;
+			info.gear = D;
+			CarControl::GetInstance().SendCommand(info);
 			return;
 		}
 		else
@@ -406,7 +455,7 @@ void PathGenerate::path_generate_using_bug()
 		}
 		else{
 			int simi_max = -1000;
-			std::vector<RoadPoint> path;
+			std::vector<RoadPoint> path=success_root[0];
 			for (auto root : success_root)
 			{
 				double simi = similarity(pre_Root, root);
@@ -427,10 +476,179 @@ void PathGenerate::path_generate_using_bug()
 				draw.Path_y.push_back(y);
 				//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
 			}
+			pre_Root = path;
+			track.SetPath(path);
 			m_sendPath.SendDraw(draw);
 			
 		}
 		
+	}
+
+}
+bool PathGenerate::path_generate_turning(VeloGrid_t& veloGrids){
+	// define search region
+	// lane width 3 so 6 grid
+	int RegionWidth = 0;
+	int RegionHeight = 0;
+	int RegionStartX = 0;
+	int RegionStartY = 0;
+
+	PosPoint endPt, startPt;
+	startPt.x = 75;
+	startPt.y = 200;
+	startPt.angle = PI / 2.;
+
+
+	if (PreDirection == TURN_LEFT)
+	{
+		RegionStartX = 75 - 12;
+		RegionStartY = 200 + 12;
+		RegionWidth = 4;
+		RegionHeight = 4;
+		endPt.angle = PI;
+
+	}
+	else if (PreDirection == TUN_RIGHT)
+	{
+		RegionStartX = 75 + 6;
+		RegionStartY = 200 + 12;
+		RegionWidth = 4;
+		RegionHeight = 4;
+		endPt.angle = 0;
+	}
+	else
+	{
+		return false;
+	}
+
+	//
+	
+
+
+	for (int i = 0; i < RegionWidth;i++)
+	{
+		for (int j = 0; j < RegionHeight;j++)
+		{
+			endPt.x = RegionStartX + i;
+			endPt.y = RegionStartY + j;
+			std::vector<RoadPoint> rdpt;
+			if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
+				std::cout << "congratulations a successful root" << std::endl;
+
+				// pass the data
+			}
+
+		}
+	}
+	
+}
+bool PathGenerate::path_generate_for_fun(){
+	// step one receive data
+	if (!DataCenter::GetInstance().HasVeloGrid()) {
+		std::cout << "Warning::not velogrid message" << std::endl;
+		return;
+	}
+	if (!DataCenter::GetInstance().HasCurb()) {
+		std::cout << "Warning::not curb message" << std::endl;
+		return;
+	}
+	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+	// step two get the target points and target direction
+	target_X = 75;
+	target_Y = 400;
+	double target_Angle = DataCenter::GetInstance().GetRoadEdgePoint(target_Y, RIGHT).angle;
+
+	//
+	std::vector<PosPoint> obstacles;
+	PosPoint startPt;
+	PosPoint endPt;
+
+	startPt.x = 75;
+	startPt.y = 200;
+	startPt.angle = 90 / 180.0 * PI;
+	endPt.angle = startPt.angle;
+	endPt.x = 75;
+	endPt.y = 300;
+	std::vector<PosPoint> root;
+	path_generate_recursive(startPt, endPt, veloGrids,root, 0);
+	if (posPtOnRoot.size() == 0)
+	{
+		return false;
+	}
+	else
+	{
+		std::cout << "we have roads number" << posPtOnRoot.size() << std::endl;
+		// how to choose one ?
+		for (int i = 0; i < posPtOnRoot[0].size();i++)
+
+		{
+			endPt = posPtOnRoot[0][i];
+			std::vector<RoadPoint> rdpt;
+			if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
+				std::cout << "congratulations a successful root" << std::endl;
+
+				ckLcmType::DecisionDraw_t draw;
+				draw.num = rdpt.size();
+				draw.Path_x.reserve(draw.num);
+				draw.Path_y.reserve(draw.num);
+				for (RoadPoint& pt : rdpt) {
+					double x, y;
+					CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
+					draw.Path_x.push_back(x);
+					draw.Path_y.push_back(y);
+					pt.x = x;
+					pt.y = y;
+
+				}
+			}
+			startPt = endPt;
+		}
+
+	}
+
+
+	
+}
+bool PathGenerate::path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, std::vector<PosPoint> &root, int count){
+
+	// first generate a path
+	if (count>5)
+	{
+		return false;
+	}
+	std::vector<RoadPoint> rdPt;
+	int obstacle_y = -1, obstacle_x = -1;
+
+	// search Left
+	for (int i = SAFE_REGION_START; i <= SAFE_REGION_END;i++)
+	{
+		endPt.x = endPt.x - i;
+		if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdPt, &obstacle_y, &obstacle_x))
+		{
+			root.push_back(endPt);
+			if (endPt.y != target_Y)
+			{
+				PosPoint startPt_tmp = endPt;
+				endPt.x = target_X;
+				endPt.y = target_Y;
+				path_generate_recursive(startPt_tmp, endPt, veloGrids, root, count + 1);
+				root.pop_back();
+			}
+			else
+			{
+				// reach the target point;
+				posPtOnRoot.push_back(root);
+			}
+			return true;
+		}
+		else
+		{
+			endPt.y = obstacle_y;
+			endPt.x = obstacle_x;
+			root.push_back(endPt);
+			path_generate_recursive(startPt, endPt, veloGrids, root, count+1);
+			root.pop_back();
+		}
 	}
 
 }

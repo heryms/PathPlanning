@@ -1,22 +1,19 @@
-#include "ClothoidTrack.h"
+#include "PureTrack.h"
 #include "TrackFinder.h"
 #include "LocalCarStatus.h"
 #include "Topology.h"
 #include "CarControl.h"
-#include "Clothoid.h"
-
-
-
-ClothoidTrack::ClothoidTrack()
+PureTrack::PureTrack()
 {
 }
 
 
-ClothoidTrack::~ClothoidTrack()
+PureTrack::~PureTrack()
 {
 }
 
-void ClothoidTrack::Track()
+
+void PureTrack::Track()
 {
 	if (path.size() < 10) return;
 	CarInfo info;
@@ -33,22 +30,20 @@ void ClothoidTrack::Track()
 		inCurve = TrackFinder::InCurve(inCurve, path, curX, curIndex);
 		RoadPoint refX;
 		if (inCurve) {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 10)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 5)];
 			info.speed = refSpeedCurve;
 		}
 		else {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 15)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 10)];
 			info.speed = refSpeedStraight;
 		}
 		info.gear = D;
 		info.state = START;
-		Clothoid clothoid(curX.x, curX.y, curX.angle, refX.x, refX.y, refX.angle);
-		std::vector<RoadPoint> rdpt;
-		rdpt.reserve(100);
-		clothoid.PointsOnClothoid(rdpt, 100);
-		info.steerAngle = atan(-rdpt[0].k*LocalCarStatus::GetInstance().GetL())
-			*LocalCarStatus::GetInstance().GetSteerRatio()
-			* 180 / PI;
+		RadAngle alpha = curX.angle - atan2(refX.y - curX.y, refX.x - curX.x);
+		double ld = sqrt(Topology::Distance2(refX, curX));
+		info.steerAngle =
+			atan(2 * LocalCarStatus::GetInstance().GetL()*sin(alpha) / ld)
+			*LocalCarStatus::GetInstance().GetSteerRatio()*180.0 / PI;
 	} while (false);
 	CarControl::GetInstance().SendCommand(info);
 }

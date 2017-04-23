@@ -5,7 +5,7 @@
 class BaseCarStatus
 {
 protected:
-	double L = 1.5;
+	double L = 2.34;
 	double m_steerRatio = 18;
 	PosPoint m_curPos;
 	double m_speed;//km/h
@@ -54,6 +54,13 @@ public:
 	virtual void Suspend();
 	virtual void Resume();
 	virtual void End();
+
+	inline double GetL() {
+		return L;
+	}
+	inline double GetSteerRatio() {
+		return m_steerRatio;
+	}
 };
 #endif
 

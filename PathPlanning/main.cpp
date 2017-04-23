@@ -28,12 +28,13 @@ int main()
 		}
 		std::chrono::steady_clock::time_point startTime
 			= std::chrono::steady_clock::now();
-		pathGen.path_generate();
+		pathGen.path_generate_using_bug();
 		std::chrono::steady_clock::time_point endTime
 			= std::chrono::steady_clock::now();
 		std::chrono::milliseconds time
 			= std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 		std::cout << time.count() << std::endl;
+		__thread_sleep_for(10);
 	}
 	DataCenter::GetInstance().EndAllSensor();
 	return 0;

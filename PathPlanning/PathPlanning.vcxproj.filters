@@ -25,6 +25,12 @@
     <Filter Include="PathGenerate">
       <UniqueIdentifier>{10eac84c-823e-4698-a659-b3282ab8a25b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Track">
+      <UniqueIdentifier>{09ea5781-332e-4429-8237-a6f0b7a12198}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Track\ForMPC">
+      <UniqueIdentifier>{640a511a-450d-470e-86b8-a225ea9d73e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -69,17 +75,41 @@
     <ClCompile Include="filterTool.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="BaseCarStatus.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="LocalCarStatus.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ClothoidTrack.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="CostFunc.cpp">
       <Filter>PathGenerate</Filter>
+    </ClCompile>
+    <ClCompile Include="ForMPC\Array.cc">
+      <Filter>Track\ForMPC</Filter>
+    </ClCompile>
+    <ClCompile Include="ForMPC\QuadProg++.cc">
+      <Filter>Track\ForMPC</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseCarStatus.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseTrack.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="ClothoidTrack.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="MPCTrack.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="LocalCarStatus.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="PureTrack.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackHelper.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="TrackFinder.cpp">
+      <Filter>Track</Filter>
+    </ClCompile>
+    <ClCompile Include="PathGenerateTool.cpp">
+      <Filter>math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -158,17 +188,44 @@
     <ClInclude Include="filterTool.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="BaseCarStatus.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="LocalCarStatus.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="ClothoidTrack.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="CostFunc.h">
       <Filter>PathGenerate</Filter>
+    </ClInclude>
+    <ClInclude Include="ForMPC\Array.hh">
+      <Filter>Track\ForMPC</Filter>
+    </ClInclude>
+    <ClInclude Include="ForMPC\MMatrix.h">
+      <Filter>Track\ForMPC</Filter>
+    </ClInclude>
+    <ClInclude Include="ForMPC\QuadProg++.hh">
+      <Filter>Track\ForMPC</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseTrack.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseCarStatus.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="ClothoidTrack.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="LocalCarStatus.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="PureTrack.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="MPCTrack.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackHelper.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="TrackFinder.h">
+      <Filter>Track</Filter>
+    </ClInclude>
+    <ClInclude Include="PathGenerateTool.h">
+      <Filter>math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
