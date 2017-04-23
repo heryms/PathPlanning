@@ -5,6 +5,8 @@
 #include "BaseType.h"
 #include "Clothoid.h"
 #include "Variables.h"
+#include "Topology.h"
+#include "PathGenerateTool.h"
 void test_To_Guassian(
 	double grad, double minute, double second,
 	double grad1, double minute1, double second1);
@@ -13,4 +15,5 @@ void test_To_Guassian(
 	);
 void test_Clothoid();
 void test_Array(int a[], int length);
+void test_spline();
 #endif

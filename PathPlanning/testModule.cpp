@@ -45,3 +45,18 @@ void test_Array(int a[], int length)
 		a[i] = i;
 	}
 }
+
+void test_spline()
+{
+	std::vector<double> X{ 0,1,2,3 };
+	std::vector<double> Y{ 0,0.5,2.0,1.5 };
+	std::chrono::high_resolution_clock::time_point startTime
+		= std::chrono::high_resolution_clock::now();
+	auto s = Topology::CubicSpline(X, Y, -0.3, 3.3);
+	std::cout << s << std::endl;
+	std::chrono::high_resolution_clock::time_point endTime
+		= std::chrono::high_resolution_clock::now();
+	std::chrono::microseconds time
+		= std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+	std::cout << time.count() << std::endl;
+}

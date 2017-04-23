@@ -1,5 +1,6 @@
 #include "Topology.h"
 
+using std::vector;
 
 //两点距离的平方
 double Topology::Distance2(RoadPoint m1, RoadPoint m2)
@@ -191,7 +192,8 @@ bool Topology::check_velogrid_rdPt_intersected(VeloGrid_t& veloGrids, std::vecto
 	}
 	return true;
 }
-static Eigen::MatrixXd rotate(double theta, Eigen::MatrixXd in){
+
+Eigen::MatrixXd Topology::rotate(double theta, Eigen::MatrixXd in){
 	Eigen::MatrixXd A(2, 2);
 	A(0, 0) = cos(theta);
 	A(0, 1) = -sin(theta);
@@ -199,4 +201,116 @@ static Eigen::MatrixXd rotate(double theta, Eigen::MatrixXd in){
 	A(1, 1) = cos(theta);
 
 	return A*in;
+}
+
+//线性方程组求解
+vector<double> Topology::lufact(vector<vector<double>> A, vector<double> B) {
+	typedef unsigned int uint;
+	uint N = A.size();
+	if (N == 0) {
+		throw "empty coefficient";
+		//return vector<double>(0);
+	}
+	if (B.size() != N) {
+		throw "not a linear system of equations";
+	}
+	vector<uint> R;
+	for (uint i = 0; i < N; i++) {
+		R.push_back(i);
+	}
+	for (uint k = 0; k < N; k++) {
+		double max = abs(A[k][k]);
+		uint maxIndex = k;
+		for (uint i = k + 1; i < N; i++) {
+			if (abs(A[i][k]) > max) {
+				max = abs(A[i][k]);
+				maxIndex = i;
+			}
+		}
+		if (max == 0) {
+			throw "singular matrix";
+			//return vector<double>(0);
+		}
+		uint tk = R[k];
+		R[k] = R[maxIndex];
+		R[maxIndex] = tk;
+		for (uint i = 0; i < N; i++) {
+			double tki = A[k][i];
+			A[k][i] = A[maxIndex][i];
+			A[maxIndex][i] = tki;
+		}
+		for (uint i = k + 1; i < N; i++) {
+			A[i][k] /= A[k][k];
+			for (uint j = k + 1; j < N; j++) {
+				A[i][j] -= A[i][k] * A[k][j];
+			}
+		}
+	}
+	vector<double> Y(N, 0);
+	Y[0] = B[R[0]];
+	for (uint k = 1; k < N; k++) {
+		vector<double> TA = A[k];
+		double sum = 0;
+		for (uint i = 0; i < k; i++) {
+			sum += TA[i] * Y[i];
+		}
+		Y[k] = B[R[k]] - sum;
+	}
+	vector<double> X(N);
+	X[N - 1] = Y[N - 1] / A[N - 1][N - 1];
+	for (int k = N - 2; k >= 0; k--) {
+		vector<double> TA = A[k];
+		double sum = 0;
+		for (uint i = k + 1; i < N; i++) {
+			sum += TA[i] * X[i];
+		}
+		X[k] = (Y[k] - sum) / A[k][k];
+	}
+	return X;
+}
+
+Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double> Y, double dds0, double ddsn)
+{
+	auto Xiter = X.rbegin();
+	auto Yiter = Y.rbegin();
+	int N = X.size() - 1;
+	std::vector<double> h(N);
+	std::vector<double> d(N);
+	std::vector<double> u(N - 1);
+	auto hiter = h.rbegin();
+	auto diter = d.rbegin();
+	auto uiter = u.rbegin();
+	for (; Xiter != X.rend() - 1; hiter++, diter++) {
+		*hiter = *Xiter - *(++Xiter);
+		*diter = (*Yiter - *(++Yiter)) / *hiter;
+	}
+	for (diter = d.rbegin(); diter != d.rend() - 1; uiter++) {
+		*uiter = (*diter - *(++diter)) * 6;
+	}
+	vector<vector<double>> A(N - 1, vector<double>(N - 1));
+	vector<double> B(N - 1);
+	A[0][0] = 2 * (h[0] + h[1]);
+	A[0][1] = h[1];
+	B[0] = u[0] - h[0] * dds0;
+	A[N - 2][ N - 3] = h[N - 2];
+	A[N - 2][ N - 2] = 2 * (h[N - 3] + h[N - 2]);
+	B[N - 2] = u[N - 2] - h[N - 2] * ddsn;
+	for (int k = 2; k <= N - 2; k++) {
+		A[k - 1][k - 2] = h[k - 1];
+		A[k - 1][k - 1] = 2 * (h[k - 1] + h[k]);
+		A[k - 1][k] = h[k];
+		B[k - 1] = u[k - 1];
+	}
+	vector<double> m=Topology::lufact(A, B);
+	m.insert(m.begin(), dds0);
+	m.push_back(ddsn);
+	Eigen::MatrixX4d s;
+	s.resize(N, 4);
+	for (int i = 0; i < N; i++) {
+		s(i,0) = Y[i];
+		s(i, 1) = d[i] - h[i] * (2 * m[i] + m[i + 1]) / 6;
+		s(i, 2) = m[i] / 2;
+		s(i, 3) = (m[i + 1] - m[i]) / (6 * h[i]);
+	}
+	return s;
 }

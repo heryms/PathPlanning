@@ -246,7 +246,7 @@ int PathGenerate::getRightestPoints(RoadPoint *rdPt, int numPt) {
 	}
 	return index;
 }
-bool path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt, int *y, int *x){
+bool  PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt, VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt, int *y, int *x){
 	// 
 	int x_start = startPt.x;
 	int y_start = startPt.y;
@@ -321,6 +321,7 @@ bool PathGenerate::path_generate_grid_obstacle(PosPoint startPt, PosPoint endPt,
 	
 	return true;
 }
+
 void PathGenerate::createClothoidTable(){
 
 
@@ -547,11 +548,11 @@ bool PathGenerate::path_generate_for_fun(){
 	// step one receive data
 	if (!DataCenter::GetInstance().HasVeloGrid()) {
 		std::cout << "Warning::not velogrid message" << std::endl;
-		return;
+		return false;
 	}
 	if (!DataCenter::GetInstance().HasCurb()) {
 		std::cout << "Warning::not curb message" << std::endl;
-		return;
+		return false;
 	}
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 	// step two get the target points and target direction

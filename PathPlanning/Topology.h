@@ -26,5 +26,7 @@ public:
 	static bool Angle_Bisector_Intersect(RoadPoint p1, RoadPoint p2, RoadPoint p3, RoadPoint &p);//求三角形角平分线和对边的交点(角是p1所在的角）
 	static bool check_velogrid_rdPt_intersected(VeloGrid_t& veloGrids, std::vector<RoadPoint>& genPoints);
 	static Eigen::MatrixXd rotate(double theta, Eigen::MatrixXd in);
+	static std::vector<double> lufact(std::vector<std::vector<double>> A, std::vector<double> B);
+	static Eigen::MatrixX4d CubicSpline(std::vector<double> X, std::vector<double> Y, double dds0 = 0, double ddsn = 0);
 };
 #endif

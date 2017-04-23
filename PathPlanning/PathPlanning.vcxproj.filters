@@ -111,6 +111,9 @@
     <ClCompile Include="PathGenerateTool.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="ShortTimePathPlanning.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataCenter.h">
@@ -226,6 +229,9 @@
     </ClInclude>
     <ClInclude Include="PathGenerateTool.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="ShortTimePathPlanning.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

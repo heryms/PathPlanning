@@ -14,6 +14,7 @@
 #include <chrono>
 int main()
 {
+	test_spline();
 	//CoordTransform transform;
 	//test_Clothoid();
 	DataCenter::GetInstance().StartVeloGrid();
