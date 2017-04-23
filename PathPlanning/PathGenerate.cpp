@@ -701,9 +701,9 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, VeloGrid
 		Eigen::Matrix2Xd norm_vec(1,2), pre(1,2);
 		norm_vec(0, 0) = delta_x[i] / length[i];
 		norm_vec(0, 1) = delta_y[i] / length[i];
-		pre(0, 0) = delta_x[i];
-		pre(0, 1) = delta_y[i];
-		Eigen::Matrix2Xd result = Topology::rotate(theta, norm_vec)*q + pre;
+		pre(0, 0) = x_ref[i-1];
+		pre(0, 1) = y_ref[i-1];
+		Eigen::Matrix2Xd result = Topology::rotate(PI / 2, norm_vec)*q + pre;
 		PointPt tmp;
 		tmp.x = result(0, 0);
 		tmp.y = result(0, 1);
