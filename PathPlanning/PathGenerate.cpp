@@ -1,5 +1,6 @@
 #include "PathGenerate.h"
 #include <assert.h>
+#include <math.h>
 #define LOG_CLOTHOID
 bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmType::VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt) {
 
@@ -555,7 +556,7 @@ bool PathGenerate::path_generate_for_fun(){
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 	// step two get the target points and target direction
 	target_X = 75;
-	target_Y = 400;
+	target_Y = 300;
 	double target_Angle = DataCenter::GetInstance().GetRoadEdgePoint(target_Y, RIGHT).angle;
 
 	//
@@ -570,7 +571,12 @@ bool PathGenerate::path_generate_for_fun(){
 	endPt.x = 75;
 	endPt.y = 300;
 	std::vector<PosPoint> root;
-	path_generate_recursive(startPt, endPt, veloGrids,root, 0);
+	bool result = path_generate_recursive(startPt, endPt, veloGrids,root, 0);
+	if (!result)
+	{
+		std::cout << "no root "<<std::endl;
+		return false;
+	}
 	if (posPtOnRoot.size() == 0)
 	{
 		return false;
@@ -585,7 +591,7 @@ bool PathGenerate::path_generate_for_fun(){
 			endPt = posPtOnRoot[0][i];
 			std::vector<RoadPoint> rdpt;
 			if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
-				std::cout << "congratulations a successful root" << std::endl;
+				//std::cout << "congratulations a successful root" << std::endl;
 
 				ckLcmType::DecisionDraw_t draw;
 				draw.num = rdpt.size();
@@ -650,5 +656,19 @@ bool PathGenerate::path_generate_recursive(PosPoint startPt, PosPoint endPt, Vel
 			root.pop_back();
 		}
 	}
+
+}
+//bool PathGenerate
+void PathGenerate::motion_model(){
+
+	double theta, x, y, kappa, vt;
+	double deltaT = 0.1;
+	get_current_state();
+	double x_deltaT = x + vt * cos(theta) * deltaT;
+	double y_deltaT = y + vt * sin(theta) * deltaT;
+	double theta_deltaT = theta + vt*kappa*deltaT;
+
+}
+double PathGenerate::dynamic_response(double x, double x_t, double deltaT){
 
 }
