@@ -41,6 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -54,7 +56,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>./</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)PathPlanning\eigen3.3.3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -93,6 +95,7 @@
     <ClCompile Include="ForMPC\QuadProg++.cc" />
     <ClCompile Include="MPCTrack.cpp" />
     <ClCompile Include="PathGenerateTool.cpp" />
+    <ClCompile Include="ShortTimePathPlanning.cpp" />
     <ClCompile Include="TrackHelper.cpp" />
     <ClCompile Include="CarControl.cpp" />
     <ClCompile Include="Clothoid.cpp" />
@@ -123,6 +126,7 @@
     <ClInclude Include="ForMPC\QuadProg++.hh" />
     <ClInclude Include="MPCTrack.h" />
     <ClInclude Include="PathGenerateTool.h" />
+    <ClInclude Include="ShortTimePathPlanning.h" />
     <ClInclude Include="TrackHelper.h" />
     <ClInclude Include="BaseType.h" />
     <ClInclude Include="CarControl.h" />

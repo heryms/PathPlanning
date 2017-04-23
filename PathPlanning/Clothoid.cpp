@@ -1,5 +1,6 @@
 #include "Clothoid.h"
 #include "BaseAngle.h"
+
 #define LOG_CLOTHOID
 double fns[] = { 0.49999988085884732562,
 1.3511177791210715095,
