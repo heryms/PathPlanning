@@ -659,16 +659,70 @@ bool PathGenerate::path_generate_recursive(PosPoint startPt, PosPoint endPt, Vel
 
 }
 //bool PathGenerate
-void PathGenerate::motion_model(){
+//void PathGenerate::motion_model(){
+//
+//	double theta, x, y, kappa, vt;
+//	double deltaT = 0.1;
+//	get_current_state();
+//	double x_deltaT = x + vt * cos(theta) * deltaT;
+//	double y_deltaT = y + vt * sin(theta) * deltaT;
+//	double theta_deltaT = theta + vt*kappa*deltaT;
+//
+//}
+//double PathGenerate::dynamic_response(double x, double x_t, double deltaT){
+//
+//}
 
-	double theta, x, y, kappa, vt;
-	double deltaT = 0.1;
-	get_current_state();
-	double x_deltaT = x + vt * cos(theta) * deltaT;
-	double y_deltaT = y + vt * sin(theta) * deltaT;
-	double theta_deltaT = theta + vt*kappa*deltaT;
+bool PathGenerate::short_time_planning(float qf, float qi, float theta, VeloGrid_t veloGrids){
+	std::vector<float> s(x_ref.size(), 0);
+	std::vector<float> delta_x(x_ref.size(), 0);
+	std::vector<float> delta_y(x_ref.size(), 0);
+	std::vector<float> length(x_ref.size(), 0);
+	std::vector<PointPt> pt;
 
-}
-double PathGenerate::dynamic_response(double x, double x_t, double deltaT){
+	// need vector operator?
+	for (int i = 1; i < x_ref.size();i++)
+	{
+		s[i] = sqrt((x_ref[i] - x_ref[i - 1])*(x_ref[i] - x_ref[i - 1])+
+			(y_ref[i] - y_ref[i - 1])*(y_ref[i] - y_ref[i - 1])) + s[i - 1];
+		delta_x[i] = x_ref[i] - x_ref[i - 1];
+		delta_y[i] = y_ref[i] - y_ref[i - 1];
+		length[i] = sqrt(delta_x[i] * delta_x[i] + delta_y[i] * delta_y[i]);
 
+	}
+	float c = tan(theta);
+	
+	float a = 2 * (qi - qf) / (pow(s[s.size() - 1], 3)) + c / pow(s[s.size() - 1], 2);
+	float b = 3 * (qf - qi) / (pow(s[s.size() - 1], 2)) - 2 * c / s[s.size() - 1];
+	for (int i = 1; i < x_ref.size();i++)
+	{
+		float delta_s = s[i];
+		float q = a * pow(delta_s , 3) + b * pow(delta_s ,2) + c *delta_s + qi;
+		Eigen::Matrix2Xd norm_vec(1,2), pre(1,2);
+		norm_vec(0, 0) = delta_x[i] / length[i];
+		norm_vec(0, 1) = delta_y[i] / length[i];
+		pre(0, 0) = delta_x[i];
+		pre(0, 1) = delta_y[i];
+		Eigen::Matrix2Xd result = Topology::rotate(theta, norm_vec)*q + pre;
+		PointPt tmp;
+		tmp.x = result(0, 0);
+		tmp.y = result(0, 1);
+		int Grid_x = tmp.x / Grid;
+		int Grid_y = tmp.y / Grid;
+		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
+		{
+			if ((int)(Grid_x + j) >= 0 && ((int)(Grid_x + j)) <= MAP_WIDTH - 1)
+			{
+				int index = MAP_WIDTH*(int)(Grid_y) + (int)(Grid_x) + j;
+				if (veloGrids.velo_grid[index]) {
+					
+					return false;
+				}
+			}
+		}
+		pt.push_back(tmp);
+
+	}
+
+	
 }

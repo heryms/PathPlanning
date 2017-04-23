@@ -42,6 +42,7 @@ public:
 	bool path_generate_for_fun();
 	bool path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, 
 		std::vector<PosPoint> &root, int count);
+	bool short_time_planning(float qf, float qi, float theta, VeloGrid_t veloGrids);
 	
 
 private:
@@ -52,6 +53,8 @@ private:
 	double target_X;
 	double target_Y;
 	std::queue<double> recAngle;
+	std::vector<float> x_ref;
+	std::vector<float> y_ref;
 
 };
 

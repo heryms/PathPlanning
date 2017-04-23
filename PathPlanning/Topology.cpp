@@ -191,4 +191,12 @@ bool Topology::check_velogrid_rdPt_intersected(VeloGrid_t& veloGrids, std::vecto
 	}
 	return true;
 }
+static Eigen::MatrixXd rotate(double theta, Eigen::MatrixXd in){
+	Eigen::MatrixXd A(2, 2);
+	A(0, 0) = cos(theta);
+	A(0, 1) = -sin(theta);
+	A(1, 0) = sin(theta);
+	A(1, 1) = cos(theta);
 
+	return A*in;
+}

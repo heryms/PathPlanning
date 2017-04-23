@@ -51,7 +51,13 @@ struct PosPoint
 	RadAngle  angle;
 
 };
+struct PointPt
+{
+	float  x;
+	float  y;
+	
 
+};
 struct RoadPoint : public PosPoint
 {
 	//double x;
