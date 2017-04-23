@@ -42,6 +42,9 @@ public:
 	bool path_generate_for_fun();
 	bool path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, 
 		std::vector<PosPoint> &root, int count);
+	void motion_model();
+	void get_current_state();
+	double dynamic_response(double x, double x_t, double deltaT);
 
 private:
 	std::vector<RoadPoint> pre_Root;
