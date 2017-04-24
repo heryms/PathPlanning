@@ -1,6 +1,9 @@
 #include "PathGenerate.h"
 #include <assert.h>
 #include <math.h>
+#include "lcmtype/PlanOutput.hpp"
+using ckLcmType::PlanOutput;
+
 #define LOG_CLOTHOID
 bool PathGenerate::path_generate_grid(PosPoint startPt, PosPoint endPt, ckLcmType::VeloGrid_t& veloGrids, std::vector<RoadPoint>& rdPt) {
 
@@ -727,7 +730,7 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 				}
 			}
 		}
-		pt.push_back(tmp);
+		pts.push_back(tmp);
 	}
 	return true;
 	/*for (int i = 1; i < x_ref.size();i++)
@@ -773,15 +776,18 @@ void PathGenerate::short_time_planning(){
 		return ;
 	}
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
-
+	std::vector<PointPt> refTrajectory = DataCenter::GetInstance().GetRefTrajectory();
+	
 	SXYSpline spline;
-	spline.init();
+	spline.init(refTrajectory);
 
 	// get data and process
 	// float theta, double sf
-	float qi = 0;
-	float theta;
-	double sf;
+	double qi = 0;
+	double theta = 0;
+	DataCenter::GetInstance().Get_InitAngle_Qi(theta, qi);
+
+	double sf=spline.S[spline.S.size()-1];
 	std::vector<std::vector<PointPt>> _root_;
 	for (int i = 0; i < 20; i++){
 		float qf = i - 10;

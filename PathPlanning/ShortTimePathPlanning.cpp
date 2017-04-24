@@ -57,6 +57,6 @@ bool ShortTimePathPlanning::GenerateCandidatePath()
 		float tmp_q = a * pow(delta_s, 3) + b * pow(delta_s, 2) + c * delta_s + _Qi;
 		Q(i, 0) = tmp_q;
 	}
-
+	//
 	return false;
 }
