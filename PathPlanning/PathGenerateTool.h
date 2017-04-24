@@ -14,8 +14,8 @@ public:
 	void init(std::vector<PointPt> baseFrame);
 	double getKappa(double Sf);
 	RadAngle getTangent(double Sf);
-	void getDeriveXY(int Sf, double & dx, double & dy);
-	void getXY(int Sf, double & X, double & Y);
+	void getDeriveXY(double Sf, double & dx, double & dy);
+	void getXY(double Sf, double & X, double & Y);
 	double getS(int index, double X, double Y);
 };
 #endif

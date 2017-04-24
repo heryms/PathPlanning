@@ -674,12 +674,13 @@ bool PathGenerate::path_generate_recursive(PosPoint startPt, PosPoint endPt, Vel
 //
 //}
 
-bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf, VeloGrid_t veloGrids){
+bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf, 
+	VeloGrid_t veloGrids, SXYSpline spline,std::vector<PointPt> & pts){
 	std::vector<float> s(x_ref.size(), 0);
 	std::vector<float> delta_x(x_ref.size(), 0);
 	std::vector<float> delta_y(x_ref.size(), 0);
 	std::vector<float> length(x_ref.size(), 0);
-	std::vector<PointPt> pt;
+	//std::vector<PointPt> pt;
 
 	// need vector operator?
 	for (int i = 1; i < x_ref.size();i++)
@@ -699,8 +700,37 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 	{
 		double delta_s = sf / 100 * i;
 		float q = a * pow(delta_s, 3) + b * pow(delta_s, 2) + c *delta_s + qi;
+		double x=0.0, y=0.0;
+		spline.getXY(delta_s, x, y);
+		double _delta_x_, _delta_y_;
+		spline.getDeriveXY(delta_s, _delta_x_, _delta_y_);
+		double _length_ = sqrt(pow(_delta_x_, 2) + pow(_delta_y_, 2));
+		Eigen::Matrix2Xd norm_vec(2, 1), pre(2, 1);
+		norm_vec(0, 0) = _delta_x_ / _length_;
+		norm_vec(1, 0) = _delta_y_ / _length_;
+		pre(0, 0) = x;
+		pre(1, 0) = y;
+		Eigen::Matrix2Xd result = Topology::rotate(PI / 2, norm_vec)*q + pre;
+		PointPt tmp;
+		tmp.x = result(0, 0);
+		tmp.y = result(0, 1);
+		int Grid_x = tmp.x / Grid;
+		int Grid_y = tmp.y / Grid;
+		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
+		{
+			if ((int)(Grid_x + j) >= 0 && ((int)(Grid_x + j)) <= MAP_WIDTH - 1)
+			{
+				int index = MAP_WIDTH*(int)(Grid_y)+(int)(Grid_x)+j;
+				if (veloGrids.velo_grid[index]) {
+
+					return false;
+				}
+			}
+		}
+		pt.push_back(tmp);
 	}
-	for (int i = 1; i < x_ref.size();i++)
+	return true;
+	/*for (int i = 1; i < x_ref.size();i++)
 	{
 		float delta_s = s[i];
 		float q = a * pow(delta_s , 3) + b * pow(delta_s ,2) + c *delta_s + qi;
@@ -728,7 +758,7 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 		}
 		pt.push_back(tmp);
 
-	}
+	}*/
 
 	
 }
@@ -744,16 +774,21 @@ void PathGenerate::short_time_planning(){
 	}
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 
+	SXYSpline spline;
+	spline.init();
+
 	// get data and process
 	// float theta, double sf
 	float qi = 0;
 	float theta;
 	double sf;
+	std::vector<std::vector<PointPt>> _root_;
 	for (int i = 0; i < 20; i++){
 		float qf = i - 10;
-		if (short_time_planning(qf, qi,theta, sf, veloGrids))
+		std::vector<PointPt> pts;
+		if (short_time_planning(qf, qi,theta, sf, veloGrids, spline, pts))
 		{
-
+			_root_.push_back(pts);
 		}
 	}
 

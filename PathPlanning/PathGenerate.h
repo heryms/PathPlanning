@@ -11,6 +11,7 @@
 #include "PathDraw.h"
 #include "CarControl.h"
 #include "TrackHelper.h"
+#include "PathGenerateTool.h"
 class PathGenerate
 {
 private:
@@ -42,7 +43,8 @@ public:
 	bool path_generate_for_fun();
 	bool path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, 
 		std::vector<PosPoint> &root, int count);
-	bool short_time_planning(float qf, float qi, float theta, double sf, VeloGrid_t veloGrids);
+	bool short_time_planning(float qf, float qi, float theta, double sf, 
+		VeloGrid_t veloGrids, SXYSpline spline, std::vector<PointPt> & pts);
 	void short_time_planning();
 	bool cmu_planning(std::vector<double> k, double vt, double sf, 
 		double theta, double x_start, double y_start, double delta_t);

@@ -52,7 +52,7 @@ RadAngle SXYSpline::getTangent(double Sf)
 	return atan(dy / dx);
 }
 
-void SXYSpline::getDeriveXY(int Sf, double & dx, double & dy)
+void SXYSpline::getDeriveXY(double Sf, double & dx, double & dy)
 {
 	int index = std::find_if(S.begin(), S.end(), [Sf](double d)->bool {
 		return d > Sf;
@@ -64,7 +64,7 @@ void SXYSpline::getDeriveXY(int Sf, double & dx, double & dy)
 	dy = 3 * ky(3)*ds*ds + 2 * ky(2)*ds + ky(1);
 }
 
-void SXYSpline::getXY(int Sf, double & X, double & Y)
+void SXYSpline::getXY(double Sf, double & X, double & Y)
 {
 	int index = std::find_if(S.begin(), S.end(), [Sf](double d)->bool {
 		return d > Sf;
