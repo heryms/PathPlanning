@@ -21,6 +21,8 @@ void SXYSpline::init(std::vector<PointPt> baseFrame)
 	splineNum = skX.rows();
 }
 
+
+
 double SXYSpline::getKappa(double Sf)
 {
 	int index = std::find_if(S.begin(), S.end(), 
@@ -48,6 +50,30 @@ RadAngle SXYSpline::getTangent(double Sf)
 	double dx = 3 * kx(3)*ds*ds + 2 * kx(2)*ds + kx(1);
 	double dy = 3 * ky(3)*ds*ds + 2 * ky(2)*ds + ky(1);
 	return atan(dy / dx);
+}
+
+void SXYSpline::getDeriveXY(int Sf, double & dx, double & dy)
+{
+	int index = std::find_if(S.begin(), S.end(), [Sf](double d)->bool {
+		return d > Sf;
+	}) - S.begin() - 1;
+	Eigen::Vector4d kx = skX.row(index);
+	Eigen::Vector4d ky = skX.row(index);
+	double ds = Sf - S[index];
+	dx = 3 * kx(3)*ds*ds + 2 * kx(2)*ds + kx(1);
+	dy = 3 * ky(3)*ds*ds + 2 * ky(2)*ds + ky(1);
+}
+
+void SXYSpline::getXY(int Sf, double & X, double & Y)
+{
+	int index = std::find_if(S.begin(), S.end(), [Sf](double d)->bool {
+		return d > Sf;
+	}) - S.begin() - 1;
+	Eigen::Vector4d kx = skX.row(index);
+	Eigen::Vector4d ky = skX.row(index);
+	double ds = Sf - S[index];
+	X = kx(3)*pow(ds, 3) + kx(2)*ds*ds + kx(1)*ds + kx(0);
+	Y = ky(3)*pow(ds, 3) + ky(2)*ds*ds + ky(1)*ds + ky(0);
 }
 
 double SXYSpline::getS(int index, double X, double Y)
