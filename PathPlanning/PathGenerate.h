@@ -48,6 +48,9 @@ public:
 	void short_time_planning();
 	bool cmu_planning(std::vector<double> k, double vt, double sf, 
 		double theta, double x_start, double y_start, double delta_t);
+	double dynamic_response(double k_next, double k, double v_next, double v, double t, 
+		double &k_response, double & v_response);
+	bool speed_logic_control(double k_next, double v_next, double v, double &v_response);
 	
 
 private:

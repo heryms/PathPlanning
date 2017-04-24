@@ -670,9 +670,53 @@ bool PathGenerate::path_generate_recursive(PosPoint startPt, PosPoint endPt, Vel
 //	double theta_deltaT = theta + vt*kappa*deltaT;
 //
 //}
-//double PathGenerate::dynamic_response(double x, double x_t, double deltaT){
-//
-//}
+double PathGenerate::dynamic_response(double k_next, double k, double v_next, double v, double t, 
+	double &k_response, double & v_response){
+
+
+	double kmax = 0.1900;
+	double kmin = -kmax;
+	double delta_k_max = 0.1021;
+	double delta_k_min = -delta_k_max;
+	double delta_v_max = 2.000;
+	double delta_v_min = -6.000;
+
+	double delta_k = (k_next - k) / t;
+	double delta_k = fmin(delta_k, delta_k_max);
+	double delta_k = fmax(delta_k, delta_k_min);
+
+	k_response = k + delta_k * t;
+	k_response = fmin(k_response, kmax);
+	k_response = fmax(k_response, kmin);
+
+	speed_logic_control(k_next, v_next, v, v_response);
+	double delta_v = (v_response - v) / t;
+	delta_v = fmin(delta_v, delta_v_max);
+	delta_v = fmax(delta_v, delta_v_min);
+	v_response = v + delta_v * t;
+
+	return true;
+
+}
+
+
+bool PathGenerate::speed_logic_control(double k_next, double v_next, double v_pre, double &v_response){
+	double v = v_next;
+	double a = 0.1681;
+	double b = -0.0049;
+	double safefactor = 1.0;
+	double vscl = 4.00;
+	double k_max = 0.1900;
+	double kv_max = 0.1485;
+	double v_max = fmax(vscl, (k_next - a) / b);
+	double k_max_scl = fmin(k_max, a + b * v);
+	if (k_next > k_max_scl)
+		v = abs(safefactor * v_max);
+	v_response = v * v_pre / abs(v_pre);
+	//value = [v_response];
+	return true;
+}
+
 
 bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf, 
 	VeloGrid_t veloGrids, SXYSpline spline,std::vector<PointPt> & pts){
@@ -727,7 +771,7 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 				}
 			}
 		}
-		pt.push_back(tmp);
+		pts.push_back(tmp);
 	}
 	return true;
 	/*for (int i = 1; i < x_ref.size();i++)
@@ -799,6 +843,7 @@ bool PathGenerate::cmu_planning(std::vector<double> k, double vt, double sf,
 	std::vector<double> x(k.size(), 0);
 	std::vector<double> y(k.size(), 0);
 	double k_response;
+	double v_response;
 	for (int i = 1; i < k.size();i++)
 	{
 		x[i] = x[i - 1] + vt * cos(theta)*delta_t;
@@ -810,5 +855,8 @@ bool PathGenerate::cmu_planning(std::vector<double> k, double vt, double sf,
 			k_tmp = k_response;
 		theta = theta + vt * k_tmp * delta_t;
 		//s = sqrt((x(i + 1) - x(i)). ^ 2 + (y(i + 1) - y(i)). ^ 2) + s;
+		double k_next = k[i];
+		dynamic_response(k_next, k_tmp, vt, vt, delta_t, k_response, v_response);
+		//k_response = value(1);
 	}
 }
