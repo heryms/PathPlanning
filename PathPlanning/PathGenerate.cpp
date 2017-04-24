@@ -674,7 +674,7 @@ bool PathGenerate::path_generate_recursive(PosPoint startPt, PosPoint endPt, Vel
 //
 //}
 
-bool PathGenerate::short_time_planning(float qf, float qi, float theta, VeloGrid_t veloGrids){
+bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf, VeloGrid_t veloGrids){
 	std::vector<float> s(x_ref.size(), 0);
 	std::vector<float> delta_x(x_ref.size(), 0);
 	std::vector<float> delta_y(x_ref.size(), 0);
@@ -695,6 +695,11 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, VeloGrid
 	
 	float a = 2 * (qi - qf) / (pow(s[s.size() - 1], 3)) + c / pow(s[s.size() - 1], 2);
 	float b = 3 * (qf - qi) / (pow(s[s.size() - 1], 2)) - 2 * c / s[s.size() - 1];
+	for (int i = 0; i < 100;i++)
+	{
+		double delta_s = sf / 100 * i;
+		float q = a * pow(delta_s, 3) + b * pow(delta_s, 2) + c *delta_s + qi;
+	}
 	for (int i = 1; i < x_ref.size();i++)
 	{
 		float delta_s = s[i];
@@ -726,4 +731,49 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, VeloGrid
 	}
 
 	
+}
+void PathGenerate::short_time_planning(){
+	// step one receive data
+	if (!DataCenter::GetInstance().HasVeloGrid()) {
+		std::cout << "Warning::not velogrid message" << std::endl;
+		return ;
+	}
+	if (!DataCenter::GetInstance().HasCurb()) {
+		std::cout << "Warning::not curb message" << std::endl;
+		return ;
+	}
+	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+
+	// get data and process
+	// float theta, double sf
+	float qi = 0;
+	float theta;
+	double sf;
+	for (int i = 0; i < 20; i++){
+		float qf = i - 10;
+		if (short_time_planning(qf, qi,theta, sf, veloGrids))
+		{
+
+		}
+	}
+
+
+}
+bool PathGenerate::cmu_planning(std::vector<double> k, double vt, double sf, 
+	double theta, double x_start, double y_start, double delta_t){
+	std::vector<double> x(k.size(), 0);
+	std::vector<double> y(k.size(), 0);
+	double k_response;
+	for (int i = 1; i < k.size();i++)
+	{
+		x[i] = x[i - 1] + vt * cos(theta)*delta_t;
+		y[i] = y[i - 1] + vt * sin(theta)*delta_t;
+		double k_tmp;
+		if (i == 1)
+			k_tmp = k[i - 1];
+		else
+			k_tmp = k_response;
+		theta = theta + vt * k_tmp * delta_t;
+		//s = sqrt((x(i + 1) - x(i)). ^ 2 + (y(i + 1) - y(i)). ^ 2) + s;
+	}
 }
