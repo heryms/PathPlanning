@@ -29,7 +29,7 @@ class DataCenter
 private:
 	PosPoint m_curPos;//x,y in Gauss; orientation by x
 	CarInfo m_curCarInfo;//speed in km/h; steerAngle in deg
-	std::vector<PointPt> m_referenceTrajectory;//reference trajectory information
+	std::vector<RoadPoint> m_referenceTrajectory;//reference trajectory information
 	double m_carInitAngle;//get car angle at start point respect to the first point on reference trajectory
 	double _qi;//init qi
 
