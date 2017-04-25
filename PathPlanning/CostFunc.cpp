@@ -15,6 +15,21 @@ double similarity(std::vector<RoadPoint> pre_cur, std::vector<RoadPoint> now_cur
 	return diff / pre_cur.size();
 
 }
+double similarity(std::vector<RoadPoint> pre_cur, std::vector<RoadPoint> now_cur, double sf){
+	if (pre_cur.size() == 0)
+		return 0;
+	double diff = 0.0;
+	for (int i = 0; i < pre_cur.size(); i++)
+	{
+		double delta_x = pre_cur[i].x - now_cur[i].x;
+		double delta_y = pre_cur[i].y - now_cur[i].y;
+		//double delta_angle = pre_cur[i].angle - now_cur[i].angle;
+		//double delta_k = (pre_cur[i].k - now_cur[i].k);
+		diff += sqrt(pow(delta_x, 2) + pow(delta_y, 2))* (sf / 100 * i);
+
+	}
+	return diff / sf;
+}
 double cost(std::vector<RoadPoint> now_curve, std::vector<RoadPoint> reference_map, std::vector<double> guassian_prob){
 	if (now_curve.size() == 0 && reference_map.size()==0)
 	{

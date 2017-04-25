@@ -6,5 +6,5 @@
 #include "CoordTransform.h"
 double cost(std::vector<RoadPoint> now_cur, std::vector<RoadPoint> reference_map, std::vector<double> guassian_prob);
 double similarity(std::vector<RoadPoint> pre_cur, std::vector<RoadPoint> now_cur);
-
+double similarity(std::vector<RoadPoint> pre_cur, std::vector<RoadPoint> now_cur, double sf);
 #endif
