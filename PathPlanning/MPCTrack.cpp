@@ -49,14 +49,16 @@ void MPCTrack::Track()
 		}
 		info.gear = D;
 		info.state = START;
+		double dis = sqrt(Topology::Distance2(curX, path[curIndex]));
 		double curSpeed = LocalCarStatus::GetInstance().GetSpeed();
 		for (int i = 0; i < simPeriod; i++) {
 			refXs[i] = path[TrackFinder::AnchorPoint
 			(path, curX, curIndex,
-				i * fmax(curSpeed - 1.2,
-					fmin(info.speed, curSpeed + 1)) / 3.6 * microseconds.count() / 1000000.0)];
+				(1 + i) * fmax(curSpeed - 1.2,
+					fmin(info.speed, curSpeed + 1)) / 3.6 * microseconds.count() / 1000000.0
+				+ dis)];
 		}
-		RealTrack(info, curSpeed, LocalCarStatus::GetInstance().GetSteerAngle(), microseconds.count() / 1000000.0,curX);
+		RealTrack(info, curSpeed, LocalCarStatus::GetInstance().GetSteerAngle(), microseconds.count() / 1000000.0, curX);
 		lastX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
 		start = std::chrono::high_resolution_clock::now();
 	} while (false);
@@ -73,7 +75,7 @@ void MPCTrack::RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, d
 	double L = LocalCarStatus::GetInstance().GetL();
 	//CMatrix<double> Cm(Nq, Nx);
 	CMatrix<double> Cm = CMatrix<double>::Identity(Nq);
-	Cm(2, 2) = 0.01;
+	Cm(2, 2) = 1;
 	CMatrix<double> Am({
 		{ 1,0,0 }
 		,{ 0,1,0 }
@@ -130,7 +132,7 @@ void MPCTrack::RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, d
 	CMatrix<double> R = CMatrix<double>::Identity(Tc*Nc);
 	for (int i = 0; i < R.ColumnCount(); i += 2) {
 		R(i, i) = 1;
-		R(i + 1, i + 1) = 1000;
+		R(i + 1, i + 1) = 700;
 	}
 	CMatrix<double> E = (PHI.Transpose()*PHI + R) * 2;
 	CMatrix<double> dRs = Rs - F*xki;

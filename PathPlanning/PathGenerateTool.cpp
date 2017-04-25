@@ -80,9 +80,9 @@ double SXYSpline::getS(int index, double X, double Y)
 {
 	Eigen::Vector4d kx = skX.row(index);
 	Eigen::Vector4d ky = skY.row(index);
-	double a = (kx(1)*ky(0) - kx(0)*ky(1));
-	double b = (kx(2)*ky(0) - kx(0)*ky(2));
-	double c = (kx(3)*ky(0) - kx(0)*ky(3)) - (ky(0)*X - kx(0)*Y);
+	double a = (kx(2)*ky(3) - kx(3)*ky(2));
+	double b = (kx(1)*ky(3) - kx(3)*ky(1));
+	double c = (kx(0)*ky(3) - kx(3)*ky(0)) - (ky(3)*X - kx(3)*Y);
 	double ret0 = (-b + sqrt(b*b - 4 * a*c)) / (2 * a);
 	double ret1 = (-b - sqrt(b*b - 4 * a*c)) / (2 * a);
 	if (ret0 >= S[index] && (index == splineNum - 1 || ret0 <= S[index + 1])) {
