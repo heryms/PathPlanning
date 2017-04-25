@@ -233,5 +233,8 @@
     <ClInclude Include="ShortTimePathPlanning.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="lcmtype\ckMapStatus_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@
 #include "lcmtype\lasercurb_t.hpp"
 #include "lcmtype\VeloGrid_t.hpp"
 #include "lcmtype\PlanOutput.hpp"
+#include "lcmtype\ckMapStatus_t.hpp"
 #include <mutex>
 #include <condition_variable>
 #include <vector>
@@ -16,6 +17,7 @@ using ckLcmType::Location_t;
 using ckLcmType::VeloGrid_t;
 using ckLcmType::cloudHandler;
 using ckLcmType::PlanOutput;
+using ckLcmType::ckMapStatus_t;
 
 enum CurbDirection{
 	LEFT = 0,
@@ -35,13 +37,13 @@ private:
 	LcmRecvHelper<StatusBody_t> m_lcmStatusBody;
 	LcmRecvHelper<VeloGrid_t> m_lcmVeloGrid;
 	LcmRecvHelper<cloudHandler> m_lcmCurb;
-	LcmRecvHelper<PlanOutput> m_lcmRefTrajectory;
+	LcmRecvHelper<ckMapStatus_t> m_lcmRefTrajectory;
 	
 	Location_t m_lcmMsgLocation;
 	StatusBody_t m_lcmMsgStatusBody;
 	VeloGrid_t m_lcmMsgVeloGrid;
 	cloudHandler m_lcmMsgCurb;
-	PlanOutput m_lcmMsgRefTrajectory;
+	ckMapStatus_t m_lcmMsgRefTrajectory;
 	
 	std::mutex m_lockLocation;
 	std::mutex m_lockStatusBody;
@@ -68,7 +70,7 @@ private:
 	/*triggered while receiving Cloud */
 	void CurbRecvOperation(const cloudHandler* msg, void*);
 	/*triggered while receiving Reference Trajectory*/
-	void RefTrajectoryRecvOperation(const PlanOutput* msg, void*);
+	void RefTrajectoryRecvOperation(const ckMapStatus_t* msg, void*);
 
 protected:
 	DataCenter();

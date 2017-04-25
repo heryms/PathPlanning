@@ -30,7 +30,7 @@ double SXYSpline::getKappa(double Sf)
 			return d > Sf;
 	}) - S.begin() - 1;
 	Eigen::Vector4d kx = skX.row(index);
-	Eigen::Vector4d ky = skX.row(index);
+	Eigen::Vector4d ky = skY.row(index);
 	double ds = Sf - S[index];
 	double dx = 3 * kx(3)*ds*ds + 2 * kx(2)*ds + kx(1);
 	double ddx = 6 * kx(3)*ds + 2 * kx(2);
@@ -45,7 +45,7 @@ RadAngle SXYSpline::getTangent(double Sf)
 		return d > Sf;
 	}) - S.begin() - 1;
 	Eigen::Vector4d kx = skX.row(index);
-	Eigen::Vector4d ky = skX.row(index);
+	Eigen::Vector4d ky = skY.row(index);
 	double ds = Sf - S[index];
 	double dx = 3 * kx(3)*ds*ds + 2 * kx(2)*ds + kx(1);
 	double dy = 3 * ky(3)*ds*ds + 2 * ky(2)*ds + ky(1);
@@ -58,7 +58,7 @@ void SXYSpline::getDeriveXY(double Sf, double & dx, double & dy)
 		return d > Sf;
 	}) - S.begin() - 1;
 	Eigen::Vector4d kx = skX.row(index);
-	Eigen::Vector4d ky = skX.row(index);
+	Eigen::Vector4d ky = skY.row(index);
 	double ds = Sf - S[index];
 	dx = 3 * kx(3)*ds*ds + 2 * kx(2)*ds + kx(1);
 	dy = 3 * ky(3)*ds*ds + 2 * ky(2)*ds + ky(1);
@@ -70,7 +70,7 @@ void SXYSpline::getXY(double Sf, double & X, double & Y)
 		return d > Sf;
 	}) - S.begin() - 1;
 	Eigen::Vector4d kx = skX.row(index);
-	Eigen::Vector4d ky = skX.row(index);
+	Eigen::Vector4d ky = skY.row(index);
 	double ds = Sf - S[index];
 	X = kx(3)*pow(ds, 3) + kx(2)*ds*ds + kx(1)*ds + kx(0);
 	Y = ky(3)*pow(ds, 3) + ky(2)*ds*ds + ky(1)*ds + ky(0);
@@ -79,7 +79,7 @@ void SXYSpline::getXY(double Sf, double & X, double & Y)
 double SXYSpline::getS(int index, double X, double Y)
 {
 	Eigen::Vector4d kx = skX.row(index);
-	Eigen::Vector4d ky = skX.row(index);
+	Eigen::Vector4d ky = skY.row(index);
 	double a = (kx(1)*ky(0) - kx(0)*ky(1));
 	double b = (kx(2)*ky(0) - kx(0)*ky(2));
 	double c = (kx(3)*ky(0) - kx(0)*ky(3)) - (ky(0)*X - kx(0)*Y);

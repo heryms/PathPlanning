@@ -124,6 +124,7 @@
     <ClInclude Include="ForMPC\Array.hh" />
     <ClInclude Include="ForMPC\MMatrix.h" />
     <ClInclude Include="ForMPC\QuadProg++.hh" />
+    <ClInclude Include="lcmtype\ckMapStatus_t.hpp" />
     <ClInclude Include="MPCTrack.h" />
     <ClInclude Include="PathGenerateTool.h" />
     <ClInclude Include="ShortTimePathPlanning.h" />

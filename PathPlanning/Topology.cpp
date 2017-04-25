@@ -1,5 +1,5 @@
 #include "Topology.h"
-
+#include <cmath>
 using std::vector;
 
 //两点距离的平方
@@ -313,4 +313,11 @@ Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double
 		s(i, 3) = (m[i + 1] - m[i]) / (6 * h[i]);
 	}
 	return s;
+}
+
+void Topology::Rotate(double theta, double x, double y, double& x_out, double& y_out)
+{
+	x_out = y * sin(theta) - x * cos(theta);
+	y_out = y * cos(theta) + x * sin(theta);
+
 }

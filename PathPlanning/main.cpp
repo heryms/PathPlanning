@@ -13,13 +13,15 @@
 #include "PathGenerate.h"
 #include <chrono>
 int main()
-{
-	test_spline();
+ {
+	//test_spline();
 	//CoordTransform transform;
 	//test_Clothoid();
 	DataCenter::GetInstance().StartVeloGrid();
 	DataCenter::GetInstance().StartCurb();
 	DataCenter::GetInstance().StartStatusBody();
+	DataCenter::GetInstance().StartRefTrajectory();
+	DataCenter::GetInstance().StartLocation();
 	__thread_sleep_for(1000);
 	PathGenerate pathGen;
 	while (true)
@@ -29,7 +31,7 @@ int main()
 		}
 		std::chrono::steady_clock::time_point startTime
 			= std::chrono::steady_clock::now();
-		pathGen.path_generate_using_bug();
+		pathGen.short_time_planning();
 		std::chrono::steady_clock::time_point endTime
 			= std::chrono::steady_clock::now();
 		std::chrono::milliseconds time

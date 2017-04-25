@@ -1,11 +1,12 @@
 #include "DataCenter.h"
 #include "lcmtype\LcmSet.h"
 #include "LocalCarStatus.h"
+#include "Topology.h"
 #include <cmath>
 
 typedef std::unique_lock<std::mutex> QuickLock;
 
-void DataCenter::RefTrajectoryRecvOperation(const PlanOutput * msg, void *)
+void DataCenter::RefTrajectoryRecvOperation(const ckMapStatus_t * msg, void *)
 {
 	QuickLock lk(m_lockRefTrajectory);
 	m_lcmMsgRefTrajectory = *msg;
@@ -137,10 +138,10 @@ void DataCenter::EndRefTrajectory()
 }
 
 PosPoint DataCenter::GetCurPosition(){
-	QuickLock lk(m_lockCurb);
+	QuickLock lk(m_lockLocation);
 	m_curPos.x = m_lcmMsgLocation.gau_pos[1] + 500000;
 	m_curPos.y = m_lcmMsgLocation.gau_pos[0];
-	m_curPos.angle = PI / 2 - m_lcmMsgLocation.orientation[2];
+	m_curPos.angle = PI / 2 - m_lcmMsgLocation.orientation[2]*PI/180;
 	return m_curPos;
 }
 
@@ -227,37 +228,50 @@ std::vector<PointPt> DataCenter::GetRefTrajectory()
 {
 	QuickLock lk(m_lockRefTrajectory);
 	std::vector<PointPt> trajectory;
-	trajectory.reserve(m_lcmMsgRefTrajectory.tn);
-
-	for (int i = 0; i < m_lcmMsgRefTrajectory.tn; i++)
+	trajectory.reserve(m_lcmMsgRefTrajectory.num-1);
+	double angle = GetCurPosition().angle;
+	for (int i = 1; i < m_lcmMsgRefTrajectory.num; i++)
 	{
 		PointPt pt;
-		pt.x = m_lcmMsgRefTrajectory.TrajectoryX[i];
-		pt.y = m_lcmMsgRefTrajectory.TrajectoryY[i];
+		double dx = m_lcmMsgRefTrajectory.x[i] - m_lcmMsgRefTrajectory.x[0];
+		double dy = m_lcmMsgRefTrajectory.y[i] - m_lcmMsgRefTrajectory.y[0];
+		// *PI / 180.0;
+		Topology::Rotate(angle, dx, dy, pt.x, pt.y);
+		
 		trajectory.push_back(pt);
+	}
+	//if (i == 1)
+	{
+		m_lcmMsgRefTrajectory.angle[0] = atan((trajectory[1].y-trajectory[0].y) /(trajectory[1].x- trajectory[0].x));
 	}
 	return trajectory;
 }
 
 void DataCenter::Get_InitAngle_Qi(double& angle, double& qi)
 {
-	QuickLock lk0(m_lockLocation);
-	QuickLock lk1(m_lockRefTrajectory);
+	QuickLock lk(m_lockRefTrajectory);
 
-	double first_pt_angle = m_lcmMsgRefTrajectory.TrajectoryAngle[0];
-	double cur_car_angle = m_lcmMsgLocation.orientation[2];
-	double car_x = m_lcmMsgLocation.gau_pos[0];
-	double car_y = m_lcmMsgLocation.gau_pos[1];
+	
+	double first_pt_angle = m_lcmMsgRefTrajectory.angle[0];
+	
+	RadAngle cur_car_angle = PI / 2;// GetCurPosition().angle;
+	double car_x = m_lcmMsgRefTrajectory.x[0];
+	double car_y = m_lcmMsgRefTrajectory.y[0];
+	if (first_pt_angle < 0)
+	{
+		first_pt_angle += PI;
+		//angle = (RadAngle)(cur_car_angle - first_pt_angle);
+	}
 
 	//这里不确定是不是采用绝对值，如果不对再改一下
-	angle = abs(cur_car_angle - first_pt_angle);//current car angle respect to first point on reference trajectory
-
+	angle =(RadAngle)( cur_car_angle - first_pt_angle);//current car angle respect to first point on reference trajectory
+	//std::cout << "cur" << cur_car_angle << "\tz:" << first_pt_angle << std::endl;
 	//这里只从参考轨迹前10个点搜索最近点
 	double min = 0;
-	for (int i = 0; i < 10; i++)
+	for (int i = 1; i <= 10; i++)
 	{
-		double tmp = (car_x - m_lcmMsgRefTrajectory.TrajectoryX[i]) * (car_x - m_lcmMsgRefTrajectory.TrajectoryX[i]) +
-			(car_y - m_lcmMsgRefTrajectory.TrajectoryY[i]) * (car_y - m_lcmMsgRefTrajectory.TrajectoryY[i]);
+		double tmp = (car_x - m_lcmMsgRefTrajectory.x[i]) * (car_x - m_lcmMsgRefTrajectory.x[i]) +
+			(car_y - m_lcmMsgRefTrajectory.y[i]) * (car_y - m_lcmMsgRefTrajectory.y[i]);
 		if (min > tmp)
 			min = tmp;
 	}
@@ -309,6 +323,6 @@ bool DataCenter::HasCurb(){
 
 bool DataCenter::HasRefTrajectory()
 {
-	return m_lcmRefTrajectory.HasLcmMessage;
+	return m_lcmRefTrajectory.HasLcmMessage();
 }
 

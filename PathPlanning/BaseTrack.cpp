@@ -13,7 +13,7 @@ BaseTrack::~BaseTrack()
 
 void BaseTrack::SetPath(std::vector<RoadPoint>& path)
 {
-	this->path = std::move(path);
+	this->path = path;// std::move(path);
 }
 
 void BaseTrack::SetRefSpeed(double straight, double curve)

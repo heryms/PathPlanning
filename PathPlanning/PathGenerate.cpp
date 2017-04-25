@@ -685,8 +685,8 @@ double PathGenerate::dynamic_response(double k_next, double k, double v_next, do
 	double delta_v_min = -6.000;
 
 	double delta_k = (k_next - k) / t;
-	double delta_k = fmin(delta_k, delta_k_max);
-	double delta_k = fmax(delta_k, delta_k_min);
+	delta_k = fmin(delta_k, delta_k_max);
+	delta_k = fmax(delta_k, delta_k_min);
 
 	k_response = k + delta_k * t;
 	k_response = fmin(k_response, kmax);
@@ -723,14 +723,14 @@ bool PathGenerate::speed_logic_control(double k_next, double v_next, double v_pr
 
 bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf, 
 	VeloGrid_t veloGrids, SXYSpline spline,std::vector<PointPt> & pts){
-	std::vector<float> s(x_ref.size(), 0);
-	std::vector<float> delta_x(x_ref.size(), 0);
-	std::vector<float> delta_y(x_ref.size(), 0);
-	std::vector<float> length(x_ref.size(), 0);
+	//std::vector<float> s(x_ref.size(), 0);
+	//std::vector<float> delta_x(x_ref.size(), 0);
+	//std::vector<float> delta_y(x_ref.size(), 0);
+	//std::vector<float> length(x_ref.size(), 0);
 	//std::vector<PointPt> pt;
 
 	// need vector operator?
-	for (int i = 1; i < x_ref.size();i++)
+	/*for (int i = 1; i < x_ref.size();i++)
 	{
 		s[i] = sqrt((x_ref[i] - x_ref[i - 1])*(x_ref[i] - x_ref[i - 1])+
 			(y_ref[i] - y_ref[i - 1])*(y_ref[i] - y_ref[i - 1])) + s[i - 1];
@@ -738,11 +738,11 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 		delta_y[i] = y_ref[i] - y_ref[i - 1];
 		length[i] = sqrt(delta_x[i] * delta_x[i] + delta_y[i] * delta_y[i]);
 
-	}
+	}*/
 	float c = tan(theta);
 	
-	float a = 2 * (qi - qf) / (pow(s[s.size() - 1], 3)) + c / pow(s[s.size() - 1], 2);
-	float b = 3 * (qf - qi) / (pow(s[s.size() - 1], 2)) - 2 * c / s[s.size() - 1];
+	float a = 2 * (qi - qf) / (pow(sf, 3)) + c / pow(sf, 2);
+	float b = 3 * (qf - qi) / (pow(sf, 2)) - 2 * c / sf;
 	for (int i = 0; i < 100;i++)
 	{
 		double delta_s = sf / 100 * i;
@@ -760,9 +760,9 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 		Eigen::Matrix2Xd result = Topology::rotate(PI / 2, norm_vec)*q + pre;
 		PointPt tmp;
 		tmp.x = result(0, 0);
-		tmp.y = result(0, 1);
-		int Grid_x = tmp.x / Grid;
-		int Grid_y = tmp.y / Grid;
+		tmp.y = result(1, 0);
+		int Grid_x = tmp.x / Grid + 75;
+		int Grid_y = tmp.y / Grid + 200;
 		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
 		{
 			if ((int)(Grid_x + j) >= 0 && ((int)(Grid_x + j)) <= MAP_WIDTH - 1)
@@ -820,6 +820,10 @@ void PathGenerate::short_time_planning(){
 		return ;
 	}
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+	if (!DataCenter::GetInstance().HasRefTrajectory()) {
+		std::cout << "Warning::not ref message" << std::endl;
+		return;
+	}
 	std::vector<PointPt> refTrajectory = DataCenter::GetInstance().GetRefTrajectory();
 	
 	SXYSpline spline;
@@ -832,7 +836,9 @@ void PathGenerate::short_time_planning(){
 	DataCenter::GetInstance().Get_InitAngle_Qi(theta, qi);
 
 	double sf=spline.S[spline.S.size()-1];
+	std::cout << "Sf:" << sf << std::endl;
 	std::vector<std::vector<PointPt>> _root_;
+	std::vector<RoadPoint> rdpt;
 	for (int i = 0; i < 20; i++){
 		float qf = i - 10;
 		std::vector<PointPt> pts;
@@ -841,7 +847,57 @@ void PathGenerate::short_time_planning(){
 			_root_.push_back(pts);
 		}
 	}
+	if (_root_.size() == 0)
+	{
+		std::cout << "no root to use " << std::endl;
+		return;
+	}
+	ckLcmType::DecisionDraw_t draw;
+	//draw.num = rdpt.size();
+	//draw.Path_x.reserve(draw.num);
+	//draw.Path_y.reserve(draw.num);
+	/*for (RoadPoint& pt : rdpt) {
+		double x, y;
+		CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
+		
+		pt.x = x;
+		pt.y = y;
 
+	}*/
+	int total_num = 0;
+	for (int i = 0; i < _root_.size();i++)
+	{
+		for (int j = 0; j < _root_[i].size();j++)
+		{
+			double x = _root_[i][j].x;
+			double y = _root_[i][j].y;
+			draw.Path_x.push_back(x);
+			draw.Path_y.push_back(y);
+			if (i==0)
+			{
+				RoadPoint pt_for_track;
+				pt_for_track.x = x;
+				pt_for_track.y = y;
+				pt_for_track.angle = 0;
+				rdpt.push_back(pt_for_track);
+			}
+		}
+		total_num += _root_[i].size();
+	}
+	track.SetPath(rdpt);
+	std::cout << "root number" << _root_.size() << std::endl;
+	draw.num = total_num;
+	int total_refnum = refTrajectory.size();
+	draw.refnum = total_refnum;
+	draw.Refer_x.reserve(total_refnum);
+	draw.Refer_y.reserve(total_refnum);
+	for (int i = 0; i < total_refnum; i++)
+	{
+		draw.Refer_x.push_back(refTrajectory[i].x);
+		draw.Refer_y.push_back(refTrajectory[i].y);
+	}
+	
+	m_sendPath.SendDraw(draw);
 
 }
 bool PathGenerate::cmu_planning(std::vector<double> k, double vt, double sf, 
@@ -865,4 +921,5 @@ bool PathGenerate::cmu_planning(std::vector<double> k, double vt, double sf,
 		dynamic_response(k_next, k_tmp, vt, vt, delta_t, k_response, v_response);
 		//k_response = value(1);
 	}
+	return true;
 }
