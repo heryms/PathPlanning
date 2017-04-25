@@ -11,7 +11,7 @@ public:
 	std::vector<double> X;//µ„X
 	std::vector<double> Y;//µ„Y
 	int splineNum;
-	void init(std::vector<PointPt> baseFrame);
+	void init(std::vector<RoadPoint> baseFrame);
 	double getKappa(double Sf);
 	RadAngle getTangent(double Sf);
 	void getDeriveXY(double Sf, double & dx, double & dy);

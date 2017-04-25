@@ -224,20 +224,20 @@ PosPoint DataCenter::GetTargetPoint() {
 	return PosPoint();
 }
 
-std::vector<PointPt> DataCenter::GetRefTrajectory()
+std::vector<RoadPoint> DataCenter::GetRefTrajectory()
 {
 	QuickLock lk(m_lockRefTrajectory);
-	std::vector<PointPt> trajectory;
+	std::vector<RoadPoint> trajectory;
 	trajectory.reserve(m_lcmMsgRefTrajectory.num-1);
 	double angle = GetCurPosition().angle;
 	for (int i = 1; i < m_lcmMsgRefTrajectory.num; i++)
 	{
-		PointPt pt;
+		RoadPoint pt;
 		double dx = m_lcmMsgRefTrajectory.x[i] - m_lcmMsgRefTrajectory.x[0];
 		double dy = m_lcmMsgRefTrajectory.y[i] - m_lcmMsgRefTrajectory.y[0];
 		// *PI / 180.0;
-		Topology::Rotate(angle, dx, dy, pt.x, pt.y);
-		
+		Topology::Rotate(PI / 2 - angle, dx, dy, pt.x, pt.y);
+
 		trajectory.push_back(pt);
 	}
 	//if (i == 1)

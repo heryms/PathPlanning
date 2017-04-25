@@ -46,17 +46,35 @@ void test_Array(int a[], int length)
 	}
 }
 
-void test_spline()
-{
-	std::vector<double> X{ 0,1,2,3 };
-	std::vector<double> Y{ 0,0.5,2.0,1.5 };
+int64_t timecal(std::function<void()> f) {
 	std::chrono::high_resolution_clock::time_point startTime
 		= std::chrono::high_resolution_clock::now();
-	auto s = Topology::CubicSpline(X, Y, -0.3, 3.3);
-	std::cout << s << std::endl;
+	f();
 	std::chrono::high_resolution_clock::time_point endTime
 		= std::chrono::high_resolution_clock::now();
 	std::chrono::microseconds time
 		= std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
-	std::cout << time.count() << std::endl;
+	return time.count();
+}
+
+#define CAL_TIME(func) timecal([&]()->void{func})
+
+void test_spline()
+{
+	std::vector<double> X{ 0,1,2,3 };
+	std::vector<double> Y{ 0,0.5,2.0,1.5 };
+	std::cout << CAL_TIME(
+		auto s = Topology::CubicSpline(X, Y, -0.3, 3.3);
+	std::cout << s << std::endl;) << std::endl;
+	//std::cout<<timecal([&]() -> void {
+	//	auto s = Topology::CubicSpline(X, Y, -0.3, 3.3);
+	//	std::cout << s << std::endl;
+	//})<<std::endl;
+	//std::chrono::high_resolution_clock::time_point startTime
+	//	= std::chrono::high_resolution_clock::now();
+	//std::chrono::high_resolution_clock::time_point endTime
+	//	= std::chrono::high_resolution_clock::now();
+	//std::chrono::microseconds time
+	//	= std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+	//std::cout << time.count() << std::endl;
 }

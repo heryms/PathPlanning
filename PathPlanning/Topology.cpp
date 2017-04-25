@@ -317,7 +317,7 @@ Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double
 
 void Topology::Rotate(double theta, double x, double y, double& x_out, double& y_out)
 {
-	x_out = y * sin(theta) - x * cos(theta);
-	y_out = y * cos(theta) + x * sin(theta);
+	x_out = y * cos(theta) - x * sin(theta);
+	y_out = y * sin(theta) + x * cos(theta);
 
 }

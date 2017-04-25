@@ -824,7 +824,7 @@ void PathGenerate::short_time_planning(){
 		std::cout << "Warning::not ref message" << std::endl;
 		return;
 	}
-	std::vector<PointPt> refTrajectory = DataCenter::GetInstance().GetRefTrajectory();
+	std::vector<RoadPoint> refTrajectory = DataCenter::GetInstance().GetRefTrajectory();
 	
 	SXYSpline spline;
 	spline.init(refTrajectory);

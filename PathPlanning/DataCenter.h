@@ -119,7 +119,7 @@ public:
 	/*@return The Plan Target Point*/
 	PosPoint GetTargetPoint();
 	/*@return reference trajectory*/
-	std::vector<PointPt> GetRefTrajectory();
+	std::vector<RoadPoint> GetRefTrajectory();
 	//get init car angle and qi
 	void Get_InitAngle_Qi(double& angle, double& qi);
 

@@ -1,6 +1,6 @@
 #include "PathGenerateTool.h"
 
-void SXYSpline::init(std::vector<PointPt> baseFrame)
+void SXYSpline::init(std::vector<RoadPoint> baseFrame)
 {
 	X.clear();
 	Y.clear();
