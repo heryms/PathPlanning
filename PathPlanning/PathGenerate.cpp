@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <math.h>
 #include "lcmtype/PlanOutput.hpp"
+#include "PathJoint.h"
 using ckLcmType::PlanOutput;
 
 #define LOG_CLOTHOID
@@ -832,6 +833,17 @@ void PathGenerate::short_time_planning(){
 
 	// get data and process
 	// float theta, double sf
+
+	// get car data
+	car.angle = PI / 2 - DataCenter::GetInstance().GetCurPosition().angle;
+	PosPoint tmp_Pt = DataCenter::GetInstance().GetCurOnTrajectory();
+	car.x = tmp_Pt.x;
+	car.y = tmp_Pt.y;
+
+	if (Root_On_Gaussian.size() != 0)
+	{
+		std::vector<RoadPoint> pre_to_now = PathJoint::Gaussian_To_Decare(Root_On_Gaussian, car.angle, car.x, car.y);
+	}
 	double qi = 0;
 	double theta = 0;
 	DataCenter::GetInstance().Get_InitAngle_Qi(theta, qi);
@@ -872,6 +884,8 @@ void PathGenerate::short_time_planning(){
 			}
 		}
 		pre_Root = _best_root_;
+
+		Root_On_Gaussian = PathJoint::Decare_To_Gaussian(_best_root_, car.angle, car.x, car.y);
 		// send the data
 		//ckLcmType::DecisionDraw_t draw;
 		

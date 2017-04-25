@@ -29,7 +29,9 @@ public:
 	static Eigen::MatrixXd rotate(double theta, Eigen::MatrixXd in);
 	static std::vector<double> lufact(std::vector<std::vector<double>> A, std::vector<double> B);
 	static Eigen::MatrixX4d CubicSpline(std::vector<double> X, std::vector<double> Y, double dds0 = 0, double ddsn = 0);
+	static void Rotate_To_Decare(double theta, double x, double y, double& x_out, double& y_out);
 	static void Rotate(double theta, double x, double y, double& x_out, double& y_out);
+	static void Rotate_To_Guassian(double theta, double x, double y, double& x_out, double& y_out);
 	static double toAngle(double dx, double dy);
 };
 #endif

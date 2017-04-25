@@ -55,11 +55,14 @@ public:
 
 private:
 	std::vector<RoadPoint> pre_Root;
+	std::vector<RoadPoint> Root_On_Gaussian;
 	std::vector<std::vector<PosPoint>> posPtOnRoot;
 	std::vector<std::vector<RoadPoint>> clothoidMap;
 	double PreDirection;
 	double target_X;
 	double target_Y;
+	//double car_orientation;
+	PosPoint car;
 	std::queue<double> recAngle;
 	std::vector<float> x_ref;
 	std::vector<float> y_ref;

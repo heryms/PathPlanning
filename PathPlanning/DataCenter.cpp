@@ -223,7 +223,13 @@ laserCurbs::pointXYZI DataCenter::GetRoadEdgeCoefficient(CurbDirection dir)
 PosPoint DataCenter::GetTargetPoint() {
 	return PosPoint();
 }
-
+PosPoint DataCenter::GetCurOnTrajectory(){
+	QuickLock lk(m_lockRefTrajectory);
+	PosPoint pt;
+	pt.x = m_lcmMsgRefTrajectory.x[0];
+	pt.y = m_lcmMsgRefTrajectory.y[0];
+	return pt;
+}
 std::vector<RoadPoint> DataCenter::GetRefTrajectory()
 {
 	QuickLock lk(m_lockRefTrajectory);

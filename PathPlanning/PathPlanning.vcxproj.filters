@@ -114,6 +114,9 @@
     <ClCompile Include="ShortTimePathPlanning.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="PathJoint.cpp">
+      <Filter>PathGenerate</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataCenter.h">
@@ -235,6 +238,9 @@
     </ClInclude>
     <ClInclude Include="lcmtype\ckMapStatus_t.hpp">
       <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="PathJoint.h">
+      <Filter>PathGenerate</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

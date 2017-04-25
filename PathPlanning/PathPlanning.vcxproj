@@ -95,6 +95,7 @@
     <ClCompile Include="ForMPC\QuadProg++.cc" />
     <ClCompile Include="MPCTrack.cpp" />
     <ClCompile Include="PathGenerateTool.cpp" />
+    <ClCompile Include="PathJoint.cpp" />
     <ClCompile Include="ShortTimePathPlanning.cpp" />
     <ClCompile Include="TrackHelper.cpp" />
     <ClCompile Include="CarControl.cpp" />
@@ -127,6 +128,7 @@
     <ClInclude Include="lcmtype\ckMapStatus_t.hpp" />
     <ClInclude Include="MPCTrack.h" />
     <ClInclude Include="PathGenerateTool.h" />
+    <ClInclude Include="PathJoint.h" />
     <ClInclude Include="ShortTimePathPlanning.h" />
     <ClInclude Include="TrackHelper.h" />
     <ClInclude Include="BaseType.h" />

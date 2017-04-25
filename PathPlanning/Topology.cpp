@@ -315,11 +315,23 @@ Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double
 	return s;
 }
 
+void Topology::Rotate_To_Decare(double theta, double x, double y, double& x_out, double& y_out)
+{
+	x_out = y * cos(theta) - x * sin(theta);
+	y_out = y * sin(theta) + x * cos(theta);
+
+}
 void Topology::Rotate(double theta, double x, double y, double& x_out, double& y_out)
 {
 	x_out = y * cos(theta) - x * sin(theta);
 	y_out = y * sin(theta) + x * cos(theta);
 
+}
+void Topology::Rotate_To_Guassian(double theta, double x, double y, double& x_out, double& y_out){
+	// x, y should be decarle coordinate
+	// theta should be same as above
+	y_out = x * cos(theta) + y * sin(theta);
+	x_out = -x * sin(theta) + y * cos(theta);
 }
 double Topology::toAngle(double dx, double dy){
 

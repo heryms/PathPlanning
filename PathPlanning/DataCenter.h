@@ -120,6 +120,7 @@ public:
 	PosPoint GetTargetPoint();
 	/*@return reference trajectory*/
 	std::vector<RoadPoint> GetRefTrajectory();
+	PosPoint GetCurOnTrajectory();
 	//get init car angle and qi
 	void Get_InitAngle_Qi(double& angle, double& qi);
 
