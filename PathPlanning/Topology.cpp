@@ -321,3 +321,22 @@ void Topology::Rotate(double theta, double x, double y, double& x_out, double& y
 	y_out = y * cos(theta) + x * sin(theta);
 
 }
+double Topology::toAngle(double dx, double dy){
+
+	// result -pi pi
+	if (dy >=0 && dx >=0)
+	{
+		return atan(dy / dx);
+	}
+	if (dy>=0 && dx<=0)
+	{
+		return atan(dy / dx) + PI;
+	}
+	if (dy<=0 && dx <= 0)
+	{
+		return atan(dy / dx) - PI;
+	}
+	if (dy <= 0 && dx >= 0){
+		return atan(dy / dx);
+	}
+}
