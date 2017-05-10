@@ -15,6 +15,7 @@ protected:
 public:
 	static CarControl& GetInstance();
 	void SendCommand(CarInfo info);
+	void StopCommand();
 };
 
 

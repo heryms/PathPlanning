@@ -18,7 +18,7 @@ using ckLcmType::VeloGrid_t;
 using ckLcmType::cloudHandler;
 using ckLcmType::PlanOutput;
 using ckLcmType::ckMapStatus_t;
-
+class SXYSpline;
 enum CurbDirection{
 	LEFT = 0,
 	RIGHT
@@ -120,9 +120,10 @@ public:
 	PosPoint GetTargetPoint();
 	/*@return reference trajectory*/
 	std::vector<RoadPoint> GetRefTrajectory();
+	std::vector<RoadPoint> GetReferenceTrajectory(RoadPoint &car);
 	PosPoint GetCurOnTrajectory();
 	//get init car angle and qi
-	void Get_InitAngle_Qi(double& angle, double& qi);
+	void Get_InitAngle_Qi(SXYSpline* spline,double& angle, double& qi);
 
 	/*continue while Location Processing completed*/
 	bool WaitForLocation(unsigned int milliseconds);

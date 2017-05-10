@@ -274,6 +274,7 @@ Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double
 	auto Xiter = X.rbegin();
 	auto Yiter = Y.rbegin();
 	int N = X.size() - 1;
+	if (N <= 3) return Eigen::Matrix4Xd();
 	std::vector<double> h(N);
 	std::vector<double> d(N);
 	std::vector<double> u(N - 1);
@@ -346,7 +347,7 @@ double Topology::toAngle(double dx, double dy){
 	}
 	if (dy<=0 && dx <= 0)
 	{
-		return atan(dy / dx) - PI;
+		return atan(dy / dx) + PI;
 	}
 	if (dy <= 0 && dx >= 0){
 		return atan(dy / dx);

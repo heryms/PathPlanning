@@ -2,7 +2,9 @@
 #include "lcmtype\LcmSet.h"
 #include "LocalCarStatus.h"
 #include "Topology.h"
+#include "PathGenerateTool.h"
 #include <cmath>
+#include <iomanip>
 
 typedef std::unique_lock<std::mutex> QuickLock;
 
@@ -230,58 +232,161 @@ PosPoint DataCenter::GetCurOnTrajectory(){
 	pt.y = m_lcmMsgRefTrajectory.y[0];
 	return pt;
 }
+std::vector<RoadPoint> DataCenter::GetReferenceTrajectory(RoadPoint &car) {
+	QuickLock lk(m_lockRefTrajectory);
+	std::vector<RoadPoint> trajectory;
+	trajectory.reserve(m_lcmMsgRefTrajectory.num);
+	PosPoint curpt = GetCurPosition();
+	double angle = curpt.angle;
+	//double min = DBL_MAX;
+	int minIndex = 0;
+	for (int i = 0; i < m_lcmMsgRefTrajectory.num; i++)
+	{
+		RoadPoint pt;
+		double dx = m_lcmMsgRefTrajectory.x[i] - m_lcmMsgRefTrajectory.x[0];
+		double dy = m_lcmMsgRefTrajectory.y[i] -  m_lcmMsgRefTrajectory.y[0];
+																  // *PI / 180.0;
+		Topology::Rotate(PI / 2 - angle, dx, dy, pt.x, pt.y);
+		trajectory.push_back(pt);
+		//pt.angle = //angle - m_lcmMsgRefTrajectory.angle[i];
+		//double dis = pt.x*pt.x + pt.y*pt.y;
+		//if (min > dis) {
+		//	min = dis;
+		//	minIndex = i;
+		//}
+	}
+	/*car.x = curpt.x - m_lcmMsgRefTrajectory.x[0];
+	car.y = curpt.y - m_lcmMsgRefTrajectory.y[0];*/
+	RoadPoint pt;
+	double dx = curpt.y - m_lcmMsgRefTrajectory.x[0];
+	double dy = curpt.x - 500000 - m_lcmMsgRefTrajectory.y[0];
+	// *PI / 180.0;
+	Topology::Rotate(PI / 2 - angle, dx, dy, pt.x, pt.y);
+	car.x = pt.x;
+	car.y = pt.y;
+	car.angle = PI / 2;
+	return trajectory;
+}
 std::vector<RoadPoint> DataCenter::GetRefTrajectory()
 {
 	QuickLock lk(m_lockRefTrajectory);
 	std::vector<RoadPoint> trajectory;
-	trajectory.reserve(m_lcmMsgRefTrajectory.num-1);
-	double angle = GetCurPosition().angle;
-	for (int i = 1; i < m_lcmMsgRefTrajectory.num; i++)
+	trajectory.reserve(m_lcmMsgRefTrajectory.num);
+	PosPoint curpt = GetCurPosition();
+	double angle = curpt.angle;
+	double min = DBL_MAX;
+	int minIndex = 0;
+	for (int i = 0; i < m_lcmMsgRefTrajectory.num; i++)
 	{
 		RoadPoint pt;
-		double dx = m_lcmMsgRefTrajectory.x[i] - m_lcmMsgRefTrajectory.x[0];
-		double dy = m_lcmMsgRefTrajectory.y[i] - m_lcmMsgRefTrajectory.y[0];
+		double dx = m_lcmMsgRefTrajectory.x[i] - curpt.y;// m_lcmMsgRefTrajectory.x[0];
+		double dy = m_lcmMsgRefTrajectory.y[i] - curpt.x + 500000;// m_lcmMsgRefTrajectory.y[0];
 		// *PI / 180.0;
 		Topology::Rotate(PI / 2 - angle, dx, dy, pt.x, pt.y);
-
+		pt.angle = angle - m_lcmMsgRefTrajectory.angle[i];
 		trajectory.push_back(pt);
+		double dis = pt.x*pt.x + pt.y*pt.y;
+		if (min > dis) {
+			min = dis;
+			minIndex = i;
+		}
 	}
-	//if (i == 1)
-	{
-		m_lcmMsgRefTrajectory.angle[0] = atan((trajectory[1].y-trajectory[0].y) /(trajectory[1].x- trajectory[0].x));
-	}
+	trajectory.erase(trajectory.begin(), trajectory.begin() + minIndex);
+	PosPoint traPt;
+	traPt.x = trajectory[1].x - trajectory[0].x;
+	traPt.y = trajectory[1].y - trajectory[0].y;
+	double length = sqrt(Topology::Distance2(trajectory[0], trajectory[1]));
+	PosPoint carPt;
+	carPt.x = -trajectory[0].x;// -curPt.x;
+	carPt.y = -trajectory[0].y;// -curPt.y;
+	double bottom = (traPt.x*carPt.x + traPt.y*carPt.y) / length;
+	double dx = traPt.x*bottom / length;
+	double dy = traPt.y*bottom / length;
+	trajectory[0].x += dx;
+	trajectory[0].y += dy;
+
+
+	//double min = DBL_MAX;
+	//double minIndex = 0;
+	//PosPoint vec;
+	//for (int i = 0; i <= 9; i++)
+	//{
+
+	//	double tmp1 =  trajectory[i].x*trajectory[i].x+trajectory[i].y*trajectory[i].y; 
+	//	PosPoint pt;
+	//	pt.x = trajectory[i + 1].x - trajectory[i].x;
+	//	pt.y = trajectory[i + 1].y - trajectory[i].y;
+	//	double tmp = sqrt(pt.x*pt.x + pt.y*pt.y);
+	//	double res = (trajectory[i].x*pt.x + pt.y * trajectory[i].y);
+	//	double c = (res) / tmp;
+	//	
+	//	double dis = sqrt(tmp1*tmp1 - c*c);
+	//	if (min > dis){
+	//		min = dis;
+	//		minIndex = i;
+	//		vec.x = trajectory[i].x + c*pt.x / tmp;
+	//		vec.y = trajectory[i].y + c*pt.y / tmp;
+
+	//	}
+	//}
+
+	//trajectory.erase(trajectory.begin(), trajectory.begin() + minIndex);
+	///*std::cout <<std::setprecision(10)<< "z:." << m_lcmMsgRefTrajectory.x[1] << "/" <<
+	//	m_lcmMsgRefTrajectory.y[1] << "/" << m_lcmMsgRefTrajectory.x[2] << "/" << m_lcmMsgRefTrajectory.y[2] << std::endl;
+	//*///if (i == 1)
+	//trajectory[0].x = vec.x;
+	//trajectory[0].y = vec.y;
+	//{
+	//	trajectory[0].angle = atan((trajectory[1].y - trajectory[0].y) / (trajectory[1].x - trajectory[0].x));
+	//}
 	return trajectory;
 }
 
-void DataCenter::Get_InitAngle_Qi(double& angle, double& qi)
+void DataCenter::Get_InitAngle_Qi(SXYSpline* spline, double& angle, double& qi)
 {
-	QuickLock lk(m_lockRefTrajectory);
-
-	
-	double first_pt_angle = m_lcmMsgRefTrajectory.angle[0];
-	
-	RadAngle cur_car_angle = PI / 2;// GetCurPosition().angle;
-	double car_x = m_lcmMsgRefTrajectory.x[0];
-	double car_y = m_lcmMsgRefTrajectory.y[0];
-	if (first_pt_angle < 0)
-	{
-		first_pt_angle += PI;
-		//angle = (RadAngle)(cur_car_angle - first_pt_angle);
+	double dx0, dy0;
+	spline->getDeriveXY(0, dx0, dy0);
+	double first_angle = Topology::toAngle(dx0, dy0);
+	angle = PI / 2 - first_angle;
+	////QuickLock lk(m_lockRefTrajectory);
+	////std::vector<RoadPoint> trajectory = GetRefTrajectory();
+	////QuickLock lk(m_lockRefTrajectory);
+	////double first_pt_angle = trajectory[0].angle;
+	////PosPoint curpos = GetCurPosition();
+	//RadAngle cur_car_angle = PI / 2;// GetCurPosition().angle;
+	////double car_x = curpos.y;
+	//// car_y = curpos.x-500000;
+	////if (first_pt_angle < 0)
+	////{
+	////	first_pt_angle += PI;
+	////angle = (RadAngle)(cur_car_angle - first_pt_angle);
+	////}
+	////这里不确定是不是采用绝对值，如果不对再改一下
+	///*angle =(RadAngle)( cur_car_angle - first_pt_angle);*///current car angle respect to first point on reference trajectory
+	////std::cout << "cur" << cur_car_angle << "\tz:" << first_pt_angle << std::endl;
+	////这里只从参考轨迹前10个点搜索最近点
+	///*double min = DBL_MAX;
+	//double minIndex = 0;
+	//for (int i = 0; i <= 10; i++)
+	//{
+	//double tmp = (car_x - m_lcmMsgRefTrajectory.x[i]) * (car_x - m_lcmMsgRefTrajectory.x[i]) +
+	//(car_y - m_lcmMsgRefTrajectory.y[i]) * (car_y - m_lcmMsgRefTrajectory.y[i]);
+	//if (min > tmp){
+	//min = tmp;
+	//minIndex = i;
+	//}
+	//}*/
+	qi = 0;
+	return;
+	double min = spline->X[0] * spline->X[0] +spline->Y[0]*spline->Y[0];
+	if (spline->X[0] < 0){
+		qi = -sqrt(min);
 	}
-
-	//这里不确定是不是采用绝对值，如果不对再改一下
-	angle =(RadAngle)( cur_car_angle - first_pt_angle);//current car angle respect to first point on reference trajectory
-	//std::cout << "cur" << cur_car_angle << "\tz:" << first_pt_angle << std::endl;
-	//这里只从参考轨迹前10个点搜索最近点
-	double min = 0;
-	for (int i = 1; i <= 10; i++)
-	{
-		double tmp = (car_x - m_lcmMsgRefTrajectory.x[i]) * (car_x - m_lcmMsgRefTrajectory.x[i]) +
-			(car_y - m_lcmMsgRefTrajectory.y[i]) * (car_y - m_lcmMsgRefTrajectory.y[i]);
-		if (min > tmp)
-			min = tmp;
+	else{
+		qi = sqrt(min);
 	}
-	qi = sqrt(min);
+	//angle = (RadAngle)(cur_car_angle - ((trajectory[0].angle < 0 ? PI : 0) + trajectory[0].angle));
+
 }
 
 bool DataCenter::WaitForLocation(unsigned int milliseconds){

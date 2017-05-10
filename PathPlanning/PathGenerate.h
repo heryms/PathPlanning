@@ -44,7 +44,7 @@ public:
 	bool path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, 
 		std::vector<PosPoint> &root, int count);
 	bool short_time_planning(float qf, float qi, float theta, double sf, 
-		VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts);
+		VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts,RoadPoint curPt);
 	void short_time_planning();
 	bool cmu_planning(std::vector<double> k, double vt, double sf, 
 		double theta, double x_start, double y_start, double delta_t);
@@ -58,6 +58,7 @@ private:
 	std::vector<RoadPoint> Root_On_Gaussian;
 	std::vector<std::vector<PosPoint>> posPtOnRoot;
 	std::vector<std::vector<RoadPoint>> clothoidMap;
+	double pre_qf;
 	double PreDirection;
 	double target_X;
 	double target_Y;

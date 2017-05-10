@@ -44,7 +44,7 @@ void ClothoidTrack::Track()
 		info.state = START;
 		Clothoid clothoid(curX.x, curX.y, curX.angle, refX.x, refX.y, refX.angle);
 		std::vector<RoadPoint> rdpt;
-		rdpt.reserve(100);
+		rdpt.resize(100);
 		clothoid.PointsOnClothoid(rdpt, 100);
 		info.steerAngle = atan(-rdpt[0].k*LocalCarStatus::GetInstance().GetL())
 			*LocalCarStatus::GetInstance().GetSteerRatio()

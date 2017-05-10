@@ -1,6 +1,7 @@
 #include "CarControl.h"
 #include "lcmtype\LcmSet.h"
 
+
 CarControl::CarControl()
 {
 	m_lcmControl.intialSend(LCM_NET_CONTROL_COMMAND, LCM_CHANNEL_CONTROL_COMMAND);
@@ -25,4 +26,9 @@ void CarControl::SendCommand(CarInfo info)
 	msg.wheelAngle = info.steerAngle;
 	msg.controlStatus = info.state;
 	m_lcmControl.sendLcm(&msg);
+}
+
+void CarControl::StopCommand()
+{
+
 }

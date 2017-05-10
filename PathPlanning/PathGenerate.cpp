@@ -1,8 +1,10 @@
 #include "PathGenerate.h"
 #include <assert.h>
 #include <math.h>
+#include <fstream>
 #include "lcmtype/PlanOutput.hpp"
 #include "PathJoint.h"
+#include <chrono>
 using ckLcmType::PlanOutput;
 
 #define LOG_CLOTHOID
@@ -588,8 +590,10 @@ bool PathGenerate::path_generate_for_fun(){
 	}
 	else
 	{
+		ckLcmType::DecisionDraw_t draw;
 		std::cout << "we have roads number" << posPtOnRoot.size() << std::endl;
 		// how to choose one ?
+		int total_num = 0.0;
 		for (int i = 0; i < posPtOnRoot[0].size();i++)
 
 		{
@@ -598,10 +602,8 @@ bool PathGenerate::path_generate_for_fun(){
 			if (path_generate_grid_obstacle(startPt, endPt, veloGrids, rdpt)) {
 				//std::cout << "congratulations a successful root" << std::endl;
 
-				ckLcmType::DecisionDraw_t draw;
-				draw.num = rdpt.size();
-				draw.Path_x.reserve(draw.num);
-				draw.Path_y.reserve(draw.num);
+				
+				
 				for (RoadPoint& pt : rdpt) {
 					double x, y;
 					CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
@@ -609,12 +611,16 @@ bool PathGenerate::path_generate_for_fun(){
 					draw.Path_y.push_back(y);
 					pt.x = x;
 					pt.y = y;
+					total_num += rdpt.size();
 
 				}
 			}
 			startPt = endPt;
 		}
-
+		draw.num = total_num;
+		//draw.Path_x.reserve(draw.num);
+		//draw.Path_y.reserve(draw.num);
+		m_sendPath.SendDraw(draw);
 	}
 
 
@@ -722,8 +728,8 @@ bool PathGenerate::speed_logic_control(double k_next, double v_next, double v_pr
 }
 
 
-bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf, 
-	VeloGrid_t veloGrids, SXYSpline spline,std::vector<RoadPoint> & pts){
+bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf,
+	VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts, RoadPoint curPt) {
 	//std::vector<float> s(x_ref.size(), 0);
 	//std::vector<float> delta_x(x_ref.size(), 0);
 	//std::vector<float> delta_y(x_ref.size(), 0);
@@ -740,6 +746,7 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 		length[i] = sqrt(delta_x[i] * delta_x[i] + delta_y[i] * delta_y[i]);
 
 	}*/
+	//??
 	float c = tan(theta);
 	
 	float a = 2 * (qi - qf) / (pow(sf, 3)) + c / pow(sf, 2);
@@ -747,7 +754,7 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 	for (int i = 0; i < 100;i++)
 	{
 		double delta_s = sf / 100 * i;
-		float q = a * pow(delta_s, 3) + b * pow(delta_s, 2) + c *delta_s + qi;
+		float q = a * pow(delta_s, 3) + b * pow(delta_s, 2) + c * delta_s + qi;
 		double x=0.0, y=0.0;
 		spline.getXY(delta_s, x, y);
 		double _delta_x_, _delta_y_;
@@ -758,26 +765,37 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 		norm_vec(1, 0) = _delta_y_ / _length_;
 		pre(0, 0) = x;
 		pre(1, 0) = y;
-		Eigen::Matrix2Xd result = Topology::rotate(PI / 2, norm_vec)*q + pre;
+		Eigen::Matrix2Xd result = Topology::rotate(PI/2, norm_vec)*q + pre;
 		RoadPoint tmp;
-		tmp.x = result(0, 0);
-		tmp.y = result(1, 0);
+		tmp.x = result(0, 0) ;
+		tmp.y = result(1, 0) ;
 		tmp.angle = Topology::toAngle(_delta_x_, _delta_y_);
 		int Grid_x = tmp.x / Grid + 75;
 		int Grid_y = tmp.y / Grid + 200;
 		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
 		{
-			if ((int)(Grid_x + j) >= 0 && ((int)(Grid_x + j)) <= MAP_WIDTH - 1)
+			for (int jj = 0; jj < 2 * CAR_HEIGHT;jj++)
 			{
-				int index = MAP_WIDTH*(int)(Grid_y)+(int)(Grid_x)+j;
-				if (veloGrids.velo_grid[index]) {
+				if ((int)(Grid_x + j) >= 0 && ((int)(Grid_x + j)) <= MAP_WIDTH - 1 && (int)(Grid_y + i) <= MAP_HEIGHT - 1)
+				{
+					int index = MAP_WIDTH*(int)(Grid_y + i)+(int)(Grid_x)+j;
+					if (veloGrids.velo_grid[index]) {
 
-					return false;
+						return false;
+					}
 				}
 			}
+			
 		}
+		/*if (i != 0){
+			tmp.x -= pts[0].x;
+			tmp.y -= pts[0].y;
+		}*/
+		
 		pts.push_back(tmp);
 	}
+	//pts[0].x = 0;
+	//pts[0].y = 0;
 	return true;
 	/*for (int i = 1; i < x_ref.size();i++)
 	{
@@ -826,7 +844,8 @@ void PathGenerate::short_time_planning(){
 		std::cout << "Warning::not ref message" << std::endl;
 		return;
 	}
-	std::vector<RoadPoint> refTrajectory = DataCenter::GetInstance().GetRefTrajectory();
+	RoadPoint curCar;
+	std::vector<RoadPoint> refTrajectory = DataCenter::GetInstance().GetReferenceTrajectory(curCar);
 	
 	SXYSpline spline;
 	spline.init(refTrajectory);
@@ -846,18 +865,20 @@ void PathGenerate::short_time_planning(){
 	}
 	double qi = 0;
 	double theta = 0;
-	DataCenter::GetInstance().Get_InitAngle_Qi(theta, qi);
-
+	DataCenter::GetInstance().Get_InitAngle_Qi(&spline,theta, qi);
+	//std::cout << "cur theta:" << theta << "qi:"<<qi<<std::endl;
 	double sf=spline.S[spline.S.size()-1];
-	std::cout << "Sf:" << sf << std::endl;
+	//std::cout << "Sf:" << sf << std::endl;
 	std::vector<std::vector<RoadPoint>> _root_;
 	std::vector<RoadPoint> rdpt;
-	for (int i = 0; i < 20; i++){
-		float qf = i - 10;
+	std::vector<float> road_qf;
+	for (float i = 0; i < 12; i+=0.2){
+		float qf = i - 6.;
 		std::vector<RoadPoint> pts;
-		if (short_time_planning(qf, qi,theta, sf, veloGrids, spline, pts))
+		if (short_time_planning(qf, qi,theta, sf, veloGrids, spline, pts, curCar))
 		{
 			_root_.push_back(pts);
+			road_qf.push_back(qf);
 		}
 	}
 	if (_root_.size() == 0)
@@ -870,50 +891,100 @@ void PathGenerate::short_time_planning(){
 	{
 		pre_Root = _root_[0];
 		_best_root_ = _root_[0];
+		int diff_max = 1000000;
+		_best_root_ = _root_[0];
+		int qf_index = 0;
+		double qf_max = 100000;
+		int index = 0;
+		RoadPoint lastPt = *refTrajectory.rbegin();
+		lastPt.x -= curCar.x;
+		lastPt.y -= curCar.y;
+		for (auto root : _root_){
+			double distance = Topology::Distance2(root[root.size() - 1], lastPt);// refTrajectory[refTrajectory.size() - 1]);
+			//distance = abs(root[root.size() - 1].x - refTrajectory[refTrajectory.size() - 1].x);
+			if (distance < diff_max)
+			{
+				diff_max = distance;
+				_best_root_ = root;
+			}
+			/*if (abs(road_qf[index])<qf_max)
+			{
+				qf_max = abs(road_qf[index]);
+				qf_index = index;
+			}
+			index++;*/
+		}
+		//_best_root_ = _root_[qf_index];
 	}
 	else
 	{
 		int diff_max = 1000000;
 		_best_root_ = _root_[0];
+		int qf_index=0;
+		double qf_max = 100000;
+		int index = 0;
+		RoadPoint lastPt = *refTrajectory.rbegin();
+		lastPt.x -= curCar.x;
+		lastPt.y -= curCar.y;
 		for (auto root : _root_)
 		{
 			double _diff_ = similarity(pre_Root, root, sf);
+			//_diff_ *= (abs(road_qf[index]) + 5) / 10;
+			double distance = Topology::Distance2(root[root.size() - 1], lastPt);// refTrajectory[refTrajectory.size() - 1]);
+			//distance = abs(root[root.size() - 1].x - refTrajectory[refTrajectory.size() - 1].x);
+			if (distance < diff_max)
+			{
+				diff_max = distance;
+				_best_root_ = root;
+			}
+			/*if (abs(road_qf[index])<qf_max)
+			{
+				qf_max = abs(road_qf[index]);
+				qf_index = index;
+			}
 			if (_diff_ < diff_max){
 				diff_max = _diff_;
 				_best_root_ = root;
-			}
+				pre_qf = road_qf[index];
+			}*/
+			
 		}
 		pre_Root = _best_root_;
-
+		/*_best_root_ = _root_[qf_index];
+		std::cout << "qf max:" << qf_max << std::endl;*/
 		Root_On_Gaussian = PathJoint::Decare_To_Gaussian(_best_root_, car.angle, car.x, car.y);
 		// send the data
 		//ckLcmType::DecisionDraw_t draw;
 		
 	}
+	long long tp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+	std::ofstream of("plan_" + std::to_string(tp) + ".txt");
+	//_best_root_ = _root_[];
 	ckLcmType::DecisionDraw_t draw;
-	draw.num = _best_root_.size();
-	draw.Path_x.reserve(draw.num);
-	draw.Path_y.reserve(draw.num);
-	for (RoadPoint& pt : _best_root_) {
-		//double x, y;
-		//CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
-		draw.Path_x.push_back(pt.x);
-		draw.Path_y.push_back(pt.y);
-		//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
-	}
+	//draw.num = _best_root_.size();
+	//draw.Path_x.reserve(draw.num);
+	//draw.Path_y.reserve(draw.num);
+	//for (RoadPoint& pt : _best_root_) {
+	//	//double x, y;
+	//	//CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
+	//	draw.Path_x.push_back(pt.x);
+	//	draw.Path_y.push_back(pt.y);
+	//	//of << pt.x << "\t" << pt.y << "\n";
+	//	//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
+	//}
 	track.SetPath(_best_root_);
 
-	// draw all lines
-	/*int total_num = 0;
-	for (int i = 0; i < _root_.size();i++)
+	//draw all lines
+		int total_num = 0;
+	for (int i = 0; i < _root_.size(); i++)
 	{
-		for (int j = 0; j < _root_[i].size();j++)
+		for (int j = 0; j < _root_[i].size(); j++)
 		{
 			double x = _root_[i][j].x;
 			double y = _root_[i][j].y;
 			draw.Path_x.push_back(x);
 			draw.Path_y.push_back(y);
-			if (i==0)
+			if (i == 0)
 			{
 				RoadPoint pt_for_track;
 				pt_for_track.x = x;
@@ -924,19 +995,31 @@ void PathGenerate::short_time_planning(){
 		}
 		total_num += _root_[i].size();
 	}
-	track.SetPath(rdpt);
+	//track.SetPath(rdpt);
 	std::cout << "root number" << _root_.size() << std::endl;
 	draw.num = total_num;
+	
+	std::ofstream ff("ref_" + std::to_string(tp) + ".txt");
 	int total_refnum = refTrajectory.size();
-	draw.refnum = total_refnum;
+	draw.refnum = total_refnum + _best_root_.size();
 	draw.Refer_x.reserve(total_refnum);
 	draw.Refer_y.reserve(total_refnum);
 	for (int i = 0; i < total_refnum; i++)
 	{
-		draw.Refer_x.push_back(refTrajectory[i].x);
-		draw.Refer_y.push_back(refTrajectory[i].y);
-	}*/
-	
+		draw.Refer_x.push_back(refTrajectory[i].x - curCar.x);
+		draw.Refer_y.push_back(refTrajectory[i].y - curCar.y);
+		//ff << refTrajectory[i].x << "\t" << refTrajectory[i].y << "\n";
+	}
+	for (RoadPoint& pt : _best_root_) {
+		//double x, y;
+		//CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
+		draw.Refer_x.push_back(pt.x);
+		draw.Refer_y.push_back(pt.y);
+		//of << pt.x << "\t" << pt.y << "\n";
+		//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
+	}
+	of.close();
+	ff.close();
 	m_sendPath.SendDraw(draw);
 
 }
