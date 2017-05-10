@@ -16,8 +16,18 @@ void SXYSpline::init(std::vector<RoadPoint> baseFrame)
 		s += sqrt(dx*dx + dy*dy);
 		S.push_back(s);
 	}
-	skX = Topology::CubicSpline(S, X);
-	skY = Topology::CubicSpline(S, Y);
+	double dx0, dxn = 0;
+	double dy0, dyn = 0;
+	if (X.size() >= 2) {
+		dx0 = (X[1] - X[0]) / (S[1] - S[0]);
+		dxn = (*X.rbegin() - *(X.rbegin() + 1)) / (*S.rbegin() - *(S.rbegin() + 1));
+	}
+	if (Y.size() >= 2) {
+		dy0 = (Y[1] - Y[0]) / (S[1] - S[0]);
+		dyn = (*Y.rbegin() - *(Y.rbegin() + 1)) / (*Y.rbegin() - *(Y.rbegin() + 1));
+	}
+	skX = Topology::CubicSpline(S, X, dx0, dxn);
+	skY = Topology::CubicSpline(S, Y, dy0, dyn);
 	splineNum = skX.rows();
 }
 
