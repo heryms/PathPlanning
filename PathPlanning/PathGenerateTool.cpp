@@ -24,7 +24,7 @@ void SXYSpline::init(std::vector<RoadPoint> baseFrame)
 	}
 	if (Y.size() >= 2) {
 		dy0 = (Y[1] - Y[0]) / (S[1] - S[0]);
-		dyn = (*Y.rbegin() - *(Y.rbegin() + 1)) / (*Y.rbegin() - *(Y.rbegin() + 1));
+		dyn = (*Y.rbegin() - *(Y.rbegin() + 1)) / (*S.rbegin() - *(S.rbegin() + 1));
 	}
 	skX = Topology::CubicSpline(S, X, dx0, dxn);
 	skY = Topology::CubicSpline(S, Y, dy0, dyn);
