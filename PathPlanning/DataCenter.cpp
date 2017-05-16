@@ -5,6 +5,7 @@
 #include "PathGenerateTool.h"
 #include <cmath>
 #include <iomanip>
+#include <utility>
 
 typedef std::unique_lock<std::mutex> QuickLock;
 
@@ -291,6 +292,7 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectory()
 			minIndex = i;
 		}
 	}
+	
 	trajectory.erase(trajectory.begin(), trajectory.begin() + minIndex);
 	PosPoint traPt;
 	traPt.x = trajectory[1].x - trajectory[0].x;
@@ -387,6 +389,46 @@ void DataCenter::Get_InitAngle_Qi(SXYSpline* spline, double& angle, double& qi)
 	}
 	//angle = (RadAngle)(cur_car_angle - ((trajectory[0].angle < 0 ? PI : 0) + trajectory[0].angle));
 
+}
+
+std::vector<RoadPoint> DataCenter::GetRefTrajectory_Qi(double& qi)
+{
+	QuickLock lk(m_lockRefTrajectory);
+	std::vector<RoadPoint> trajectory;
+	trajectory.reserve(m_lcmMsgRefTrajectory.num);
+	PosPoint curpt = GetCurPosition();
+	double angle = curpt.angle;
+	double min = DBL_MAX;
+	int minIndex = 0;
+	for (int i = 0; i < m_lcmMsgRefTrajectory.num; i++)
+	{
+		RoadPoint pt;
+		double dx = m_lcmMsgRefTrajectory.x[i] - curpt.y;// m_lcmMsgRefTrajectory.x[0];
+		double dy = m_lcmMsgRefTrajectory.y[i] - curpt.x + 500000;// m_lcmMsgRefTrajectory.y[0];
+																  // *PI / 180.0;
+		Topology::Rotate(PI / 2 - angle, dx, dy, pt.x, pt.y);
+		pt.angle = angle - m_lcmMsgRefTrajectory.angle[i];
+		trajectory.push_back(pt);
+		double dis = pt.x*pt.x + pt.y*pt.y;
+		if (min > dis) {
+			min = dis;
+			minIndex = i;
+		}
+	}
+	//求参考轨迹上离车当前点最近的点
+	std::pair<double, double> v1;
+	v1.first = trajectory[minIndex + 1].x - trajectory[minIndex].x;
+	v1.second = trajectory[minIndex + 1].y - trajectory[minIndex].y;
+
+	RoadPoint firstPt;
+	firstPt.y = (-v1.first * v1.second * trajectory[minIndex].x + v1.first * v1.first * trajectory[minIndex].y) / (v1.first * v1.first + v1.second * v1.second);
+	firstPt.x = (-v1.second * firstPt.y) / (v1.first);
+
+	firstPt.angle = trajectory[minIndex].angle;
+
+	trajectory.erase(trajectory.begin(), trajectory.begin() + minIndex - 1);
+	trajectory[0] = firstPt;
+	return trajectory;
 }
 
 bool DataCenter::WaitForLocation(unsigned int milliseconds){

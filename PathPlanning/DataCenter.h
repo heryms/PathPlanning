@@ -124,7 +124,7 @@ public:
 	PosPoint GetCurOnTrajectory();
 	//get init car angle and qi
 	void Get_InitAngle_Qi(SXYSpline* spline,double& angle, double& qi);
-
+	std::vector<RoadPoint> GetRefTrajectory_Qi(double& qi);
 	/*continue while Location Processing completed*/
 	bool WaitForLocation(unsigned int milliseconds);
 	/*continue while StatusBody Processing completed*/
