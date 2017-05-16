@@ -269,7 +269,7 @@ vector<double> Topology::lufact(vector<vector<double>> A, vector<double> B) {
 	return X;
 }
 
-Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double> Y, double dds0, double ddsn)
+Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double> Y, double ds0, double dsn)
 {
 	auto Xiter = X.rbegin();
 	auto Yiter = Y.rbegin();
@@ -290,12 +290,12 @@ Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double
 	}
 	vector<vector<double>> A(N - 1, vector<double>(N - 1));
 	vector<double> B(N - 1);
-	A[0][0] = 2 * (h[0] + h[1]);
+	A[0][0] = 3 * h[0] / 2 + 2 * h[1];//2 * (h[0] + h[1]);
 	A[0][1] = h[1];
-	B[0] = u[0] - h[0] * dds0;
+	B[0] = u[0] - 3 * (d[0] - ds0);//u[0] - h[0] * dds0;
 	A[N - 2][ N - 3] = h[N - 2];
-	A[N - 2][ N - 2] = 2 * (h[N - 3] + h[N - 2]);
-	B[N - 2] = u[N - 2] - h[N - 2] * ddsn;
+	A[N - 2][N - 2] = 2 * h[N - 2] + 3 * h[N - 1] / 2;//2 * (h[N - 3] + h[N - 2]);
+	B[N - 2] = u[N - 2] - 3 * (dsn - d[N - 1]);//u[N - 2] - h[N - 2] * ddsn;
 	for (int k = 2; k <= N - 2; k++) {
 		A[k - 1][k - 2] = h[k - 1];
 		A[k - 1][k - 1] = 2 * (h[k - 1] + h[k]);
@@ -303,8 +303,8 @@ Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double
 		B[k - 1] = u[k - 1];
 	}
 	vector<double> m=Topology::lufact(A, B);
-	m.insert(m.begin(), dds0);
-	m.push_back(ddsn);
+	m.insert(m.begin(), 3 / h[0] * (d[0] - ds0) - m[0] / 2);
+	m.push_back(3 / h[N - 1] * (dsn - d[N - 1]) - m[N - 1] / 2);
 	Eigen::MatrixX4d s;
 	s.resize(N, 4);
 	for (int i = 0; i < N; i++) {
