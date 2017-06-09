@@ -458,6 +458,11 @@ double Clothoid::guessA(double phi0, double phi1)
 	return A;
 }
 
+double Clothoid::getK()
+{
+	return _k;
+}
+
 //XY为保存Clothoid上点的数组，npts为点的个数
 void Clothoid::PointsOnClothoid(std::vector<RoadPoint>& XY, int npts)
 {

@@ -33,20 +33,20 @@ void ClothoidTrack::Track()
 		inCurve = TrackFinder::InCurve(inCurve, path, curX, curIndex);
 		RoadPoint refX;
 		if (inCurve) {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 10)];
+			refX = path[TrackFinder::AnchorPointStraight(path, curX, curIndex, 12)];
 			info.speed = refSpeedCurve;
 		}
 		else {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 15)];
+			refX = path[TrackFinder::AnchorPointStraight(path, curX, curIndex, 12)];
 			info.speed = refSpeedStraight;
 		}
 		info.gear = D;
 		info.state = START;
 		Clothoid clothoid(curX.x, curX.y, curX.angle, refX.x, refX.y, refX.angle);
-		std::vector<RoadPoint> rdpt;
-		rdpt.resize(100);
-		clothoid.PointsOnClothoid(rdpt, 100);
-		info.steerAngle = atan(-rdpt[0].k*LocalCarStatus::GetInstance().GetL())
+		//std::vector<RoadPoint> rdpt;
+		//rdpt.resize(100);
+		//clothoid.PointsOnClothoid(rdpt, 100);
+		info.steerAngle = atan(-clothoid.getK()*LocalCarStatus::GetInstance().GetL())
 			*LocalCarStatus::GetInstance().GetSteerRatio()
 			* 180 / PI;
 	} while (false);

@@ -14,7 +14,7 @@ private:
 	int Nu = 2;
 	std::chrono::high_resolution_clock::time_point start, end;
 	std::chrono::microseconds microseconds;
-	const static int simPeriod = 80;
+	const static int simPeriod = 60;
 	RoadPoint refXs[simPeriod];
 	void RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, double Tctrl, RoadPoint curX);
 	inline Matrix<double> ToMat(CMatrix<double>& H);

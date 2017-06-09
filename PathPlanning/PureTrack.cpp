@@ -27,14 +27,29 @@ void PureTrack::Track()
 			info.steerAngle = LocalCarStatus::GetInstance().GetSteerAngle();
 			break;
 		}
+		{
+			RoadPoint refX;
+			if (TrackFinder::FindPursuitPoint(path, curX, refX, LocalCarStatus::GetInstance().GetSpeed()/3.6)){
+				info.steerAngle = TrackFinder::MiddlePiont_Shan(refX.x, refX.y);
+				info.gear = D;
+				info.state = START;
+			}
+			else{
+				info.gear = D;
+				info.speed = 0;
+				info.state = E_STOP;
+				info.steerAngle = LocalCarStatus::GetInstance().GetSteerAngle();
+			}
+			break;
+		}
 		inCurve = TrackFinder::InCurve(inCurve, path, curX, curIndex);
 		RoadPoint refX;
 		if (inCurve) {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 8)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 3)];
 			info.speed = refSpeedCurve;
 		}
 		else {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex,11)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex,5)];
 			info.speed = refSpeedStraight;
 		}
 		info.gear = D;

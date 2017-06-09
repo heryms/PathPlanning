@@ -1,6 +1,7 @@
 #include "LocalCarStatus.h"
 #include "LoopThread.h"
 #include "DataCenter.h"
+#include "Topology.h"
 class LocalPosThread :public ZBaseLoopThread {
 private:
 	LocalCarStatus* status;
@@ -23,6 +24,7 @@ public:
 	}
 
 	bool RunLoop() {
+		return false;
 		std::this_thread::sleep_for(std::chrono::microseconds(1000));
 		endTime = std::chrono::high_resolution_clock::now();
 		PosPoint pos = status->m_curPos;
@@ -56,6 +58,11 @@ LocalCarStatus& LocalCarStatus::GetInstance()
 	return instance;
 }
 
+void LocalCarStatus::SetOriginPos(PosPoint pos)
+{
+	orgPos = pos;
+}
+
 void LocalCarStatus::Start()
 {
 	thread->Start();
@@ -74,4 +81,25 @@ void LocalCarStatus::Resume()
 void LocalCarStatus::End()
 {
 	thread->Stop();
+}
+
+PosPoint LocalCarStatus::GetPosition()
+{
+	PosPoint pt=DataCenter::GetInstance().GetCurPosition();
+	double dx = pt.x-orgPos.x;
+	double dy = pt.y - orgPos.y;
+	// *PI / 180.0;
+	Topology::Rotate(PI / 2 - orgPos.angle, dx, dy, pt.x, pt.y);
+	pt.angle = PI / 2 + pt.angle - orgPos.angle;
+	return pt;
+}
+
+double LocalCarStatus::GetSpeed()
+{
+	return DataCenter::GetInstance().GetCarInfo().speed;
+}
+
+double LocalCarStatus::GetSteerAngle()
+{
+	return DataCenter::GetInstance().GetCarInfo().steerAngle;
 }

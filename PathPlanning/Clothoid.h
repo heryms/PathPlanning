@@ -33,6 +33,7 @@ public:
 	void BuildClothoid(double tol = 0.05);
 	void PointsOnClothoid(std::vector<RoadPoint>& XY, int npts);
 
+	double getK();
 protected:
 	void FresnelCS(double *FresnelC, double *FresnelS, double y);
 	void intXY(double *X, double *Y, int nk, double a, double b, double c);
@@ -43,7 +44,6 @@ protected:
 	void evalXYaSmall(double *X, double *Y, int nk, double a, double b, double p);
 	void findA(double &A, double Aguess, double delta, double phi0, double tol);
 	double guessA(double phi0, double phi1);
-
 private:
 	double _k;//斜率
 	double _dk;//斜率变化率

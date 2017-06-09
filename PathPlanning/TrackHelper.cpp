@@ -6,6 +6,7 @@
 #include "MPCTrack.h"
 #include "ClothoidTrack.h"
 #include "PureTrack.h"
+#include "DataCenter.h"
 
 class TrackThread : public ZBaseLoopThread{
 private:
@@ -15,7 +16,7 @@ public:
 	TrackThread(void* parent):
 		track((TrackHelper*)parent)
 	{
-		loopInterval = 10;
+		loopInterval = 100;
 	}
 	
 	bool RunLoop() {
@@ -73,13 +74,16 @@ void TrackHelper::SetPath(std::vector<RoadPoint>& path)
 {
 	//std::unique_lock<std::mutex> lk(m_lock);
 	thread->Suspend();
+	LocalCarStatus::GetInstance().Suspend();
 	//this->path = path;
 	PosPoint p;
 	p.x = 0 ;
 	p.y = 0;
 	p.angle = PI / 2;
 	thread->Reset();
+	LocalCarStatus::GetInstance().SetOriginPos(DataCenter::GetInstance().GetCurPosition());
 	LocalCarStatus::GetInstance().SetCurPosition(p);
+	LocalCarStatus::GetInstance().Resume();
 	track->SetPath(path);
 	thread->Resume();
 }

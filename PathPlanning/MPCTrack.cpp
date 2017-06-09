@@ -51,12 +51,21 @@ void MPCTrack::Track()
 		info.state = START;
 		double dis = sqrt(Topology::Distance2(curX, path[curIndex]));
 		double curSpeed = LocalCarStatus::GetInstance().GetSpeed();
+		double tdis = 0;
+		double tv = curSpeed;
+		double diserror = sqrt(Topology::Distance2(curX, path[curIndex])) * 1;
+		int ti = 0;
 		for (int i = 0; i < simPeriod; i++) {
-			refXs[i] = path[TrackFinder::AnchorPoint
-			(path, curX, curIndex,
-				(1 + i) * fmax(curSpeed - 1.2,
-					fmin(info.speed, curSpeed + 1)) / 3.6 * microseconds.count() / 1000000.0
-				+ dis)];
+			tv = fmax(tv - 4, fmin(info.speed, tv + 1));
+			tdis += microseconds.count()/1000000.0 * tv / 3.6;
+			int tar = TrackFinder::AnchorPoint(path, curX, curIndex, tdis);
+			refXs[i] =
+				path[tar];
+			//refXs[i] = path[TrackFinder::AnchorPoint
+			//(path, curX, curIndex,
+			//	(1 + i) * fmax(curSpeed - 1.2,
+			//		fmin(info.speed, curSpeed + 1)) / 3.6 * microseconds.count() / 1000000.0
+			//	+ dis)];
 		}
 		RealTrack(info, curSpeed, LocalCarStatus::GetInstance().GetSteerAngle(), microseconds.count() / 1000000.0, curX);
 		lastX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
@@ -75,7 +84,7 @@ void MPCTrack::RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, d
 	double L = LocalCarStatus::GetInstance().GetL();
 	//CMatrix<double> Cm(Nq, Nx);
 	CMatrix<double> Cm = CMatrix<double>::Identity(Nq);
-	Cm(2, 2) = 1;
+	Cm(2, 2) = 0.1;
 	CMatrix<double> Am({
 		{ 1,0,0 }
 		,{ 0,1,0 }
@@ -141,20 +150,54 @@ void MPCTrack::RealTrack(CarInfo& info, double curSpeed, double curSteerAngle, d
 	}
 	CMatrix<double> f = (PHI.Transpose()*dRs)*-2;
 
-	double dvmin = fmax(-v, -4 * Tsample);
-	double dv = info.speed / 3.6 - v;
-	double dvmax = fmin(dv > 0 ? dv : fmax(-4 * Tsample, dv), Tsample);// :fmax(dv, -4 * Tsample);
-	double ddeltamin = fmax(-0.52 - delta, -0.26*Tsample);
-	double ddeltamax = fmin(0.52 - delta, 0.26*Tsample);
+//	double dvmin = fmax(-v, -4 * Tsample);
+//	double dv = info.speed / 3.6 - v;
+	//double dvmax = fmin(dv > 0 ? dv : fmax(-4 * Tsample, dv), Tsample);// :fmax(dv, -4 * Tsample);
+	//double ddeltamin = fmax(-0.52 - delta, -0.26*Tsample);
+	//double ddeltamax = fmin(0.52 - delta, 0.26*Tsample);
 
 
-	CMatrix<double> Acoff = CMatrix<double>::Zero(Nc * 2, Nc * Tc);
-	Acoff(0, 0) = 1;
-	Acoff(1, 1) = 1;
-	Acoff(2, 0) = -1;
-	Acoff(3, 1) = -1;
-	CMatrix<double> bcoff(Nc * 2, 1, { -dvmin,-ddeltamin,dvmax,ddeltamax });
+	//CMatrix<double> Acoff = CMatrix<double>::Zero(Nc * 2, Nc * Tc);
+	//Acoff(0, 0) = 1;
+	//Acoff(1, 1) = 1;
+	//Acoff(2, 0) = -1;
+	//Acoff(3, 1) = -1;
+	//CMatrix<double> bcoff(Nc * 2, 1, { -dvmin,-ddeltamin,dvmax,ddeltamax });
 
+	double ddeltamin = -0.26*Tsample;
+	double ddeltamax = 0.26*Tsample;
+	double deltamin = -0.52 - delta;
+	double deltamax = 0.52 - delta;
+	double dvmin = -4 * Tsample;
+	double dvmax = Tsample;
+	double vmin = -v;
+	double vmax = info.speed / 3.6 - v;
+	CMatrix<double> Acoff = CMatrix<double>::Zero(4 * Nc * Tc, Nc*Tc);
+	CMatrix<double> bcoff = CMatrix<double>::Zero(4 * Nc * Tc, 1);
+	for (int i = 0; i < Nc*Tc; i += 2) {
+		Acoff(4 * i, i) = 1;
+		Acoff(4 * i + 1, i + 1) = 1;
+		Acoff(4 * i + 2, i) = -1;
+		Acoff(4 * i + 3, i + 1) = -1;
+		bcoff[4 * i] = -dvmin;
+		bcoff[4 * i + 1] = -ddeltamin;
+		bcoff[4 * i + 2] = dvmax;
+		bcoff[4 * i + 3] = ddeltamax;
+		for (int j = 0; j < i + 2; j++) {
+			if (j % 2) {
+				Acoff(4 * i + 5, j) = 1;
+				Acoff(4 * i + 7, j) = -1;
+			}
+			else {
+				Acoff(4 * i + 4, j) = 1;
+				Acoff(4 * i + 6, j) = -1;
+			}
+		}
+		bcoff[4 * i + 4] = -vmin;
+		bcoff[4 * i + 5] = -deltamin;
+		bcoff[4 * i + 6] = vmax;
+		bcoff[4 * i + 7] = deltamax;
+	}
 	CMatrix<double> X = QuadProg(E, f, Acoff, bcoff, CMatrix<double>(0, Nc*Tc), CMatrix<double>(0, 1));//, lb, ub);
 
 	info.speed = (v + X(0, 0))*3.6;
@@ -194,7 +237,7 @@ inline CMatrix<double> MPCTrack::FromVec(Vector<double>& x)
 
 CMatrix<double> MPCTrack::QuadProg(CMatrix<double>& H, CMatrix<double>& f, CMatrix<double>& A, CMatrix<double>& b, CMatrix<double>& Aeq, CMatrix<double>& beq)//, CMatrix<double> lb, CMatrix<double> ub)
 {
-	Matrix<double> G = ToMat(H.Transpose());
+	Matrix<double> G = ToMat(H);
 	Vector<double> g0 = ToVec(f);
 	Matrix<double> CE = ToMat(Aeq.Transpose());
 	Vector<double> Ce0 = ToVec(beq);
@@ -204,4 +247,14 @@ CMatrix<double> MPCTrack::QuadProg(CMatrix<double>& H, CMatrix<double>& f, CMatr
 	x.resize(H.RowCount());
 	solve_quadprog(G, g0, CE, Ce0, CI, Ci0, x);
 	return FromVec(x);
+	//Matrix<double> G = ToMat(H.Transpose());
+	//Vector<double> g0 = ToVec(f);
+	//Matrix<double> CE = ToMat(Aeq.Transpose());
+	//Vector<double> Ce0 = ToVec(beq);
+	//Matrix<double> CI = ToMat(A.Transpose());
+	//Vector<double> Ci0 = ToVec(b);
+	//Vector<double> x;
+	//x.resize(H.RowCount());
+	//solve_quadprog(G, g0, CE, Ce0, CI, Ci0, x);
+	//return FromVec(x);
 }

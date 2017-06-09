@@ -6,7 +6,7 @@ class BaseCarStatus
 {
 protected:
 	double L = 2.67;
-	double m_steerRatio = 20;
+	double m_steerRatio = 17.3;
 	PosPoint m_curPos;
 	double m_speed;//km/h
 	double m_steerAngle;//deg

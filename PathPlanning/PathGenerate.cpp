@@ -729,7 +729,7 @@ bool PathGenerate::speed_logic_control(double k_next, double v_next, double v_pr
 
 
 bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf,
-	VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts, RoadPoint curPt) {
+	VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts, PosPoint curPt) {
 	//std::vector<float> s(x_ref.size(), 0);
 	//std::vector<float> delta_x(x_ref.size(), 0);
 	//std::vector<float> delta_y(x_ref.size(), 0);
@@ -759,16 +759,22 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 		spline.getXY(delta_s, x, y);
 		double _delta_x_, _delta_y_;
 		spline.getDeriveXY(delta_s, _delta_x_, _delta_y_);
+		//if (i == 0)
+		//	std::cout << "delta_X: " << _delta_x_ << " delta_Y: " << _delta_y_ << std::endl;
 		double _length_ = sqrt(pow(_delta_x_, 2) + pow(_delta_y_, 2));
 		Eigen::Matrix2Xd norm_vec(2, 1), pre(2, 1);
 		norm_vec(0, 0) = _delta_x_ / _length_;
 		norm_vec(1, 0) = _delta_y_ / _length_;
 		pre(0, 0) = x;
 		pre(1, 0) = y;
-		Eigen::Matrix2Xd result = Topology::rotate(PI/2, norm_vec)*q + pre;
+		Eigen::Matrix2Xd result = Topology::rotate(PI / 2, norm_vec)*q + pre;
 		RoadPoint tmp;
-		tmp.x = result(0, 0) ;
-		tmp.y = result(1, 0) ;
+		tmp.x = /*x + _delta_y_ * q;*/ result(0, 0);
+		tmp.y = /*y - _delta_x_ * q;*/ result(1, 0);
+		//if (i == 0)
+		//{
+		//	std::cout << "X: " << tmp.x << "\tY: " << tmp.y << std::endl;
+		//}
 		tmp.angle = Topology::toAngle(_delta_x_, _delta_y_);
 		int Grid_x = tmp.x / Grid + 75;
 		int Grid_y = tmp.y / Grid + 200;
@@ -839,43 +845,52 @@ void PathGenerate::short_time_planning(){
 		std::cout << "Warning::not curb message" << std::endl;
 		return ;
 	}
-	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 	if (!DataCenter::GetInstance().HasRefTrajectory()) {
 		std::cout << "Warning::not ref message" << std::endl;
 		return;
 	}
-	RoadPoint curCar;
-	std::vector<RoadPoint> refTrajectory = DataCenter::GetInstance().GetReferenceTrajectory(curCar);
-	
+	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+	PosPoint curCar;
+	curCar = DataCenter::GetInstance().GetCurPosition();
+	//在相对于车俩的坐标系里规划
+	curCar.x = .0;
+	curCar.y = .0;
+	//std::vector<RoadPoint> refTrajectory = DataCenter::GetInstance().GetReferenceTrajectory(curCar);
+	double tmp_qi = 0.0;
+	std::vector<RoadPoint> refTrajectory = DataCenter::GetInstance().GetRefTrajectory_Qi(tmp_qi);
+
+
 	SXYSpline spline;
 	spline.init(refTrajectory);
 
 	// get data and process
 	// float theta, double sf
 
-	// get car data
-	car.angle = PI / 2 - DataCenter::GetInstance().GetCurPosition().angle;
-	PosPoint tmp_Pt = DataCenter::GetInstance().GetCurOnTrajectory();
-	car.x = tmp_Pt.x;
-	car.y = tmp_Pt.y;
+	 //get car data
+	//car.angle = PI / 2 - DataCenter::GetInstance().GetCurPosition().angle;
+	//PosPoint tmp_Pt = DataCenter::GetInstance().GetCurOnTrajectory();
+	//car.x = tmp_Pt.x;
+	//car.y = tmp_Pt.y;
 
-	if (Root_On_Gaussian.size() != 0)
-	{
-		std::vector<RoadPoint> pre_to_now = PathJoint::Gaussian_To_Decare(Root_On_Gaussian, car.angle, car.x, car.y);
-	}
+	//if (Root_On_Gaussian.size() != 0)
+	//{
+	//	std::vector<RoadPoint> pre_to_now = PathJoint::Gaussian_To_Decare(Root_On_Gaussian, car.angle, car.x, car.y);
+	//}
 	double qi = 0;
+	
 	double theta = 0;
 	DataCenter::GetInstance().Get_InitAngle_Qi(&spline,theta, qi);
-	//std::cout << "cur theta:" << theta << "qi:"<<qi<<std::endl;
-	double sf=spline.S[spline.S.size()-1];
+
+	double sf = spline.S[spline.S.size() - 1];
 	//std::cout << "Sf:" << sf << std::endl;
 	std::vector<std::vector<RoadPoint>> _root_;
 	std::vector<RoadPoint> rdpt;
 	std::vector<float> road_qf;
+	//生成候选路径
 	for (float i = 0; i < 12; i+=0.2){
 		float qf = i - 6.;
 		std::vector<RoadPoint> pts;
-		if (short_time_planning(qf, qi,theta, sf, veloGrids, spline, pts, curCar))
+		if(short_time_planning(qf, tmp_qi, theta, sf, veloGrids, spline, pts, curCar))
 		{
 			_root_.push_back(pts);
 			road_qf.push_back(qf);
@@ -886,6 +901,7 @@ void PathGenerate::short_time_planning(){
 		std::cout << "no root to use " << std::endl;
 		return;
 	}
+	//选择最优路径
 	std::vector<RoadPoint> _best_root_;
 	if (pre_Root.size()==0)
 	{

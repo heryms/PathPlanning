@@ -1,7 +1,12 @@
 #include "PathGenerateTool.h"
+#include <iostream>
 
 void SXYSpline::init(std::vector<RoadPoint> baseFrame)
 {
+	if (baseFrame.empty())
+	{
+		std::cout << "zzzz" << std::endl;
+	}
 	X.clear();
 	Y.clear();
 	double s = 0;

@@ -6,6 +6,7 @@
 #include <cmath>
 #include <iomanip>
 #include <utility>
+#include <iostream>
 
 typedef std::unique_lock<std::mutex> QuickLock;
 
@@ -34,14 +35,19 @@ DataCenter& DataCenter::GetInstance() {
 void DataCenter::LocationRecvOperation(const Location_t* msg, void*){
 	QuickLock lk(m_lockLocation);
 	m_lcmMsgLocation = *msg;
+	//PosPoint pos;
+	//pos.x = m_lcmMsgLocation.gau_pos[1] + 500000;
+	//pos.y = m_lcmMsgLocation.gau_pos[0];
+	//pos.angle = PI / 2 - m_lcmMsgLocation.orientation[2] * PI / 180;
+	//LocalCarStatus::GetInstance().SetCurPosition(pos);
 	m_waitLocation.notify_all();
 }
 
 void DataCenter::StatusBodyRecvOperation(const StatusBody_t* msg, void*){
 	QuickLock lk(m_lockStatusBody);
 	m_lcmMsgStatusBody = *msg;
-	LocalCarStatus::GetInstance().SetSteerAngle(msg->wheelAngle);
-	LocalCarStatus::GetInstance().SetSpeed(msg->vehicleSpeed);
+	//LocalCarStatus::GetInstance().SetSteerAngle(msg->wheelAngle);
+	//LocalCarStatus::GetInstance().SetSpeed(msg->vehicleSpeed);
 	m_waitStatusBody.notify_all();
 }
 
@@ -400,6 +406,7 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectory_Qi(double& qi)
 	double angle = curpt.angle;
 	double min = DBL_MAX;
 	int minIndex = 0;
+	//转到车体坐标系
 	for (int i = 0; i < m_lcmMsgRefTrajectory.num; i++)
 	{
 		RoadPoint pt;
@@ -415,19 +422,31 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectory_Qi(double& qi)
 			minIndex = i;
 		}
 	}
+
 	//求参考轨迹上离车当前点最近的点
 	std::pair<double, double> v1;
 	v1.first = trajectory[minIndex + 1].x - trajectory[minIndex].x;
 	v1.second = trajectory[minIndex + 1].y - trajectory[minIndex].y;
 
 	RoadPoint firstPt;
-	firstPt.y = (-v1.first * v1.second * trajectory[minIndex].x + v1.first * v1.first * trajectory[minIndex].y) / (v1.first * v1.first + v1.second * v1.second);
+	firstPt.y = (-v1.first * v1.second * trajectory[minIndex].x 
+		+ v1.first * v1.first * trajectory[minIndex].y) 
+		/ (v1.first * v1.first + v1.second * v1.second);
 	firstPt.x = (-v1.second * firstPt.y) / (v1.first);
 
-	firstPt.angle = trajectory[minIndex].angle;
+	//firstPt.angle = trajectory[minIndex].angle;
+	firstPt.angle = atan2(v1.second, v1.first);
+	
+	//std::cout << "angle: " << tan(firstPt.angle) << std::endl;
 
-	trajectory.erase(trajectory.begin(), trajectory.begin() + minIndex - 1);
+	trajectory.erase(trajectory.begin(), trajectory.begin() + minIndex);
 	trajectory[0] = firstPt;
+
+	qi = sqrt(trajectory[0].x * trajectory[0].x + trajectory[0].y * trajectory[0].y);
+	if (firstPt.x < 0)
+	{
+		qi = -qi;
+	}
 	return trajectory;
 }
 
