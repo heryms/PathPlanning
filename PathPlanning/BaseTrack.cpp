@@ -11,7 +11,7 @@ BaseTrack::~BaseTrack()
 {
 }
 
-void BaseTrack::SetPath(std::vector<RoadPoint>& path)
+void BaseTrack::SetLocalPath(std::vector<RoadPoint>& path)
 {
 	this->path = path;// std::move(path);
 }

@@ -52,7 +52,7 @@ public:
 		double &k_response, double & v_response);
 	bool speed_logic_control(double k_next, double v_next, double v, double &v_response);
 	
-
+	void gps_tracking();
 private:
 	std::vector<RoadPoint> pre_Root;
 	std::vector<RoadPoint> Root_On_Gaussian;

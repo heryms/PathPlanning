@@ -25,7 +25,7 @@ private:
 public:
 	MPCTrack();
 	~MPCTrack();
-	void SetPath(std::vector<RoadPoint>& path);
+	void SetLocalPath(std::vector<RoadPoint>& path);
 	void Track();
 };
 

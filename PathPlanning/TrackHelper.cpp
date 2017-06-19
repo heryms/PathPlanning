@@ -70,7 +70,7 @@ TrackHelper::~TrackHelper()
 	track = nullptr;
 }
 
-void TrackHelper::SetPath(std::vector<RoadPoint>& path)
+void TrackHelper::SetLocalPath(std::vector<RoadPoint>& path)
 {
 	//std::unique_lock<std::mutex> lk(m_lock);
 	thread->Suspend();
@@ -84,7 +84,20 @@ void TrackHelper::SetPath(std::vector<RoadPoint>& path)
 	LocalCarStatus::GetInstance().SetOriginPos(DataCenter::GetInstance().GetCurPosition());
 	LocalCarStatus::GetInstance().SetCurPosition(p);
 	LocalCarStatus::GetInstance().Resume();
-	track->SetPath(path);
+	track->SetLocalPath(path);
+	thread->Resume();
+}
+
+void TrackHelper::SetPath(std::vector<RoadPoint>& path)
+{
+	thread->Suspend();
+	LocalCarStatus::GetInstance().Suspend();
+	PosPoint p = DataCenter::GetInstance().GetCurPosition();
+	thread->Reset();
+	LocalCarStatus::GetInstance().SetOriginPos(p);
+	LocalCarStatus::GetInstance().SetCurPosition(p);
+	LocalCarStatus::GetInstance().Resume();
+	track->SetLocalPath(path);
 	thread->Resume();
 }
 
