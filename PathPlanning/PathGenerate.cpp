@@ -728,8 +728,14 @@ bool PathGenerate::speed_logic_control(double k_next, double v_next, double v_pr
 }
 
 
+std::vector<RoadPoint> PathGenerate::BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath)
+{
+
+}
+
 bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf,
-	VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts, PosPoint curPt) {
+	VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts, PosPoint curPt,
+	double& firstObstacle_x, double& firstObstacle_y, int& index, double& new_sf) {
 	//std::vector<float> s(x_ref.size(), 0);
 	//std::vector<float> delta_x(x_ref.size(), 0);
 	//std::vector<float> delta_y(x_ref.size(), 0);
@@ -751,6 +757,13 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 	
 	float a = 2 * (qi - qf) / (pow(sf, 3)) + c / pow(sf, 2);
 	float b = 3 * (qf - qi) / (pow(sf, 2)) - 2 * c / sf;
+
+	/*bool firstObstacle = false;
+	double firstObstacle_x = 0.0;
+	double firstObstacle_y = 0.0;*/
+
+	bool firstObstacle = true;
+
 	for (int i = 0; i < 100;i++)
 	{
 		double delta_s = sf / 100 * i;
@@ -769,15 +782,18 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 		pre(1, 0) = y;
 		Eigen::Matrix2Xd result = Topology::rotate(PI / 2, norm_vec)*q + pre;
 		RoadPoint tmp;
-		tmp.x = /*x + _delta_y_ * q;*/ result(0, 0);
-		tmp.y = /*y - _delta_x_ * q;*/ result(1, 0);
-		//if (i == 0)
-		//{
-		//	std::cout << "X: " << tmp.x << "\tY: " << tmp.y << std::endl;
-		//}
+		tmp.x = result(0, 0);
+		tmp.y = result(1, 0);
+
 		tmp.angle = Topology::toAngle(_delta_x_, _delta_y_);
+
 		int Grid_x = tmp.x / Grid + 75;
 		int Grid_y = tmp.y / Grid + 200;
+
+		firstObstacle_x = 0.0;
+		firstObstacle_y = 0.0;
+		new_sf = 0.0;
+		//collision detection
 		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
 		{
 			for (int jj = 0; jj < 2 * CAR_HEIGHT;jj++)
@@ -786,7 +802,14 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 				{
 					int index = MAP_WIDTH*(int)(Grid_y + i)+(int)(Grid_x)+j;
 					if (veloGrids.velo_grid[index]) {
-
+						//record first obstacle
+						if (firstObstacle)
+						{
+							firstObstacle_x = ((int)(Grid_x + j) - 75) * Grid;
+							firstObstacle_y = ((int)(Grid_y + i + 2) - 200) * Grid;
+							index = i;
+							new_sf = delta_s;
+						}
 						return false;
 					}
 				}
@@ -852,7 +875,7 @@ void PathGenerate::short_time_planning(){
 	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
 	PosPoint curCar;
 	curCar = DataCenter::GetInstance().GetCurPosition();
-	//在相对于车俩的坐标系里规划
+	//在相对于车辆的坐标系里规划
 	curCar.x = .0;
 	curCar.y = .0;
 	//std::vector<RoadPoint> refTrajectory = DataCenter::GetInstance().GetReferenceTrajectory(curCar);
@@ -876,6 +899,7 @@ void PathGenerate::short_time_planning(){
 	//{
 	//	std::vector<RoadPoint> pre_to_now = PathJoint::Gaussian_To_Decare(Root_On_Gaussian, car.angle, car.x, car.y);
 	//}
+	//qi here is not used
 	double qi = 0;
 	
 	double theta = 0;
@@ -887,10 +911,14 @@ void PathGenerate::short_time_planning(){
 	std::vector<RoadPoint> rdpt;
 	std::vector<float> road_qf;
 	//生成候选路径
+	double firstObstacle_x = 0.0;
+	double firstObstacle_y = 0.0;
+	int firstObsIndex;
+	double new_sf = 0.0;
 	for (float i = 0; i < 12; i+=0.2){
 		float qf = i - 6.;
 		std::vector<RoadPoint> pts;
-		if(short_time_planning(qf, tmp_qi, theta, sf, veloGrids, spline, pts, curCar))
+		if(short_time_planning(qf, tmp_qi, theta, sf, veloGrids, spline, pts, curCar, firstObstacle_x, firstObstacle_y, firstObsIndex, new_sf))
 		{
 			_root_.push_back(pts);
 			road_qf.push_back(qf);
@@ -953,16 +981,7 @@ void PathGenerate::short_time_planning(){
 				diff_max = distance;
 				_best_root_ = root;
 			}
-			/*if (abs(road_qf[index])<qf_max)
-			{
-				qf_max = abs(road_qf[index]);
-				qf_index = index;
-			}
-			if (_diff_ < diff_max){
-				diff_max = _diff_;
-				_best_root_ = root;
-				pre_qf = road_qf[index];
-			}*/
+
 			
 		}
 		pre_Root = _best_root_;
@@ -1038,6 +1057,187 @@ void PathGenerate::short_time_planning(){
 	ff.close();
 	m_sendPath.SendDraw(draw);
 
+}
+void PathGenerate::short_time_segment()
+{
+	//receive data from sensor
+	if (!DataCenter::GetInstance().HasVeloGrid()) {
+		std::cout << "Warning::not velogrid message" << std::endl;
+		return;
+	}
+	if (!DataCenter::GetInstance().HasCurb()) {
+		std::cout << "Warning::not curb message" << std::endl;
+		return;
+	}
+	if (!DataCenter::GetInstance().HasRefTrajectory()) {
+		std::cout << "Warning::not ref message" << std::endl;
+		return;
+	}
+	VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+	PosPoint curCar;
+	curCar = DataCenter::GetInstance().GetCurPosition();
+	//planning in the car coordinate
+	curCar.x = .0;
+	curCar.y = .0;
+
+	double tmp_qi = 0.0;
+	std::vector<RoadPoint> refTrajectory = DataCenter::GetInstance().GetRefTrajectory_Qi(tmp_qi);
+
+	SXYSpline spline;
+	spline.init(refTrajectory);
+
+	//qi here is not used
+	double qi = 0;
+
+	double theta = 0;
+	DataCenter::GetInstance().Get_InitAngle_Qi(&spline, theta, qi);
+
+	double sf = spline.S[spline.S.size() - 1];
+
+	std::vector<std::vector<RoadPoint>> cadidatePath;
+	std::vector<RoadPoint> rdpt;
+	std::vector<float> road_qf;
+
+	//generate candidate path
+	double firstObstacle_x = 0.0;
+	double firstObstacle_y = 0.0;
+	int firstObsIndex;
+	double tmp_sf = 0.0;
+	for (float i = 0; i < 12; i += 0.2) {
+		float qf = i - 6.;
+		std::vector<RoadPoint> pts;
+		if (short_time_planning(qf, tmp_qi, theta, sf, veloGrids, spline, pts, curCar, firstObstacle_x, firstObstacle_y, firstObsIndex, tmp_sf))
+		{
+			cadidatePath.push_back(pts);
+			road_qf.push_back(qf);
+		}
+	}
+
+	//if we can not find a path, we replace the goal point with first obstacle(a little further)
+	//and do the replanning work
+	if (cadidatePath.size() == 0)
+	{
+		//std::cout << "no path found " << std::endl;
+		//TODO:trim spline and replan
+		for (float i = 0; i < 12; i += 0.2) {
+			float qf = i - 6.0;
+			std::vector<RoadPoint> pts;
+			if (short_time_planning(qf, tmp_qi, theta, tmp_sf, veloGrids, spline, pts, curCar, firstObstacle_x, firstObstacle_y, firstObsIndex, tmp_sf))
+			{
+				cadidatePath.push_back(pts);
+				road_qf.push_back(qf);
+			}
+			if (cadidatePath.empty())
+			{
+				std::cout << "No validate path found" << std::endl;
+				return;
+			}
+		}
+		
+	}
+	//select best path
+	std::vector<RoadPoint> _best_root_;
+	if (pre_Root.size() == 0)
+	{
+		pre_Root = cadidatePath[0];
+		_best_root_ = cadidatePath[0];
+		int diff_max = 1000000;
+		_best_root_ = cadidatePath[0];
+		int qf_index = 0;
+		double qf_max = 100000;
+		int index = 0;
+		RoadPoint lastPt = *refTrajectory.rbegin();
+		lastPt.x -= curCar.x;
+		lastPt.y -= curCar.y;
+		for (auto root : cadidatePath) {
+			double distance = Topology::Distance2(root[root.size() - 1], lastPt);// refTrajectory[refTrajectory.size() - 1]);
+																				 //distance = abs(root[root.size() - 1].x - refTrajectory[refTrajectory.size() - 1].x);
+			if (distance < diff_max)
+			{
+				diff_max = distance;
+				_best_root_ = root;
+			}
+		}
+	}
+	else
+	{
+		int diff_max = 1000000;
+		_best_root_ = cadidatePath[0];
+		int qf_index = 0;
+		double qf_max = 100000;
+		int index = 0;
+		RoadPoint lastPt = *refTrajectory.rbegin();
+		lastPt.x -= curCar.x;
+		lastPt.y -= curCar.y;
+		for (auto root : cadidatePath)
+		{
+			double _diff_ = similarity(pre_Root, root, sf);
+			//_diff_ *= (abs(road_qf[index]) + 5) / 10;
+			double distance = Topology::Distance2(root[root.size() - 1], lastPt);// refTrajectory[refTrajectory.size() - 1]);
+																				 //distance = abs(root[root.size() - 1].x - refTrajectory[refTrajectory.size() - 1].x);
+			if (distance < diff_max)
+			{
+				diff_max = distance;
+				_best_root_ = root;
+			}
+
+		}
+		pre_Root = _best_root_;
+		Root_On_Gaussian = PathJoint::Decare_To_Gaussian(_best_root_, car.angle, car.x, car.y);
+	}
+	long long tp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+	std::ofstream of("plan_" + std::to_string(tp) + ".txt");
+
+	ckLcmType::DecisionDraw_t draw;
+	track.SetPath(_best_root_);
+
+	//draw all lines
+	int total_num = 0;
+	for (int i = 0; i < cadidatePath.size(); i++)
+	{
+		for (int j = 0; j < cadidatePath[i].size(); j++)
+		{
+			double x = cadidatePath[i][j].x;
+			double y = cadidatePath[i][j].y;
+			draw.Path_x.push_back(x);
+			draw.Path_y.push_back(y);
+			if (i == 0)
+			{
+				RoadPoint pt_for_track;
+				pt_for_track.x = x;
+				pt_for_track.y = y;
+				pt_for_track.angle = 0;
+				rdpt.push_back(pt_for_track);
+			}
+		}
+		total_num += cadidatePath[i].size();
+	}
+	//track.SetPath(rdpt);
+	std::cout << "root number" << cadidatePath.size() << std::endl;
+	draw.num = total_num;
+
+	std::ofstream ff("ref_" + std::to_string(tp) + ".txt");
+	int total_refnum = refTrajectory.size();
+	draw.refnum = total_refnum + _best_root_.size();
+	draw.Refer_x.reserve(total_refnum);
+	draw.Refer_y.reserve(total_refnum);
+	for (int i = 0; i < total_refnum; i++)
+	{
+		draw.Refer_x.push_back(refTrajectory[i].x - curCar.x);
+		draw.Refer_y.push_back(refTrajectory[i].y - curCar.y);
+		//ff << refTrajectory[i].x << "\t" << refTrajectory[i].y << "\n";
+	}
+	for (RoadPoint& pt : _best_root_) {
+		//double x, y;
+		//CoordTransform::GridtoLocal(pt.x + X_START, pt.y - Y_START, x, y);
+		draw.Refer_x.push_back(pt.x);
+		draw.Refer_y.push_back(pt.y);
+		//of << pt.x << "\t" << pt.y << "\n";
+		//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
+	}
+	of.close();
+	ff.close();
+	m_sendPath.SendDraw(draw);
 }
 bool PathGenerate::cmu_planning(std::vector<double> k, double vt, double sf, 
 	double theta, double x_start, double y_start, double delta_t){

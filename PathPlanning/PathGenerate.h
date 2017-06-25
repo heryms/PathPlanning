@@ -44,13 +44,16 @@ public:
 	bool path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, 
 		std::vector<PosPoint> &root, int count);
 	bool short_time_planning(float qf, float qi, float theta, double sf, 
-		VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts,PosPoint curPt);
+		VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts,PosPoint curPt, double& firstObstacle_x, double& firstObstacle_y, int& index,
+		double& new_sf);
 	void short_time_planning();
+	void short_time_segment();
 	bool cmu_planning(std::vector<double> k, double vt, double sf, 
 		double theta, double x_start, double y_start, double delta_t);
 	double dynamic_response(double k_next, double k, double v_next, double v, double t, 
 		double &k_response, double & v_response);
 	bool speed_logic_control(double k_next, double v_next, double v, double &v_response);
+	std::vector<RoadPoint> BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath);
 	
 
 private:
