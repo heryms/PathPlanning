@@ -274,6 +274,19 @@ std::vector<RoadPoint> DataCenter::GetReferenceTrajectory(RoadPoint &car) {
 	car.angle = PI / 2;
 	return trajectory;
 }
+std::vector<RoadPoint> DataCenter::GetRefTrajectories()
+{
+	QuickLock lk(m_lockRefTrajectory);
+	std::vector<RoadPoint> pos;
+	for (int i = 0; i < m_lcmMsgRefTrajectory.num; i++) {
+		RoadPoint p;
+		p.x = m_lcmMsgRefTrajectory.y[i] + 500000;
+		p.y = m_lcmMsgRefTrajectory.x[i];
+		p.angle = PI / 2 - m_lcmMsgRefTrajectory.angle[i];
+		pos.push_back(p);
+	}
+	return pos;
+}
 std::vector<RoadPoint> DataCenter::GetRefTrajectory()
 {
 	QuickLock lk(m_lockRefTrajectory);

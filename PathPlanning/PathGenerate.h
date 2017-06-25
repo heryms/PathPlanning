@@ -55,7 +55,7 @@ public:
 	bool speed_logic_control(double k_next, double v_next, double v, double &v_response);
 	std::vector<RoadPoint> BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath);
 	
-
+	void gps_tracking();
 private:
 	std::vector<RoadPoint> pre_Root;
 	std::vector<RoadPoint> Root_On_Gaussian;

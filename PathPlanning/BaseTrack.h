@@ -14,7 +14,7 @@ protected:
 public:
 	BaseTrack();
 	~BaseTrack();
-	virtual void SetPath(std::vector<RoadPoint>& path);
+	virtual void SetLocalPath(std::vector<RoadPoint>& path);
 	/**
 	* @param straight 直道参考车速km/h
 	* @param curve 弯道参考车速km/h

@@ -13,9 +13,9 @@ MPCTrack::~MPCTrack()
 {
 }
 
-void MPCTrack::SetPath(std::vector<RoadPoint>& path)
+void MPCTrack::SetLocalPath(std::vector<RoadPoint>& path)
 {
-	BaseTrack::SetPath(path);
+	BaseTrack::SetLocalPath(path);
 	start = end = std::chrono::high_resolution_clock::now();
 	lastX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
 }

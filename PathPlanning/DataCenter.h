@@ -121,6 +121,7 @@ public:
 	/*@return reference trajectory*/
 	std::vector<RoadPoint> GetRefTrajectory();
 	std::vector<RoadPoint> GetReferenceTrajectory(RoadPoint &car);
+	std::vector<RoadPoint> GetRefTrajectories();
 	PosPoint GetCurOnTrajectory();
 	//get init car angle and qi
 	void Get_InitAngle_Qi(SXYSpline* spline,double& angle, double& qi);

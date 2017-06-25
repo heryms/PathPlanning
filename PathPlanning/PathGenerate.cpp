@@ -213,7 +213,7 @@ void PathGenerate::path_generate() {
 			fclose(fp);
 #endif // 
 			m_sendPath.SendDraw(draw);
-			track.SetPath(rdpt);
+			track.SetLocalPath(rdpt);
 			send_succeed = true;
 			break;
 
@@ -222,7 +222,7 @@ void PathGenerate::path_generate() {
 	if (!send_succeed)
 	{
 		std::cout << "no path" << std::endl;
-		track.SetPath(std::vector<RoadPoint>());
+		track.SetLocalPath(std::vector<RoadPoint>());
 		//TODO: step five send message about how to stop
 		CarInfo info;
 		info.speed = 0;
@@ -424,7 +424,7 @@ void PathGenerate::path_generate_using_bug()
 		if (success_root.size() == 0)
 		{
 			std::cout << "no path" << std::endl;
-			track.SetPath(std::vector<RoadPoint>());
+			track.SetLocalPath(std::vector<RoadPoint>());
 			//TODO: step five send message about how to stop
 			CarInfo info;
 			info.speed = 0;
@@ -452,7 +452,7 @@ void PathGenerate::path_generate_using_bug()
 			// choice using the pre the go 
 			// or stop
 			std::cout << "no path" << std::endl;
-			track.SetPath(std::vector<RoadPoint>());
+			track.SetLocalPath(std::vector<RoadPoint>());
 			//TODO: step five send message about how to stop
 			CarInfo info;
 			info.speed = 0;
@@ -485,7 +485,7 @@ void PathGenerate::path_generate_using_bug()
 				//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
 			}
 			pre_Root = path;
-			track.SetPath(path);
+			track.SetLocalPath(path);
 			m_sendPath.SendDraw(draw);
 			
 		}
@@ -725,6 +725,17 @@ bool PathGenerate::speed_logic_control(double k_next, double v_next, double v_pr
 	v_response = v * v_pre / abs(v_pre);
 	//value = [v_response];
 	return true;
+}
+
+void PathGenerate::gps_tracking()
+{
+	if (!DataCenter::GetInstance().HasRefTrajectory()) {
+		std::cout << "Warning::not ref message" << std::endl;
+		return;
+	}
+	PosPoint curPos = DataCenter::GetInstance().GetCurPosition();
+	std::vector<RoadPoint> path = DataCenter::GetInstance().GetRefTrajectories();
+	track.SetLocalPath(path);
 }
 
 
@@ -1007,7 +1018,7 @@ void PathGenerate::short_time_planning(){
 	//	//of << pt.x << "\t" << pt.y << "\n";
 	//	//fprintf(fp, "%lf %lf %lf\n", x, y, pt.angle);
 	//}
-	track.SetPath(_best_root_);
+	track.SetLocalPath(_best_root_);
 
 	//draw all lines
 		int total_num = 0;
@@ -1030,7 +1041,7 @@ void PathGenerate::short_time_planning(){
 		}
 		total_num += _root_[i].size();
 	}
-	//track.SetPath(rdpt);
+	//track.SetLocalPath(rdpt);
 	std::cout << "root number" << _root_.size() << std::endl;
 	draw.num = total_num;
 	

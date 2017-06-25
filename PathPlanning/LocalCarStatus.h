@@ -3,7 +3,7 @@
 #define _PATH_PLANNING_LOCAL_CAR_STATUS_H
 
 #include "BaseCarStatus.h"
-class LocalPosThread;
+
 class LocalCarStatus :
 	public BaseCarStatus
 {

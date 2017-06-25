@@ -17,6 +17,7 @@ private:
 public:
 	TrackHelper();
 	virtual ~TrackHelper();
+	void SetLocalPath(std::vector<RoadPoint>& path);
 	void SetPath(std::vector<RoadPoint>& path);
 	void Track();
 	void Start();

@@ -85,10 +85,9 @@ void LocalCarStatus::End()
 
 PosPoint LocalCarStatus::GetPosition()
 {
-	PosPoint pt=DataCenter::GetInstance().GetCurPosition();
-	double dx = pt.x-orgPos.x;
+	PosPoint pt = DataCenter::GetInstance().GetCurPosition();
+	double dx = pt.x - orgPos.x;
 	double dy = pt.y - orgPos.y;
-	// *PI / 180.0;
 	Topology::Rotate(PI / 2 - orgPos.angle, dx, dy, pt.x, pt.y);
 	pt.angle = PI / 2 + pt.angle - orgPos.angle;
 	return pt;
