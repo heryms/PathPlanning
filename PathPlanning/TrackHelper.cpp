@@ -76,6 +76,7 @@ void TrackHelper::SetLocalPath(std::vector<RoadPoint>& path)
 	thread->Suspend();
 	LocalCarStatus::GetInstance().Suspend();
 	//this->path = path;
+
 	PosPoint p;
 	p.x = 0 ;
 	p.y = 0;

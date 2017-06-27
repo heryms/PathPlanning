@@ -148,7 +148,7 @@ void DataCenter::EndRefTrajectory()
 
 PosPoint DataCenter::GetCurPosition(){
 	QuickLock lk(m_lockLocation);
-	m_curPos.x = m_lcmMsgLocation.gau_pos[1] + 500000;
+	m_curPos.x = m_lcmMsgLocation.gau_pos[1];
 	m_curPos.y = m_lcmMsgLocation.gau_pos[0];
 	m_curPos.angle = PI / 2 - m_lcmMsgLocation.orientation[2]*PI/180;
 	return m_curPos;
@@ -161,7 +161,7 @@ CarInfo DataCenter::GetCarInfo(){
 	return m_curCarInfo;
 }
 
-VeloGrid_t& DataCenter::GetLidarData()
+VeloGrid_t DataCenter::GetLidarData()
 {
 	QuickLock lk(m_lockVeloGrid);
 	return m_lcmMsgVeloGrid;
@@ -211,10 +211,10 @@ PosPoint DataCenter::GetRoadEdgePoint(double y, CurbDirection dir)
 	return pt;
 }
 
-laserCurbs::pointXYZI DataCenter::GetRoadEdgeCoefficient(CurbDirection dir)
+PCLcloudShow::pointXYZI DataCenter::GetRoadEdgeCoefficient(CurbDirection dir)
 {
 	QuickLock lk(m_lockCurb);
-	laserCurbs::pointXYZI coeff;
+	PCLcloudShow::pointXYZI coeff;
 	switch (dir)
 	{
 	case LEFT:
@@ -226,7 +226,7 @@ laserCurbs::pointXYZI DataCenter::GetRoadEdgeCoefficient(CurbDirection dir)
 	default:
 		break;
 	}
-	return laserCurbs::pointXYZI();
+	return PCLcloudShow::pointXYZI();
 }
 
 PosPoint DataCenter::GetTargetPoint() {
@@ -280,9 +280,9 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectories()
 	std::vector<RoadPoint> pos;
 	for (int i = 0; i < m_lcmMsgRefTrajectory.num; i++) {
 		RoadPoint p;
-		p.x = m_lcmMsgRefTrajectory.y[i] + 500000;
+		p.x = m_lcmMsgRefTrajectory.y[i];
 		p.y = m_lcmMsgRefTrajectory.x[i];
-		p.angle = PI / 2 - m_lcmMsgRefTrajectory.angle[i];
+		p.angle = PI / 2 - m_lcmMsgRefTrajectory.angle[i]*PI/180;
 		pos.push_back(p);
 	}
 	return pos;
@@ -423,8 +423,8 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectory_Qi(double& qi)
 	for (int i = 0; i < m_lcmMsgRefTrajectory.num; i++)
 	{
 		RoadPoint pt;
-		double dx = m_lcmMsgRefTrajectory.x[i] - curpt.y;// m_lcmMsgRefTrajectory.x[0];
-		double dy = m_lcmMsgRefTrajectory.y[i] - curpt.x + 500000;// m_lcmMsgRefTrajectory.y[0];
+		double dy = m_lcmMsgRefTrajectory.x[i] - curpt.y;// m_lcmMsgRefTrajectory.x[0];
+		double dx = m_lcmMsgRefTrajectory.y[i] - curpt.x;// m_lcmMsgRefTrajectory.y[0];
 																  // *PI / 180.0;
 		Topology::Rotate(PI / 2 - angle, dx, dy, pt.x, pt.y);
 		pt.angle = angle - m_lcmMsgRefTrajectory.angle[i];

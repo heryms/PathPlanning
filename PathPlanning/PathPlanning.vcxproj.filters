@@ -19,9 +19,6 @@
     <Filter Include="Utils">
       <UniqueIdentifier>{db7a0bea-15e3-4cbd-8b59-11607e978909}</UniqueIdentifier>
     </Filter>
-    <Filter Include="math">
-      <UniqueIdentifier>{a7f266e1-5885-4776-bc74-8ee849a7e219}</UniqueIdentifier>
-    </Filter>
     <Filter Include="PathGenerate">
       <UniqueIdentifier>{10eac84c-823e-4698-a659-b3282ab8a25b}</UniqueIdentifier>
     </Filter>
@@ -30,6 +27,9 @@
     </Filter>
     <Filter Include="Track\ForMPC">
       <UniqueIdentifier>{640a511a-450d-470e-86b8-a225ea9d73e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{a7f266e1-5885-4776-bc74-8ee849a7e219}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

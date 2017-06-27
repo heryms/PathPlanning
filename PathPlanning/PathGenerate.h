@@ -70,7 +70,7 @@ private:
 	std::queue<double> recAngle;
 	std::vector<float> x_ref;
 	std::vector<float> y_ref;
-
+	bool CheckCollision(VeloGrid_t& grids, std::vector<RoadPoint> localPath,bool hasAngle=false);
 
 };
 

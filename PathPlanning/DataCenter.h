@@ -15,7 +15,7 @@
 using ckLcmType::StatusBody_t;
 using ckLcmType::Location_t;
 using ckLcmType::VeloGrid_t;
-using ckLcmType::cloudHandler;
+using PCLcloudShow::cloudHandler;
 using ckLcmType::PlanOutput;
 using ckLcmType::ckMapStatus_t;
 class SXYSpline;
@@ -111,11 +111,11 @@ public:
 	/*@return speed in km/h£¬ steerAngle in deg*/
 	CarInfo GetCarInfo();
 	/*return Lidar Data*/
-	VeloGrid_t& GetLidarData();
+	VeloGrid_t GetLidarData();
 	/*return a point on road edge*/
 	PosPoint GetRoadEdgePoint(double y, CurbDirection dir);
 	/*@return The Coefficient of Road Edge Line*/ 
-	laserCurbs::pointXYZI GetRoadEdgeCoefficient(CurbDirection dir);
+	PCLcloudShow::pointXYZI GetRoadEdgeCoefficient(CurbDirection dir);
 	/*@return The Plan Target Point*/
 	PosPoint GetTargetPoint();
 	/*@return reference trajectory*/

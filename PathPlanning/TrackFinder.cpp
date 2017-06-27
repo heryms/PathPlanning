@@ -150,23 +150,24 @@ bool TrackFinder::FindPursuitPoint(std::vector<RoadPoint>& refPath, RoadPoint cu
 	if (refPath.empty()) {
 		return false;
 	}
+	RoadPoint orgX = refPath[0];
 	int minIndex = 0;
 	double minDistance;
 	{
-		double dx = refPath[0].x;
-		double dy = refPath[0].y;
+		double dx = refPath[0].x-curX.x;
+		double dy = refPath[0].y - curX.y;
 		minDistance = dx*dx + dy*dy;
 	}
 	for (int i = 1; i < refPath.size(); i++) {
-		double dx = refPath[i].x;
-		double dy = refPath[i].y;
+		double dx = refPath[i].x - curX.x;
+		double dy = refPath[i].y - curX.y;
 		double dis = dx*dx + dy*dy;
 		if (dis < minDistance) {
 			minDistance = dis;
 			minIndex = i;
 		}
 	}
-	double radius = 5.5;//预瞄半径+
+	double radius = 6.5;//预瞄半径+
 	float Kla = 2.25; //比例系数
 	float Vchange = 2.25;  //速度阈值 单位为m/s
 	if (Speed <= Vchange)
@@ -183,10 +184,10 @@ bool TrackFinder::FindPursuitPoint(std::vector<RoadPoint>& refPath, RoadPoint cu
 	double towardX = sin(PI/2-curX.angle);
 	double towardY = cos(PI/2-curX.angle);
 	for (int i = 1; i < refPath.size(); i++) {
-		double delGaux0 = refPath[i - 1].x;
-		double delGauy0 = refPath[i - 1].y;
-		double delGaux1 = refPath[i].x;
-		double delGauy1 = refPath[i].y;
+		double delGaux0 = refPath[i - 1].x-curX.x;
+		double delGauy0 = refPath[i - 1].y - curX.y;
+		double delGaux1 = refPath[i].x - curX.x;
+		double delGauy1 = refPath[i].y - curX.y;
 		double r0 = delGaux0*delGaux0 + delGauy0*delGauy0 - radius*radius;
 		double r1 = delGaux1*delGaux1 + delGauy1*delGauy1 - radius*radius;
 		if (fabs(r0) < 0.01) {
@@ -206,7 +207,13 @@ bool TrackFinder::FindPursuitPoint(std::vector<RoadPoint>& refPath, RoadPoint cu
 		}
 
 		if (r0*r1 < 0) {
-			RoadPoint tag0 = Newton_divide(refPath[i - 1], refPath[i], radius);
+			RoadPoint p0 = refPath[i - 1];
+			p0.x -= curX.x;
+			p0.y -= curX.y;
+			RoadPoint p1 = refPath[i];
+			p1.x -= curX.x;
+			p1.y -= curX.y;
+			RoadPoint tag0 = Newton_divide(p0,p1, radius);
 			if (towardX*tag0.x + towardY*tag0.y > 0) {
 				refX = tag0;
 				isFind = true;
@@ -215,13 +222,13 @@ bool TrackFinder::FindPursuitPoint(std::vector<RoadPoint>& refPath, RoadPoint cu
 		}
 	}
 	if (isFind) {
-		//refX.x += curX.x;
-		//refX.y += curX.y;
+		refX.x += curX.x;
+		refX.y += curX.y;
 	}
 	return isFind;
 }
 
-short TrackFinder::MiddlePiont_Shan(double firMidPoint_x, double firMidPoint_y)
+short TrackFinder::MiddlePiont_Shan(PosPoint orgX, double firMidPoint_x, double firMidPoint_y)
 {
 	static float a_theta = 0;
 	static int n = 1;
@@ -234,8 +241,14 @@ short TrackFinder::MiddlePiont_Shan(double firMidPoint_x, double firMidPoint_y)
 	double c;					//方向盘转角
 	double kp = 1;				//转角增益
 	double error = 0;
-	delt_b = atan(firMidPoint_x / (firMidPoint_y));
-	Lf = sqrt((firMidPoint_x*firMidPoint_x) + (firMidPoint_y)*(firMidPoint_y));
+	RoadPoint pt;
+	//CoordTransform::WorldtoLocal(curPos, path[i].x, path[i].y, pt.x, pt.y);
+	double dx = firMidPoint_x - orgX.x;// m_lcmMsgRefTrajectory.x[0];
+	double dy = firMidPoint_y - orgX.y;// m_lcmMsgRefTrajectory.y[0];
+	// *PI / 180.0;
+	Topology::Rotate(PI / 2 - orgX.angle, dx, dy, pt.x, pt.y);
+	delt_b = atan(pt.x/pt.y);
+	Lf = sqrt((firMidPoint_x - orgX.x)*(firMidPoint_x - orgX.x) + (firMidPoint_y - orgX.y)*(firMidPoint_y - orgX.y));
 	a = atan(2 * L*sin(delt_b) / Lf);
 	a_theta = a*180.0* LocalCarStatus::GetInstance().GetSteerRatio()/ PI;
 	short changeangle;

@@ -15,7 +15,7 @@ public:
 static	RoadPoint Newton_divide(RoadPoint p0, RoadPoint p1, float radious);
 //static bool FindPursuitPoint(vector<NodePoint> linebuffer, RoadPoint curPoint, RoadPoint &TargetPoint, float Speed);
 static bool FindPursuitPoint(std::vector<RoadPoint>& refPath, RoadPoint curX, RoadPoint &refX, float Speed);
-static short MiddlePiont_Shan(double firMidPoint_x, double firMidPoint_y);
+static short MiddlePiont_Shan(PosPoint org, double firMidPoint_x, double firMidPoint_y);
 static
 		int AnchorPointStraight(std::vector<RoadPoint>& path, RoadPoint curX, int curIndex, double distance);
 };

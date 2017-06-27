@@ -736,12 +736,147 @@ void PathGenerate::gps_tracking()
 	PosPoint curPos = DataCenter::GetInstance().GetCurPosition();
 	std::vector<RoadPoint> path = DataCenter::GetInstance().GetRefTrajectories();
 	track.SetLocalPath(path);
+	DecisionDraw_t draw;
+	draw.num = path.size();
+	for (int i = 0; i < path.size(); i++)
+	{
+		RoadPoint pt;
+		//CoordTransform::WorldtoLocal(curPos, path[i].x, path[i].y, pt.x, pt.y);
+		double dx = path[i].x -curPos.x;// m_lcmMsgRefTrajectory.x[0];
+		double dy = path[i].y - curPos.y;// m_lcmMsgRefTrajectory.y[0];
+		// *PI / 180.0;
+		Topology::Rotate(PI/2-curPos.angle, dx, dy, pt.x, pt.y);
+		pt.angle = curPos.angle - path[i].angle;
+		draw.Path_x.push_back(pt.x);
+		draw.Path_y.push_back(pt.y);
+	}
+	m_sendPath.SendDraw(draw);
+}
+
+bool PathGenerate::CheckCollision(VeloGrid_t & grids, std::vector<RoadPoint> localPath, bool hasAngle)
+{//Î´¿¼ÂÇ³µÆ¨¹É
+	const double carW = 1.837;
+	const double carH = 4.505;
+	const double gridL = Grid;
+	const double gridW = MAP_WIDTH;
+	const double gridH = MAP_HEIGHT;
+	if (!hasAngle) {
+		for (int i = 0; i + 1 < localPath.size(); i++) {
+			localPath[i].angle = atan2((localPath[i + 1].y - localPath[i].y), (localPath[i + 1].x - localPath[i].x));
+		}
+		*localPath.rbegin() = *(localPath.rbegin() + 1);
+	}
+	for (RoadPoint rpt : localPath) {
+		PointPt dLeftFront, dRightFront, dLeftBack, dRightBack;
+		dLeftBack.x = -carW / 2 * sin(rpt.angle);
+		dLeftBack.y = carW / 2 * cos(rpt.angle);
+		dRightBack.x = -dLeftBack.x;
+		dRightBack.y = -dLeftBack.y;
+		PointPt dFront;
+		dFront.x = carH*cos(rpt.angle);
+		dFront.y = carH*sin(rpt.angle);
+		dLeftFront.x = dFront.x + dLeftBack.x;
+		dLeftFront.y = dFront.y + dLeftBack.y;
+		dRightFront.x = dFront.x + dRightBack.x;
+		dRightFront.y = dFront.y + dRightBack.y;
+		
+		PosPoint rb, lb,third0,lf,rf,third1;
+		rb.x = rpt.x + dRightBack.x;
+		rb.y = rpt.y + dRightBack.y;
+		lb.x = rpt.x + dLeftBack.x;
+		lb.y = rpt.y + dLeftBack.y;
+		lf.x = rpt.x + dLeftFront.x;
+		lf.y = rpt.y + dLeftFront.y;
+		rf.x = rpt.x + dRightFront.x;
+		rf.y = rpt.x + dRightFront.y;
+		if (tan(rpt.angle) >= 0) {
+			double dx = carW*cos(rpt.angle) / tan(rpt.angle);
+			third0.y = lb.y;
+			third0.x = dx + rb.x;
+			PosPoint gridIndex;
+			gridIndex.x = dRightBack.x / gridL + gridW / 2;
+			gridIndex.y = dRightBack.y / gridL + gridH / 2;
+			std::vector<int> tmpGrids = CoordTransform::XTriangleToGrids(lb, third0, rb, gridIndex);
+			for (int index : tmpGrids) {
+				if (grids.velo_grid[index]) {
+					return false;
+				}
+			}
+			third1.y = rf.y;
+			third1.x = lf.x - dx;
+			gridIndex.x = dLeftFront.x / gridL + gridW / 2;
+			gridIndex.y = dLeftFront.y / gridL + gridH / 2;
+			tmpGrids = CoordTransform::XTriangleToGrids(rf, third1, lf, gridIndex);
+			for (int index : tmpGrids) {
+				if (grids.velo_grid[index]) {
+					return false;
+				}
+			}
+			gridIndex.x = (third0.x - rpt.x) / gridL + gridW / 2;
+			gridIndex.y = (third0.y - rpt.y) / gridL + gridH / 2;
+			tmpGrids = CoordTransform::XTriangleToGrids(rf, third1, third0, gridIndex);
+			for (int index : tmpGrids) {
+				if (grids.velo_grid[index]) {
+					return false;
+				}
+			}
+			gridIndex.x = (third1.x - rpt.x) / gridL + gridW / 2;
+			gridIndex.y = (third1.y - rpt.y) / gridL + gridH / 2;
+			tmpGrids = CoordTransform::XTriangleToGrids(lb, third0, third1, gridIndex);
+			for (int index : tmpGrids) {
+				if (grids.velo_grid[index]) {
+					return false;
+				}
+			}
+		}
+		else {
+			double dx = carW*sin(rpt.angle) * tan(rpt.angle);
+			third0.y = rb.y;
+			third0.x = lb.x+dx;
+			PosPoint gridIndex;
+			gridIndex.x = dLeftBack.x / gridL + gridW / 2;
+			gridIndex.y = dRightBack.y / gridL + gridH / 2;
+			std::vector<int> tmpGrids = CoordTransform::XTriangleToGrids(rb, third0, lb, gridIndex);
+			for (int index : tmpGrids) {
+				if (grids.velo_grid[index]) {
+					return false;
+				}
+			}
+			third1.y = lf.y;
+			third1.x = rf.x - dx;
+			gridIndex.x = dRightFront.x / gridL + gridW / 2;
+			gridIndex.y = dRightFront.y / gridL + gridH / 2;
+			tmpGrids = CoordTransform::XTriangleToGrids(lf, third1, rf, gridIndex);
+			for (int index : tmpGrids) {
+				if (grids.velo_grid[index]) {
+					return false;
+				}
+			}
+			gridIndex.x = (third0.x - rpt.x) / gridL + gridW / 2;
+			gridIndex.y = (third0.y - rpt.y) / gridL + gridH / 2;
+			tmpGrids = CoordTransform::XTriangleToGrids(lf, third1, third0, gridIndex);
+			for (int index : tmpGrids) {
+				if (grids.velo_grid[index]) {
+					return false;
+				}
+			}
+			gridIndex.x = (third1.x - rpt.x) / gridL + gridW / 2;
+			gridIndex.y = (third1.y - rpt.y) / gridL + gridH / 2;
+			tmpGrids = CoordTransform::XTriangleToGrids(rb, third0, third1, gridIndex);
+			for (int index : tmpGrids) {
+				if (grids.velo_grid[index]) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 
 std::vector<RoadPoint> PathGenerate::BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath)
 {
-
+	return std::vector<RoadPoint>();
 }
 
 bool PathGenerate::short_time_planning(float qf, float qi, float theta, double sf,
@@ -807,7 +942,7 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 		//collision detection
 		for (int j = -CAR_WIDTH; j <= CAR_WIDTH; j++)
 		{
-			for (int jj = 0; jj < 2 * CAR_HEIGHT;jj++)
+			//for (int jj = 0; jj < 2 * CAR_HEIGHT;jj++)
 			{
 				if ((int)(Grid_x + j) >= 0 && ((int)(Grid_x + j)) <= MAP_WIDTH - 1 && (int)(Grid_y + i) <= MAP_HEIGHT - 1)
 				{
@@ -818,8 +953,9 @@ bool PathGenerate::short_time_planning(float qf, float qi, float theta, double s
 						{
 							firstObstacle_x = ((int)(Grid_x + j) - 75) * Grid;
 							firstObstacle_y = ((int)(Grid_y + i + 2) - 200) * Grid;
+							std::cout << "collision:\t" << firstObstacle_x << "\t" << firstObstacle_y << std::endl;
 							index = i;
-							new_sf = delta_s;
+				 			new_sf = delta_s;
 						}
 						return false;
 					}
@@ -875,10 +1011,10 @@ void PathGenerate::short_time_planning(){
 		std::cout << "Warning::not velogrid message" << std::endl;
 		return ;
 	}
-	if (!DataCenter::GetInstance().HasCurb()) {
-		std::cout << "Warning::not curb message" << std::endl;
-		return ;
-	}
+	//if (!DataCenter::GetInstance().HasCurb()) {
+	//	std::cout << "Warning::not curb message" << std::endl;
+	//	return ;
+	//}
 	if (!DataCenter::GetInstance().HasRefTrajectory()) {
 		std::cout << "Warning::not ref message" << std::endl;
 		return;
@@ -1076,10 +1212,10 @@ void PathGenerate::short_time_segment()
 		std::cout << "Warning::not velogrid message" << std::endl;
 		return;
 	}
-	if (!DataCenter::GetInstance().HasCurb()) {
-		std::cout << "Warning::not curb message" << std::endl;
-		return;
-	}
+	//if (!DataCenter::GetInstance().HasCurb()) {
+	//	std::cout << "Warning::not curb message" << std::endl;
+	//	return;
+	//}
 	if (!DataCenter::GetInstance().HasRefTrajectory()) {
 		std::cout << "Warning::not ref message" << std::endl;
 		return;
@@ -1200,7 +1336,7 @@ void PathGenerate::short_time_segment()
 	std::ofstream of("plan_" + std::to_string(tp) + ".txt");
 
 	ckLcmType::DecisionDraw_t draw;
-	track.SetPath(_best_root_);
+	track.SetLocalPath(_best_root_);
 
 	//draw all lines
 	int total_num = 0;

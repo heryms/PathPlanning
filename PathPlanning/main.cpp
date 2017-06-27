@@ -18,7 +18,7 @@ int main()
 	//CoordTransform transform;
 	//test_Clothoid();
 	DataCenter::GetInstance().StartVeloGrid();
-	DataCenter::GetInstance().StartCurb();
+	//DataCenter::GetInstance().StartCurb();
 	DataCenter::GetInstance().StartStatusBody();
 	DataCenter::GetInstance().StartRefTrajectory();
 	DataCenter::GetInstance().StartLocation();

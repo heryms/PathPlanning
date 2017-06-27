@@ -324,8 +324,8 @@ void Topology::Rotate_To_Decare(double theta, double x, double y, double& x_out,
 }
 void Topology::Rotate(double theta, double x, double y, double& x_out, double& y_out)
 {
-	x_out = y * cos(theta) - x * sin(theta);
-	y_out = y * sin(theta) + x * cos(theta);
+	x_out = x * cos(theta) - y * sin(theta);
+	y_out = x * sin(theta) + y * cos(theta);
 
 }
 void Topology::Rotate_To_Guassian(double theta, double x, double y, double& x_out, double& y_out){

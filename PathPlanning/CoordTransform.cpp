@@ -1,7 +1,6 @@
 ﻿#include "CoordTransform.h"
 #include <cmath>
 
-
 #pragma region IMAGE_TO_ROAD_AND_ROAD_TO_IMAGE
 
 double CoordTransform::calcZcameraFromYcameraOnRoad(CamParam *pCamParam, double dYcamera)
@@ -132,5 +131,39 @@ bool CoordTransform::GridtoLocal(int xIn, int yIn, double &xOut, double &yOut){
 	}
 	else{
 		return false;
+	}
+}
+
+//x1.y==x2.y
+std::vector<int> CoordTransform::XTriangleToGrids(PosPoint x1, PosPoint x2, PosPoint y, PosPoint yGrid) {
+	if (x1.x > x2.x) {
+		PosPoint tmp=x1;
+		x1 = x2;
+		x2 = tmp;
+	}
+	double len1=fabs(y.x-x1.x);
+	double len2=fabs(y.x-x2.x);
+	double height=fabs(y.y-x1.y);
+	std::vector<int> grids;
+	int xindex = yGrid.x;
+	int yindex = yGrid.y;
+	for (int i = 0;; i++, (y.y>x1.y)?(yindex--)?(yindex++)) {
+		double tmpH = Grid*(i + 1);
+		if (tmpH > fabs(height)) break;
+		double tmpX1 = len1*tmpH / height;
+		double tmpX2 = len2*tmpH / height;
+		int x1GridNum = tmpX1 / Grid + 0.5;
+		int x2GridNum = tmpX2 / Grid + 0.5;
+		for (int n = 1; n <= x1GridNum; n++) {
+			int xi = xindex - n;
+			int index = yindex*MAP_WIDTH + xindex;
+			grids.push_back(index);
+		}
+		for (int n = 0; n < x2GridNum; n++) {
+			int xi = xindex + n;
+			int index = yindex*MAP_WIDTH + xindex;
+			grids.push_back(index);
+		}
+
 	}
 }

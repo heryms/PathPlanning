@@ -30,8 +30,9 @@ void PureTrack::Track()
 		{
 			RoadPoint refX;
 			if (TrackFinder::FindPursuitPoint(path, curX, refX, LocalCarStatus::GetInstance().GetSpeed()/3.6)){
-				info.steerAngle = TrackFinder::MiddlePiont_Shan(refX.x, refX.y);
+				info.steerAngle = TrackFinder::MiddlePiont_Shan(curX,refX.x, refX.y);
 				info.gear = D;
+				info.speed = 10;
 				info.state = START;
 			}
 			else{
@@ -45,11 +46,11 @@ void PureTrack::Track()
 		inCurve = TrackFinder::InCurve(inCurve, path, curX, curIndex);
 		RoadPoint refX;
 		if (inCurve) {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 3)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 6.5)];
 			info.speed = refSpeedCurve;
 		}
 		else {
-			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex,5)];
+			refX = path[TrackFinder::AnchorPoint(path, curX, curIndex, 12)];
 			info.speed = refSpeedStraight;
 		}
 		info.gear = D;
