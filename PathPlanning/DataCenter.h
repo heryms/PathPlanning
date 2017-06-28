@@ -8,6 +8,7 @@
 #include "lcmtype\VeloGrid_t.hpp"
 #include "lcmtype\PlanOutput.hpp"
 #include "lcmtype\ckMapStatus_t.hpp"
+#include "lcmtype\Map_t.hpp"
 #include <mutex>
 #include <condition_variable>
 #include <vector>
@@ -18,6 +19,7 @@ using ckLcmType::VeloGrid_t;
 using PCLcloudShow::cloudHandler;
 using ckLcmType::PlanOutput;
 using ckLcmType::ckMapStatus_t;
+using ckLcmType::Map_t;
 class SXYSpline;
 enum CurbDirection{
 	LEFT = 0,
@@ -38,18 +40,21 @@ private:
 	LcmRecvHelper<VeloGrid_t> m_lcmVeloGrid;
 	LcmRecvHelper<cloudHandler> m_lcmCurb;
 	LcmRecvHelper<ckMapStatus_t> m_lcmRefTrajectory;
+	LcmRecvHelper<Map_t> m_lcmDoubleLane;
 	
 	Location_t m_lcmMsgLocation;
 	StatusBody_t m_lcmMsgStatusBody;
 	VeloGrid_t m_lcmMsgVeloGrid;
 	cloudHandler m_lcmMsgCurb;
 	ckMapStatus_t m_lcmMsgRefTrajectory;
+	Map_t m_lcmMsgDoubleLane;
 	
 	std::mutex m_lockLocation;
 	std::mutex m_lockStatusBody;
 	std::mutex m_lockVeloGrid;
 	std::mutex m_lockCurb;
 	std::mutex m_lockRefTrajectory;
+	std::mutex m_lockDoubleLane;
 
 	std::condition_variable m_waitLocation;
 	//std::mutex m_waitLockLocation;
@@ -59,6 +64,7 @@ private:
 	//std::mutex m_waitLockVeloGrid;
 	std::condition_variable m_waitCurb;
 	std::condition_variable m_waitRefTrajectory;
+	std::condition_variable m_waitDoubleLane;
 
 	//std::mutex m_waitLockCurb;
 	/*triggered while receiving Location_t */
@@ -71,6 +77,8 @@ private:
 	void CurbRecvOperation(const cloudHandler* msg, void*);
 	/*triggered while receiving Reference Trajectory*/
 	void RefTrajectoryRecvOperation(const ckMapStatus_t* msg, void*);
+
+	void DoubleLaneRecvOperation(const Map_t* msg, void*);
 
 protected:
 	DataCenter();
@@ -96,6 +104,8 @@ public:
 	/**start reference trajectory*/
 	void StartRefTrajectory();
 
+	void StartDoubleLane();
+
 	/*end location*/
 	void EndLocation();
 	/*end statusboyd*/
@@ -106,6 +116,9 @@ public:
 	void EndCurb();
 	/*end reference trajectory*/
 	void EndRefTrajectory();
+	void EndDoubleLane();
+
+	
 	/*@return x,y in Gauss, orientation by x*/
 	PosPoint GetCurPosition();
 	/*@return speed in km/h£¬ steerAngle in deg*/
@@ -121,11 +134,13 @@ public:
 	/*@return reference trajectory*/
 	std::vector<RoadPoint> GetRefTrajectory();
 	std::vector<RoadPoint> GetReferenceTrajectory(RoadPoint &car);
-	std::vector<RoadPoint> GetRefTrajectories();
+	std::vector<RoadPoint> GetRefTrajectories(); 
+	std::vector<std::vector<RoadPoint>> GetDoubleLanes(int & laneIndex);
 	PosPoint GetCurOnTrajectory();
 	//get init car angle and qi
 	void Get_InitAngle_Qi(SXYSpline* spline,double& angle, double& qi);
 	std::vector<RoadPoint> GetRefTrajectory_Qi(double& qi);
+	void GetLanes_Qi(int laneIndex, double& qi, std::vector<RoadPoint>& lane);
 	/*continue while Location Processing completed*/
 	bool WaitForLocation(unsigned int milliseconds);
 	/*continue while StatusBody Processing completed*/
@@ -137,6 +152,8 @@ public:
 	/*continue while RefTrajectory Processing completed*/
 	bool WaitForRefTrajectory(unsigned int milliseconds);
 
+	bool WaitForDoubleLane(unsigned int milliseconds);
+
 	/*@return if having Location_t during 500ms*/
 	bool HasLocation();
 	/*@return if having StatusBody_t during 500ms*/
@@ -147,6 +164,8 @@ public:
 	bool HasCurb();
 	/*@return if having RefTrajectory during 500ms*/
 	bool HasRefTrajectory();
+
+	bool HasDoubleLane();
 
 
 private:

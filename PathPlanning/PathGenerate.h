@@ -56,6 +56,8 @@ public:
 	std::vector<RoadPoint> BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath);
 	
 	void gps_tracking();
+
+	void short_time_several_lanes();
 private:
 	std::vector<RoadPoint> pre_Root;
 	std::vector<RoadPoint> Root_On_Gaussian;
@@ -70,7 +72,7 @@ private:
 	std::queue<double> recAngle;
 	std::vector<float> x_ref;
 	std::vector<float> y_ref;
-	bool CheckCollision(VeloGrid_t& grids, std::vector<RoadPoint> localPath,bool hasAngle=false);
+	int CheckCollision(VeloGrid_t& grids, std::vector<RoadPoint> localPath, bool hasAngle = false);
 
 };
 

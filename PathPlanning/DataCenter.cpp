@@ -63,12 +63,19 @@ void DataCenter::CurbRecvOperation(const cloudHandler* msg, void*){
 	m_waitCurb.notify_all();
 }
 
+void DataCenter::DoubleLaneRecvOperation(const Map_t* msg, void*){
+	QuickLock lk(m_lockDoubleLane);
+	m_lcmMsgDoubleLane = *msg;
+	m_waitDoubleLane.notify_all();
+}
+
 void DataCenter::StartAllSensor(){
 	StartLocation();
 	StartStatusBody();
 	StartVeloGrid();
 	StartCurb();
 	StartRefTrajectory();
+	StartDoubleLane();
 	//m_lcmLocation.initialLcm(LCM_NET_LOCATION, LCM_CHANNEL_LOCATION
 	//	, std::bind(&DataCenter::LocationRecvOperation, this,std::placeholders::_1,std::placeholders::_2),this);
 	//m_lcmStatusBody.initialLcm(LCM_NET_STATUS_BODY, LCM_CHANNEL_STATUS_BODY
@@ -85,6 +92,7 @@ void DataCenter::EndAllSensor(){
 	EndVeloGrid();
 	EndCurb();
 	EndRefTrajectory();
+	EndDoubleLane();
 	//m_lcmLocation.uninitialLcm();
 	//m_lcmStatusBody.uninitialLcm();
 	//m_lcmVeloGrid.uninitialLcm();
@@ -120,6 +128,11 @@ void DataCenter::StartRefTrajectory()
 	m_lcmRefTrajectory.initialLcm(LCM_NET_REFERENCE_TRAJECTORY, LCM_CHANNEL_REFERENCE_TRAJECTORY,
 		std::bind(&DataCenter::RefTrajectoryRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
 }
+void DataCenter::StartDoubleLane()
+{
+	m_lcmDoubleLane.initialLcm(LCM_NET_MAP, LCM_CHANNEL_MAP
+		, std::bind(&DataCenter::DoubleLaneRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+}
 
 void DataCenter::EndLocation()
 {
@@ -144,6 +157,10 @@ void DataCenter::EndCurb()
 void DataCenter::EndRefTrajectory()
 {
 	m_lcmRefTrajectory.uninitialLcm();
+}
+
+void DataCenter::EndDoubleLane(){
+	m_lcmDoubleLane.uninitialLcm();
 }
 
 PosPoint DataCenter::GetCurPosition(){
@@ -287,6 +304,26 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectories()
 	}
 	return pos;
 }
+
+
+std::vector<std::vector<RoadPoint>> DataCenter::GetDoubleLanes(int & laneIndex){
+	QuickLock lk(m_lockDoubleLane);
+	laneIndex = m_lcmMsgDoubleLane.timestamp;
+	std::vector < std::vector<RoadPoint>> lanes;
+	for (int i = 0; i < m_lcmMsgDoubleLane.lanenum; i++){
+		std::vector<RoadPoint> pos;
+		for (int j = 0; j < m_lcmMsgDoubleLane.pointnum; j++){
+			RoadPoint p;
+			p.x = m_lcmMsgDoubleLane.vy[i][j];
+			p.y = m_lcmMsgDoubleLane.vx[i][j];
+			p.angle = PI / 2 - m_lcmMsgDoubleLane.vyaw[i][j] * PI / 180;
+			pos.push_back(p);
+		}
+		lanes.push_back(pos);
+	}
+	return lanes;
+}
+
 std::vector<RoadPoint> DataCenter::GetRefTrajectory()
 {
 	QuickLock lk(m_lockRefTrajectory);
@@ -463,6 +500,10 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectory_Qi(double& qi)
 	return trajectory;
 }
 
+void DataCenter::GetLanes_Qi(int laneIndex,double& qi, std::vector<RoadPoint>& lane){
+	
+}
+
 bool DataCenter::WaitForLocation(unsigned int milliseconds){
 	QuickLock lk(m_lockLocation);
 	return m_waitLocation.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
@@ -490,6 +531,13 @@ bool DataCenter::WaitForRefTrajectory(unsigned int milliseconds)
 	return m_waitRefTrajectory.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
 }
 
+bool DataCenter::WaitForDoubleLane(unsigned int milliseconds){
+
+	QuickLock lk(m_lockDoubleLane);
+
+	return m_waitDoubleLane.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
+}
+
 bool DataCenter::HasLocation(){
 	return m_lcmLocation.HasLcmMessage();
 }
@@ -509,5 +557,10 @@ bool DataCenter::HasCurb(){
 bool DataCenter::HasRefTrajectory()
 {
 	return m_lcmRefTrajectory.HasLcmMessage();
+}
+
+bool DataCenter::HasDoubleLane()
+{
+	return m_lcmDoubleLane.HasLcmMessage();
 }
 

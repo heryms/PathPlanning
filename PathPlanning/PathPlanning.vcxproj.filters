@@ -242,5 +242,8 @@
     <ClInclude Include="PathJoint.h">
       <Filter>PathGenerate</Filter>
     </ClInclude>
+    <ClInclude Include="lcmtype\Map_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
