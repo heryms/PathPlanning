@@ -22,6 +22,7 @@ int main()
 	DataCenter::GetInstance().StartStatusBody();
 	DataCenter::GetInstance().StartRefTrajectory();
 	DataCenter::GetInstance().StartLocation();
+	DataCenter::GetInstance().StartDoubleLane();
 	__thread_sleep_for(1000);
 	PathGenerate pathGen;
 	while (true)
@@ -31,7 +32,7 @@ int main()
 		}
 		std::chrono::steady_clock::time_point startTime
 			= std::chrono::steady_clock::now();
-		pathGen.short_time_planning();
+		pathGen.short_time_segment();
 		std::chrono::steady_clock::time_point endTime
 			= std::chrono::steady_clock::now();
 		std::chrono::milliseconds time

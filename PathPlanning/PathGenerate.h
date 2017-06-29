@@ -43,9 +43,10 @@ public:
 	bool path_generate_for_fun();
 	bool path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, 
 		std::vector<PosPoint> &root, int count);
-	bool short_time_planning(float qf, float qi, float theta, double sf, 
+	int short_time_planning(float qf, float qi, float theta, double sf, 
 		VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts,PosPoint curPt, double& firstObstacle_x, double& firstObstacle_y, int& index,
 		double& new_sf);
+	std::vector<RoadPoint> trajectory_build(float qf,float qi,float theta,double sf,SXYSpline& spline);
 	void short_time_planning();
 	void short_time_segment();
 	bool cmu_planning(std::vector<double> k, double vt, double sf, 
@@ -56,6 +57,8 @@ public:
 	std::vector<RoadPoint> BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath);
 	std::vector<PointPt> getColisionArea(PointPt inPt);
 	void gps_tracking();
+
+	void short_time_several_lanes();
 private:
 	std::vector<RoadPoint> pre_Root;
 	std::vector<RoadPoint> Root_On_Gaussian;
@@ -70,7 +73,7 @@ private:
 	std::queue<double> recAngle;
 	std::vector<float> x_ref;
 	std::vector<float> y_ref;
-	bool CheckCollision(VeloGrid_t& grids, std::vector<RoadPoint> localPath,bool hasAngle=false);
+	int CheckCollision(VeloGrid_t& grids, std::vector<RoadPoint> localPath, bool hasAngle = false);
 
 };
 

@@ -147,7 +147,7 @@ std::vector<int> CoordTransform::XTriangleToGrids(PosPoint x1, PosPoint x2, PosP
 	std::vector<int> grids;
 	int xindex = yGrid.x;
 	int yindex = yGrid.y;
-	for (int i = 0;; i++, (y.y>x1.y)?(yindex--)?(yindex++)) {
+	for (int i = 0;; i++, (y.y>x1.y)?(yindex--):(yindex++)) {
 		double tmpH = Grid*(i + 1);
 		if (tmpH > fabs(height)) break;
 		double tmpX1 = len1*tmpH / height;
@@ -157,13 +157,18 @@ std::vector<int> CoordTransform::XTriangleToGrids(PosPoint x1, PosPoint x2, PosP
 		for (int n = 1; n <= x1GridNum; n++) {
 			int xi = xindex - n;
 			int index = yindex*MAP_WIDTH + xindex;
-			grids.push_back(index);
+			if (index>0&&index < MAP_WIDTH*MAP_HEIGHT){
+				grids.push_back(index);
+			}
 		}
 		for (int n = 0; n < x2GridNum; n++) {
 			int xi = xindex + n;
 			int index = yindex*MAP_WIDTH + xindex;
-			grids.push_back(index);
+			if( index>0&&index < MAP_WIDTH*MAP_HEIGHT){
+				grids.push_back(index);
+			}
 		}
 
 	}
+	return grids;
 }

@@ -126,6 +126,7 @@
     <ClInclude Include="ForMPC\MMatrix.h" />
     <ClInclude Include="ForMPC\QuadProg++.hh" />
     <ClInclude Include="lcmtype\ckMapStatus_t.hpp" />
+    <ClInclude Include="lcmtype\Map_t.hpp" />
     <ClInclude Include="MPCTrack.h" />
     <ClInclude Include="PathGenerateTool.h" />
     <ClInclude Include="PathJoint.h" />
