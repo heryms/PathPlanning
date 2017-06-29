@@ -1708,3 +1708,4 @@ std::vector<RoadPoint> PathGenerate::trajectory_build(float qf, float qi, float 
 	}
 	return pts;
 }
+
