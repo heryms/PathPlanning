@@ -1709,3 +1709,37 @@ std::vector<RoadPoint> PathGenerate::trajectory_build(float qf, float qi, float 
 	return pts;
 }
 
+
+bool check_circle_area_collision(VeloGrid_t & grids, std::vector<RoadPoint> localPath){
+
+	//liyong yuanxing jinxing pengzhuang jiance
+	int index[13] = { 13, 13, 13, 13, 12, 12, 11, 11, 10, 9, 8, 6, 4 };
+	for (int ptIndex = 0; ptIndex < localPath.size(); ptIndex++) {
+		RoadPoint rpt = localPath[ptIndex];
+
+		for (int i = 0; i < 13; i++){
+
+			int colnum = index[i];
+			for (int j = -colnum; j < colnum; j++)
+			{
+				int pos = (rpt.y - i) * MAP_WIDTH + rpt.x + j;
+				if (grids.velo_grid[pos])
+					return false;
+			}
+		}
+
+		//¼ì²éÏÂ°ëÔ²
+		for (int i = -12; i <= 0; i++){
+
+			int colnum = index[abs(i)];
+			for (int j = -colnum; j < colnum; j++)
+			{
+				int pos = (rpt.y - i) * MAP_WIDTH + rpt.x + j;
+				if (grids.velo_grid[pos])
+					return false;
+			}
+		}
+	}
+	return true;
+	
+}
