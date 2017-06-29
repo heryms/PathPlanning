@@ -1533,6 +1533,7 @@ void PathGenerate::short_time_several_lanes(){
 			double dx = rpt.x - curPos.x;// m_lcmMsgRefTrajectory.x[0];
 			double dy = rpt.y - curPos.y;// m_lcmMsgRefTrajectory.y[0];
 			// *PI / 180.0;
+			//z
 			Topology::Rotate(PI / 2 - curPos.angle, dx, dy, rpt.x, rpt.y);
 			rpt.angle = PI / 2 + curPos.angle - rpt.angle;
 		}
