@@ -1409,3 +1409,7 @@ bool PathGenerate::cmu_planning(std::vector<double> k, double vt, double sf,
 	}
 	return true;
 }
+
+std::vector<PointPt> getColisionArea(PointPt inPt){
+	
+}
