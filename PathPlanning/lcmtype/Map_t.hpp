@@ -35,6 +35,18 @@ class Map_t
 
         double     curyaw;
 
+        int32_t    index;
+
+        int8_t     stopline;
+
+        double     slx;
+
+        double     sly;
+
+        double     slyaw;
+
+        double     slwidth;
+
     public:
         /**
          * Encode a message into binary form.
@@ -170,6 +182,24 @@ int Map_t::_encodeNoHash(void *buf, int offset, int maxlen) const
     tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->curyaw, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __int32_t_encode_array(buf, offset + pos, maxlen - pos, &this->index, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __int8_t_encode_array(buf, offset + pos, maxlen - pos, &this->stopline, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->slx, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->sly, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->slyaw, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->slwidth, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -222,6 +252,24 @@ int Map_t::_decodeNoHash(const void *buf, int offset, int maxlen)
     tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->curyaw, 1);
     if(tlen < 0) return tlen; else pos += tlen;
 
+    tlen = __int32_t_decode_array(buf, offset + pos, maxlen - pos, &this->index, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __int8_t_decode_array(buf, offset + pos, maxlen - pos, &this->stopline, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->slx, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->sly, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->slyaw, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
+    tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->slwidth, 1);
+    if(tlen < 0) return tlen; else pos += tlen;
+
     return pos;
 }
 
@@ -237,12 +285,18 @@ int Map_t::_getEncodedSizeNoHash() const
     enc_size += __double_encoded_array_size(NULL, 1);
     enc_size += __double_encoded_array_size(NULL, 1);
     enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __int32_t_encoded_array_size(NULL, 1);
+    enc_size += __int8_t_encoded_array_size(NULL, 1);
+    enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __double_encoded_array_size(NULL, 1);
+    enc_size += __double_encoded_array_size(NULL, 1);
     return enc_size;
 }
 
 int64_t Map_t::_computeHash(const __lcm_hash_ptr *)
 {
-    int64_t hash = 0x73223ec0701fceb6LL;
+    int64_t hash = 0x22097691a1b44c72LL;
     return (hash<<1) + ((hash>>63)&1);
 }
 

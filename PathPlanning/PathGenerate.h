@@ -43,9 +43,10 @@ public:
 	bool path_generate_for_fun();
 	bool path_generate_recursive(PosPoint startPt, PosPoint endPt, VeloGrid_t veloGrids, 
 		std::vector<PosPoint> &root, int count);
-	bool short_time_planning(float qf, float qi, float theta, double sf, 
+	int short_time_planning(float qf, float qi, float theta, double sf, 
 		VeloGrid_t veloGrids, SXYSpline spline, std::vector<RoadPoint> & pts,PosPoint curPt, double& firstObstacle_x, double& firstObstacle_y, int& index,
 		double& new_sf);
+	std::vector<RoadPoint> trajectory_build(float qf,float qi,float theta,double sf,SXYSpline& spline);
 	void short_time_planning();
 	void short_time_segment();
 	bool cmu_planning(std::vector<double> k, double vt, double sf, 

@@ -32,7 +32,7 @@ int main()
 		}
 		std::chrono::steady_clock::time_point startTime
 			= std::chrono::steady_clock::now();
-		pathGen.short_time_several_lanes();
+		pathGen.short_time_segment();
 		std::chrono::steady_clock::time_point endTime
 			= std::chrono::steady_clock::now();
 		std::chrono::milliseconds time

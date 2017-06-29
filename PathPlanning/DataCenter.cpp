@@ -308,7 +308,7 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectories()
 
 std::vector<std::vector<RoadPoint>> DataCenter::GetDoubleLanes(int & laneIndex){
 	QuickLock lk(m_lockDoubleLane);
-	laneIndex = m_lcmMsgDoubleLane.timestamp;
+	laneIndex = m_lcmMsgDoubleLane.index;
 	std::vector < std::vector<RoadPoint>> lanes;
 	for (int i = 0; i < m_lcmMsgDoubleLane.lanenum; i++){
 		std::vector<RoadPoint> pos;
@@ -317,12 +317,32 @@ std::vector<std::vector<RoadPoint>> DataCenter::GetDoubleLanes(int & laneIndex){
 			p.x = m_lcmMsgDoubleLane.vy[i][j];
 			p.y = m_lcmMsgDoubleLane.vx[i][j];
 			p.angle = PI / 2 - m_lcmMsgDoubleLane.vyaw[i][j] * PI / 180;
+			if (p.x == -1){
+				continue;
+			}
 			pos.push_back(p);
 		}
 		lanes.push_back(pos);
 	}
 	return lanes;
 }
+
+PosPoint DataCenter::GetStopLine(double& width){
+	QuickLock lk(m_lockDoubleLane);
+	if (m_lcmMsgDoubleLane.stopline){
+		PosPoint p;
+		p.x = m_lcmMsgDoubleLane.sly;
+		p.y = m_lcmMsgDoubleLane.slx;
+		p.angle = PI / 2 - m_lcmMsgDoubleLane.slyaw*PI/180;
+		width = m_lcmMsgDoubleLane.slwidth;
+		return p;
+	}
+	else{
+		width = 0;
+		return PosPoint();
+	}
+}
+
 
 std::vector<RoadPoint> DataCenter::GetRefTrajectory()
 {
