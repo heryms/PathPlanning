@@ -167,7 +167,7 @@ bool TrackFinder::FindPursuitPoint(std::vector<RoadPoint>& refPath, RoadPoint cu
 			minIndex = i;
 		}
 	}
-	double radius = 6.5;//预瞄半径+
+	double radius = 5.5;//预瞄半径+
 	float Kla = 2.25; //比例系数
 	float Vchange = 2.25;  //速度阈值 单位为m/s
 	if (Speed <= Vchange)

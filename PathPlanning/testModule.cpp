@@ -1,6 +1,7 @@
 #include "testModule.h"
 #include <iostream>
 #include <iomanip>
+#include "CoordTransform.h"
 using namespace std;
 void test_To_Guassian(double grad, double minute, double second,
 	double grad1, double minute1, double second1){
@@ -77,4 +78,18 @@ void test_spline()
 	//std::chrono::microseconds time
 	//	= std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
 	//std::cout << time.count() << std::endl;
+}
+
+void test_axis_transform()
+{
+	RoadPoint pt;
+	pt.x = 246340.95890675954;
+	pt.y = 3382180.4580072556;
+	pt.angle = 1.32;
+	pt.changeangle = 1;
+	pt.k = 2;
+	RoadPoint org = pt;
+	org.y += 4;
+	CoordTransform::WorldToLocal(org, pt, &pt);
+	CoordTransform::LocalToWorld(org, pt, &pt);
 }

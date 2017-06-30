@@ -17,7 +17,7 @@ void PureTrack::Track()
 {
 	if (path.size() < 10) return;
 	CarInfo info;
-	RoadPoint curX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
+	RoadPoint curX=LocalCarStatus::GetInstance().GetPosition();
 	int curIndex = TrackFinder::FindPointIndex(path, curX);
 	do {
 		if (curIndex < 0) {

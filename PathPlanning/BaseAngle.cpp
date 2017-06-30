@@ -48,6 +48,20 @@ bool RadAngle::operator !=(const double & v) const {
 	return (value) != (Normalize(v));
 }
 
+bool RadAngle::belong(RadAngle min, RadAngle max)
+{
+	double themax = max - min;
+	double now = *this;
+	now -= min;
+	if (themax < 0) {
+		themax += 2 * PI;
+	}
+	if (now < 0) {
+		now += 2 * PI;
+	}
+	return now < themax;
+}
+
 
 
 DegAngle::DegAngle()

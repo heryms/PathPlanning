@@ -16,4 +16,5 @@ void test_To_Guassian(
 void test_Clothoid();
 void test_Array(int a[], int length);
 void test_spline();
+void test_axis_transform();
 #endif

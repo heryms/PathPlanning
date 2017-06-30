@@ -44,34 +44,53 @@ typedef struct {
 	ERunState state;
 }CarInfo;
 
-struct PosPoint
-{
-	double  x;
-	double  y;
-	RadAngle  angle;
-
-};
 struct PointPt
 {
+public:
 	double  x;
 	double  y;
-	
+	PointPt() :x(0), y(0) {
 
+	}
 };
+
+struct PosPoint :public PointPt
+{
+public:
+	RadAngle  angle;
+	PosPoint() :PointPt(), angle(0) {
+
+	}
+	PosPoint(const PointPt& p) :PointPt(p),angle(0) {
+	}
+
+	PosPoint &operator =(const PointPt& p) {
+		this->x = p.x;
+		this->y = p.y;
+		return *this;
+	}
+};
+
 struct RoadPoint : public PosPoint
 {
+public:
 	//double x;
 	//double y;
 	//double angle;
 	double changeangle;
 	double k;
+	RoadPoint():PosPoint(),changeangle(0),k(0) {
 
-	static RoadPoint toRoadPoint(PosPoint p) {
-		RoadPoint rp;
-		rp.x = p.x;
-		rp.y = p.y;
-		rp.angle = p.angle;
-		return rp;
+	}
+
+	RoadPoint(const PosPoint& p):PosPoint(p), changeangle(0), k(0) {
+	}
+
+	RoadPoint &operator =(const PosPoint& p) {
+		this->x = p.x;
+		this->y = p.y;
+		this->angle = p.angle;
+		return *this;
 	}
 };
 

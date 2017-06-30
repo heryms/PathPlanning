@@ -9,6 +9,7 @@ void SXYSpline::init(std::vector<RoadPoint> baseFrame)
 	}
 	X.clear();
 	Y.clear();
+	S.clear();
 	double s = 0;
 	X.push_back(baseFrame.begin()->x);
 	Y.push_back(baseFrame.begin()->y);

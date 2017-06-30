@@ -271,7 +271,11 @@ vector<double> Topology::lufact(vector<vector<double>> A, vector<double> B) {
 
 Eigen::MatrixX4d Topology::CubicSpline(std::vector<double> X, std::vector<double> Y, double ds0, double dsn)
 {
-	if (X.size() <= 4) return Eigen::Matrix4Xd();
+	if (X.size() <= 4){
+		Eigen::MatrixX4d s;
+		s.resize(0, 4);
+		return s;
+	}
 	auto Xiter = X.rbegin();
 	auto Yiter = Y.rbegin();
 	int N = X.size() - 1;

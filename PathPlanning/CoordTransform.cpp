@@ -1,4 +1,5 @@
 ﻿#include "CoordTransform.h"
+#include "Topology.h"
 #include <cmath>
 
 #pragma region IMAGE_TO_ROAD_AND_ROAD_TO_IMAGE
@@ -72,42 +73,89 @@ double CoordTransform::calcVimageFromXcameraAndZcameraOnRoad(CamParam *pCamParam
 #pragma endregion IMAGE_TO_ROAD_AND_ROAD_TO_IMAGE
 
 
-//转换全局世界坐标到局部坐标
-/************************************************************************/
-/*
-Param:
-org 目标坐标系的原点和方位角
-xIn 输入的X坐标
-yIn 输入的Y坐标
-xOut 输出的X坐标
-yOut  输出的Y坐标
-Function：
-将全局坐标投影到车体（或者指定位置）的局部坐标系,全局坐标的X和Y与局部坐标是相反的
-*/
-/************************************************************************/
-int CoordTransform::WorldtoLocal(PosPoint org, double xIn, double yIn, double &xOut, double &yOut)
+void CoordTransform::WorldToLocal(PosPoint org, PosPoint ptIn, PosPoint* ptOut)
 {
-	double dx = 0, dy = 0, dstX = 0, dstY = 0;
-	dx = xIn - org.x;
-	dy = yIn - org.y;
-	dstX = dx*cos(org.angle) - dy*sin(org.angle);
-	dstY = dx*sin(org.angle) + dy*cos(org.angle);
-	xOut = dstX;
-	yOut = dstY;
-
-	return 1;
+	ptOut->x = ptIn.x - org.x;
+	ptOut->y = ptIn.y - org.y;
+	Topology::Rotate(PI / 2 - org.angle, ptOut->x, ptOut->y, ptOut->x, ptOut->y);
+	ptOut->angle = PI / 2 - org.angle + ptIn.angle;
 }
 
-//转换局部坐标到全局世界坐标
-int CoordTransform::LocaltoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut)
+void CoordTransform::LocalToWorld(PosPoint org, PosPoint ptIn, PosPoint* ptOut)
 {
-	double dx = 0, dy = 0, dstX = 0, dstY = 0;
-	dstX = xIn*cos(org.angle) + yIn*sin(org.angle);
-	dstY = -xIn*sin(org.angle) + yIn*cos(org.angle);
-	xOut = dstX + org.x;
-	yOut = dstY + org.y;
-	return 1;
+	Topology::Rotate(org.angle - PI / 2, ptIn.x, ptIn.y, ptOut->x, ptOut->y);
+	ptOut->x += org.x;
+	ptOut->y += org.y;
+	ptOut->angle = -ptIn.angle + org.angle + PI / 2;
 }
+double CoordTransform::TrimLocalPathToCurPt(std::vector<RoadPoint>& localPath)
+{
+	double min = DBL_MAX;
+	int minIndex = 0;
+	for (int i = 0; i < localPath.size(); i++)
+	{
+		PosPoint pt = localPath[i];
+		double dis = pt.x*pt.x + pt.y*pt.y;
+		if (min > dis&&pt.angle > 0) {
+			min = dis;
+			minIndex = i;
+		}
+	}
+	std::pair<double, double> v1;
+	v1.first = localPath[minIndex + 1].x - localPath[minIndex].x;
+	v1.second = localPath[minIndex + 1].y - localPath[minIndex].y;
+	RoadPoint firstPt;
+	firstPt.y = (-v1.first * v1.second * localPath[minIndex].x
+		+ v1.first * v1.first * localPath[minIndex].y)
+		/ (v1.first * v1.first + v1.second * v1.second);
+	firstPt.x = (-v1.second * firstPt.y) / (v1.first);
+	firstPt.angle = atan2(v1.second, v1.first);
+	localPath.erase(localPath.begin(), localPath.begin() + minIndex);
+	localPath[0] = firstPt;
+	double qi = sqrt(firstPt.x * firstPt.x + firstPt.y * firstPt.y);
+	if (firstPt.x < 0)
+	{
+		return -qi;
+	}
+	return qi;
+}
+//
+////转换全局世界坐标到局部坐标
+///************************************************************************/
+///*
+//Param:
+//org 目标坐标系的原点和方位角
+//xIn 输入的X坐标
+//yIn 输入的Y坐标
+//xOut 输出的X坐标
+//yOut  输出的Y坐标
+//Function：
+//将全局坐标投影到车体（或者指定位置）的局部坐标系,全局坐标的X和Y与局部坐标是相反的
+//*/
+///************************************************************************/
+//int CoordTransform::WorldtoLocal(PosPoint org, double xIn, double yIn, double &xOut, double &yOut)
+//{
+//	double dx = 0, dy = 0, dstX = 0, dstY = 0;
+//	dx = xIn - org.x;
+//	dy = yIn - org.y;
+//	dstX = dx*cos(org.angle) - dy*sin(org.angle);
+//	dstY = dx*sin(org.angle) + dy*cos(org.angle);
+//	xOut = dstX;
+//	yOut = dstY;
+//
+//	return 1;
+//}
+//
+////转换局部坐标到全局世界坐标
+//int CoordTransform::LocaltoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut)
+//{
+//	double dx = 0, dy = 0, dstX = 0, dstY = 0;
+//	dstX = xIn*cos(org.angle) + yIn*sin(org.angle);
+//	dstY = -xIn*sin(org.angle) + yIn*cos(org.angle);
+//	xOut = dstX + org.x;
+//	yOut = dstY + org.y;
+//	return 1;
+//}
 
 bool CoordTransform::LocaltoGrid(PosPoint org, int &xOut, int &yOut)
 {

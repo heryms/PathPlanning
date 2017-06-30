@@ -17,7 +17,7 @@ void MPCTrack::SetLocalPath(std::vector<RoadPoint>& path)
 {
 	BaseTrack::SetLocalPath(path);
 	start = end = std::chrono::high_resolution_clock::now();
-	lastX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
+	lastX = LocalCarStatus::GetInstance().GetPosition();
 }
 
 void MPCTrack::Track()
@@ -30,7 +30,7 @@ void MPCTrack::Track()
 		std::chrono::duration_cast<std::chrono::microseconds>
 		(end - start);
 	CarInfo info;
-	RoadPoint curX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
+	RoadPoint curX = LocalCarStatus::GetInstance().GetPosition();
 	int curIndex = TrackFinder::FindPointIndex(path, curX);
 	do {
 		if (curIndex < 0) {
@@ -68,7 +68,7 @@ void MPCTrack::Track()
 			//	+ dis)];
 		}
 		RealTrack(info, curSpeed, LocalCarStatus::GetInstance().GetSteerAngle(), microseconds.count() / 1000000.0, curX);
-		lastX = RoadPoint::toRoadPoint(LocalCarStatus::GetInstance().GetPosition());
+		lastX = LocalCarStatus::GetInstance().GetPosition();
 		start = std::chrono::high_resolution_clock::now();
 	} while (false);
 	CarControl::GetInstance().SendCommand(info);

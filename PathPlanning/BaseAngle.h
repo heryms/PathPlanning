@@ -44,6 +44,9 @@ public:
 	bool operator ==(const double & v) const;
 
 	bool operator !=(const double & v) const;
+
+	//ÄæÊ±Õë
+	bool belong(RadAngle min, RadAngle max);
 };
 
 class DegAngle

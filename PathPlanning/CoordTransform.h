@@ -23,8 +23,22 @@ enum CoordSystem
 class CoordTransform
 {
 public:
-	static int WorldtoLocal(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
-	static int LocaltoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
+	/**
+	* 笛卡尔坐标系，方向角与X轴夹角。
+	* org的local坐标为(0,0,PI/2)
+	**/ 
+	static void WorldToLocal(PosPoint org, PosPoint ptIn, PosPoint * ptOut);
+	/**
+	* 笛卡尔坐标系，方向角与X轴夹角。
+	* org的local坐标为(0,0,PI/2)
+	**/
+	static void LocalToWorld(PosPoint org, PosPoint ptIn, PosPoint * ptOut);
+	/**
+	* 精确当前位置(0,0,PI/2)在路径中的最近点，并返回距离
+	**/
+	static double TrimLocalPathToCurPt(std::vector<RoadPoint>& localPath);
+	//static int WorldtoLocal(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
+	//static int LocaltoWorld(PosPoint org, double xIn, double yIn, double &xOut, double &yOut);
 	static bool LocaltoGrid(PosPoint org, int &xOut, int &yOut);
 	static bool GridtoLocal(int xIn, int yIn, double &xOut, double &yOut);
 	static std::vector<int> XTriangleToGrids(PosPoint x1, PosPoint x2, PosPoint y, PosPoint yGrid);

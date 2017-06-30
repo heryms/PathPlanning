@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <utility>
 #include <iostream>
+#include "CoordTransform.h"
 
 typedef std::unique_lock<std::mutex> QuickLock;
 
@@ -63,10 +64,10 @@ void DataCenter::CurbRecvOperation(const cloudHandler* msg, void*){
 	m_waitCurb.notify_all();
 }
 
-void DataCenter::DoubleLaneRecvOperation(const Map_t* msg, void*){
-	QuickLock lk(m_lockDoubleLane);
-	m_lcmMsgDoubleLane = *msg;
-	m_waitDoubleLane.notify_all();
+void DataCenter::MultiLaneRecvOperation(const Map_t* msg, void*){
+	QuickLock lk(m_lockMultiLane);
+	m_lcmMsgMultiLane = *msg;
+	m_waitMultiLane.notify_all();
 }
 
 void DataCenter::StartAllSensor(){
@@ -75,7 +76,7 @@ void DataCenter::StartAllSensor(){
 	StartVeloGrid();
 	StartCurb();
 	StartRefTrajectory();
-	StartDoubleLane();
+	StartMultiLane();
 	//m_lcmLocation.initialLcm(LCM_NET_LOCATION, LCM_CHANNEL_LOCATION
 	//	, std::bind(&DataCenter::LocationRecvOperation, this,std::placeholders::_1,std::placeholders::_2),this);
 	//m_lcmStatusBody.initialLcm(LCM_NET_STATUS_BODY, LCM_CHANNEL_STATUS_BODY
@@ -92,7 +93,7 @@ void DataCenter::EndAllSensor(){
 	EndVeloGrid();
 	EndCurb();
 	EndRefTrajectory();
-	EndDoubleLane();
+	EndMultiLane();
 	//m_lcmLocation.uninitialLcm();
 	//m_lcmStatusBody.uninitialLcm();
 	//m_lcmVeloGrid.uninitialLcm();
@@ -128,10 +129,10 @@ void DataCenter::StartRefTrajectory()
 	m_lcmRefTrajectory.initialLcm(LCM_NET_REFERENCE_TRAJECTORY, LCM_CHANNEL_REFERENCE_TRAJECTORY,
 		std::bind(&DataCenter::RefTrajectoryRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
 }
-void DataCenter::StartDoubleLane()
+void DataCenter::StartMultiLane()
 {
-	m_lcmDoubleLane.initialLcm(LCM_NET_MAP, LCM_CHANNEL_MAP
-		, std::bind(&DataCenter::DoubleLaneRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+	m_lcmMultiLane.initialLcm(LCM_NET_MAP, LCM_CHANNEL_MAP
+		, std::bind(&DataCenter::MultiLaneRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
 }
 
 void DataCenter::EndLocation()
@@ -159,8 +160,8 @@ void DataCenter::EndRefTrajectory()
 	m_lcmRefTrajectory.uninitialLcm();
 }
 
-void DataCenter::EndDoubleLane(){
-	m_lcmDoubleLane.uninitialLcm();
+void DataCenter::EndMultiLane(){
+	m_lcmMultiLane.uninitialLcm();
 }
 
 PosPoint DataCenter::GetCurPosition(){
@@ -175,6 +176,8 @@ CarInfo DataCenter::GetCarInfo(){
 	QuickLock lk(m_lockStatusBody);
 	m_curCarInfo.speed = m_lcmMsgStatusBody.vehicleSpeed;
 	m_curCarInfo.steerAngle = m_lcmMsgStatusBody.wheelAngle;
+	m_curCarInfo.gear =(EGear)m_lcmMsgStatusBody.gear;
+	m_curCarInfo.state =(ERunState) m_lcmMsgStatusBody.controlStatus;
 	return m_curCarInfo;
 }
 
@@ -306,17 +309,17 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectories()
 }
 
 
-std::vector<std::vector<RoadPoint>> DataCenter::GetDoubleLanes(int & laneIndex){
-	QuickLock lk(m_lockDoubleLane);
-	laneIndex = m_lcmMsgDoubleLane.index;
+std::vector<std::vector<RoadPoint>> DataCenter::GetMultiLanes(int & laneIndex){
+	QuickLock lk(m_lockMultiLane);
+	laneIndex = m_lcmMsgMultiLane.index;
 	std::vector < std::vector<RoadPoint>> lanes;
-	for (int i = 0; i < m_lcmMsgDoubleLane.lanenum; i++){
+	for (int i = 0; i < m_lcmMsgMultiLane.lanenum; i++){
 		std::vector<RoadPoint> pos;
-		for (int j = 0; j < m_lcmMsgDoubleLane.pointnum; j++){
+		for (int j = 0; j < m_lcmMsgMultiLane.pointnum; j++){
 			RoadPoint p;
-			p.x = m_lcmMsgDoubleLane.vy[i][j];
-			p.y = m_lcmMsgDoubleLane.vx[i][j];
-			p.angle = PI / 2 - m_lcmMsgDoubleLane.vyaw[i][j] * PI / 180;
+			p.x = m_lcmMsgMultiLane.vy[i][j];
+			p.y = m_lcmMsgMultiLane.vx[i][j];
+			p.angle = PI / 2 - m_lcmMsgMultiLane.vyaw[i][j] * PI / 180;
 			if (p.x == -1){
 				continue;
 			}
@@ -328,13 +331,13 @@ std::vector<std::vector<RoadPoint>> DataCenter::GetDoubleLanes(int & laneIndex){
 }
 
 PosPoint DataCenter::GetStopLine(double& width){
-	QuickLock lk(m_lockDoubleLane);
-	if (m_lcmMsgDoubleLane.stopline){
+	QuickLock lk(m_lockMultiLane);
+	if (m_lcmMsgMultiLane.stopline){
 		PosPoint p;
-		p.x = m_lcmMsgDoubleLane.sly;
-		p.y = m_lcmMsgDoubleLane.slx;
-		p.angle = PI / 2 - m_lcmMsgDoubleLane.slyaw*PI/180;
-		width = m_lcmMsgDoubleLane.slwidth;
+		p.x = m_lcmMsgMultiLane.sly;
+		p.y = m_lcmMsgMultiLane.slx;
+		p.angle = PI / 2 - m_lcmMsgMultiLane.slyaw*PI/180;
+		width = m_lcmMsgMultiLane.slwidth;
 		return p;
 	}
 	else{
@@ -357,7 +360,7 @@ std::vector<RoadPoint> DataCenter::GetRefTrajectory()
 	{
 		RoadPoint pt;
 		double dx = m_lcmMsgRefTrajectory.x[i] - curpt.y;// m_lcmMsgRefTrajectory.x[0];
-		double dy = m_lcmMsgRefTrajectory.y[i] - curpt.x + 500000;// m_lcmMsgRefTrajectory.y[0];
+		double dy = m_lcmMsgRefTrajectory.y[i] - curpt.x;// m_lcmMsgRefTrajectory.y[0];
 		// *PI / 180.0;
 		Topology::Rotate(PI / 2 - angle, dx, dy, pt.x, pt.y);
 		pt.angle = angle - m_lcmMsgRefTrajectory.angle[i];
@@ -469,54 +472,46 @@ void DataCenter::Get_InitAngle_Qi(SXYSpline* spline, double& angle, double& qi)
 
 std::vector<RoadPoint> DataCenter::GetRefTrajectory_Qi(double& qi)
 {
-	QuickLock lk(m_lockRefTrajectory);
+	std::vector<RoadPoint> refTrajectory = GetRefTrajectories();
 	std::vector<RoadPoint> trajectory;
-	trajectory.reserve(m_lcmMsgRefTrajectory.num);
+	trajectory.reserve(refTrajectory.size());
 	PosPoint curpt = GetCurPosition();
-	double angle = curpt.angle;
-	double min = DBL_MAX;
-	int minIndex = 0;
+	//double min = DBL_MAX;
+	//int minIndex = 0;
 	//转到车体坐标系
-	for (int i = 0; i < m_lcmMsgRefTrajectory.num; i++)
+	for (int i = 0; i < refTrajectory.size(); i++)
 	{
-		RoadPoint pt;
-		double dy = m_lcmMsgRefTrajectory.x[i] - curpt.y;// m_lcmMsgRefTrajectory.x[0];
-		double dx = m_lcmMsgRefTrajectory.y[i] - curpt.x;// m_lcmMsgRefTrajectory.y[0];
-																  // *PI / 180.0;
-		Topology::Rotate(PI / 2 - angle, dx, dy, pt.x, pt.y);
-		pt.angle = angle - m_lcmMsgRefTrajectory.angle[i];
+		PosPoint pt;
+		CoordTransform::WorldToLocal(curpt, refTrajectory[i], &pt);
 		trajectory.push_back(pt);
-		double dis = pt.x*pt.x + pt.y*pt.y;
-		if (min > dis) {
+		/*double dis = pt.x*pt.x + pt.y*pt.y;
+		if (min > dis&&cos(pt.angle - curpt.angle) > 0) {
 			min = dis;
 			minIndex = i;
-		}
+		}*/
 	}
 
-	//求参考轨迹上离车当前点最近的点
-	std::pair<double, double> v1;
-	v1.first = trajectory[minIndex + 1].x - trajectory[minIndex].x;
-	v1.second = trajectory[minIndex + 1].y - trajectory[minIndex].y;
-
-	RoadPoint firstPt;
-	firstPt.y = (-v1.first * v1.second * trajectory[minIndex].x 
-		+ v1.first * v1.first * trajectory[minIndex].y) 
-		/ (v1.first * v1.first + v1.second * v1.second);
-	firstPt.x = (-v1.second * firstPt.y) / (v1.first);
-
-	//firstPt.angle = trajectory[minIndex].angle;
-	firstPt.angle = atan2(v1.second, v1.first);
-	
-	//std::cout << "angle: " << tan(firstPt.angle) << std::endl;
-
-	trajectory.erase(trajectory.begin(), trajectory.begin() + minIndex);
-	trajectory[0] = firstPt;
-
-	qi = sqrt(trajectory[0].x * trajectory[0].x + trajectory[0].y * trajectory[0].y);
-	if (firstPt.x < 0)
-	{
-		qi = -qi;
-	}
+	qi=CoordTransform::TrimLocalPathToCurPt(trajectory);
+	////求参考轨迹上离车当前点最近的点
+	//std::pair<double, double> v1;
+	//v1.first = trajectory[minIndex + 1].x - trajectory[minIndex].x;
+	//v1.second = trajectory[minIndex + 1].y - trajectory[minIndex].y;
+	//RoadPoint firstPt;
+	//firstPt.y = (-v1.first * v1.second * trajectory[minIndex].x 
+	//	+ v1.first * v1.first * trajectory[minIndex].y) 
+	//	/ (v1.first * v1.first + v1.second * v1.second);
+	//firstPt.x = (-v1.second * firstPt.y) / (v1.first);
+	////firstPt.angle = trajectory[minIndex].angle;
+	//firstPt.angle = atan2(v1.second, v1.first);
+	//
+	////std::cout << "angle: " << tan(firstPt.angle) << std::endl;
+	//trajectory.erase(trajectory.begin(), trajectory.begin() + minIndex);
+	//trajectory[0] = firstPt;
+	//qi = sqrt(trajectory[0].x * trajectory[0].x + trajectory[0].y * trajectory[0].y);
+	//if (firstPt.x < 0)
+	//{
+	//	qi = -qi;
+	//}
 	return trajectory;
 }
 
@@ -551,11 +546,11 @@ bool DataCenter::WaitForRefTrajectory(unsigned int milliseconds)
 	return m_waitRefTrajectory.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
 }
 
-bool DataCenter::WaitForDoubleLane(unsigned int milliseconds){
+bool DataCenter::WaitForMultiLane(unsigned int milliseconds){
 
-	QuickLock lk(m_lockDoubleLane);
+	QuickLock lk(m_lockMultiLane);
 
-	return m_waitDoubleLane.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
+	return m_waitMultiLane.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
 }
 
 bool DataCenter::HasLocation(){
@@ -579,8 +574,8 @@ bool DataCenter::HasRefTrajectory()
 	return m_lcmRefTrajectory.HasLcmMessage();
 }
 
-bool DataCenter::HasDoubleLane()
+bool DataCenter::HasMultiLane()
 {
-	return m_lcmDoubleLane.HasLcmMessage();
+	return m_lcmMultiLane.HasLcmMessage();
 }
 

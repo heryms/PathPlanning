@@ -1,5 +1,6 @@
 #include "CarControl.h"
 #include "lcmtype\LcmSet.h"
+#include "DataCenter.h"
 
 
 CarControl::CarControl()
@@ -9,7 +10,7 @@ CarControl::CarControl()
 
 CarControl::~CarControl()
 {
-
+	m_lcmControl.uninitialLcm();
 }
 
 CarControl & CarControl::GetInstance()
@@ -30,5 +31,11 @@ void CarControl::SendCommand(CarInfo info)
 
 void CarControl::StopCommand()
 {
-
+	ControlCommand_t msg;
+	CarInfo info = DataCenter::GetInstance().GetCarInfo();
+	msg.gear = info.gear;
+	msg.vehicleSpeed = info.speed;
+	msg.wheelAngle = info.steerAngle;
+	msg.controlStatus = ERunState::E_STOP;
+	m_lcmControl.sendLcm(&msg);
 }

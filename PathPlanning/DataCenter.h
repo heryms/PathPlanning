@@ -40,21 +40,21 @@ private:
 	LcmRecvHelper<VeloGrid_t> m_lcmVeloGrid;
 	LcmRecvHelper<cloudHandler> m_lcmCurb;
 	LcmRecvHelper<ckMapStatus_t> m_lcmRefTrajectory;
-	LcmRecvHelper<Map_t> m_lcmDoubleLane;
+	LcmRecvHelper<Map_t> m_lcmMultiLane;
 	
 	Location_t m_lcmMsgLocation;
 	StatusBody_t m_lcmMsgStatusBody;
 	VeloGrid_t m_lcmMsgVeloGrid;
 	cloudHandler m_lcmMsgCurb;
 	ckMapStatus_t m_lcmMsgRefTrajectory;
-	Map_t m_lcmMsgDoubleLane;
+	Map_t m_lcmMsgMultiLane;
 	
 	std::mutex m_lockLocation;
 	std::mutex m_lockStatusBody;
 	std::mutex m_lockVeloGrid;
 	std::mutex m_lockCurb;
 	std::mutex m_lockRefTrajectory;
-	std::mutex m_lockDoubleLane;
+	std::mutex m_lockMultiLane;
 
 	std::condition_variable m_waitLocation;
 	//std::mutex m_waitLockLocation;
@@ -64,7 +64,7 @@ private:
 	//std::mutex m_waitLockVeloGrid;
 	std::condition_variable m_waitCurb;
 	std::condition_variable m_waitRefTrajectory;
-	std::condition_variable m_waitDoubleLane;
+	std::condition_variable m_waitMultiLane;
 
 	//std::mutex m_waitLockCurb;
 	/*triggered while receiving Location_t */
@@ -78,7 +78,7 @@ private:
 	/*triggered while receiving Reference Trajectory*/
 	void RefTrajectoryRecvOperation(const ckMapStatus_t* msg, void*);
 
-	void DoubleLaneRecvOperation(const Map_t* msg, void*);
+	void MultiLaneRecvOperation(const Map_t* msg, void*);
 
 protected:
 	DataCenter();
@@ -104,7 +104,7 @@ public:
 	/**start reference trajectory*/
 	void StartRefTrajectory();
 
-	void StartDoubleLane();
+	void StartMultiLane();
 
 	/*end location*/
 	void EndLocation();
@@ -116,7 +116,7 @@ public:
 	void EndCurb();
 	/*end reference trajectory*/
 	void EndRefTrajectory();
-	void EndDoubleLane();
+	void EndMultiLane();
 
 	
 	/*@return x,y in Gauss, orientation by x*/
@@ -135,7 +135,7 @@ public:
 	std::vector<RoadPoint> GetRefTrajectory();
 	std::vector<RoadPoint> GetReferenceTrajectory(RoadPoint &car);
 	std::vector<RoadPoint> GetRefTrajectories(); 
-	std::vector<std::vector<RoadPoint>> GetDoubleLanes(int & laneIndex);
+	std::vector<std::vector<RoadPoint>> GetMultiLanes(int & laneIndex);
 	PosPoint GetStopLine(double& width);
 	PosPoint GetCurOnTrajectory();
 	//get init car angle and qi
@@ -153,7 +153,7 @@ public:
 	/*continue while RefTrajectory Processing completed*/
 	bool WaitForRefTrajectory(unsigned int milliseconds);
 
-	bool WaitForDoubleLane(unsigned int milliseconds);
+	bool WaitForMultiLane(unsigned int milliseconds);
 
 	/*@return if having Location_t during 500ms*/
 	bool HasLocation();
@@ -166,7 +166,7 @@ public:
 	/*@return if having RefTrajectory during 500ms*/
 	bool HasRefTrajectory();
 
-	bool HasDoubleLane();
+	bool HasMultiLane();
 
 
 private:
