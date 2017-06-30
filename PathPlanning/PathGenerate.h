@@ -55,13 +55,20 @@ public:
 		double &k_response, double & v_response);
 	bool speed_logic_control(double k_next, double v_next, double v, double &v_response);
 	std::vector<RoadPoint> BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath);
-	std::vector<PointPt> getColisionArea(PointPt inPt);
 	bool check_circle_area_collision(VeloGrid_t & grids, std::vector<RoadPoint> localPath);
 	void gps_tracking();
 
 	void short_time_several_lanes();
 
 	void short_time_uturn();
+
+	std::vector<std::vector<RoadPoint>> generateTrajectories(std::vector<RoadPoint>& path,bool local=false);
+	void plan();
+	std::vector<std::vector<RoadPoint>> planRef(std::vector<RoadPoint>& baseFrame);
+	std::vector<std::vector<RoadPoint>> planRefWithSegment(std::vector<RoadPoint>& baseFrame);
+	std::vector<std::vector<RoadPoint>> planRefInUTurn(std::vector<RoadPoint>& baseFrame);
+	std::vector<RoadPoint> selectBestTraj(std::vector<std::vector<RoadPoint>>& paths,std::vector<RoadPoint>& prePath, std::vector<RoadPoint>& refPath);
+	void SendPath(std::vector<RoadPoint>& ref, std::vector<RoadPoint>& best, std::vector<std::vector<RoadPoint>>& paths);
 private:
 	std::vector<RoadPoint> pre_Root;
 	std::vector<RoadPoint> Root_On_Gaussian;
