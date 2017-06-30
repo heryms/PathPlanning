@@ -843,7 +843,7 @@ int PathGenerate::CheckCollision(VeloGrid_t & grids, std::vector<RoadPoint>& loc
 				}
 			}
 		}
-	}
+				}
 	return -1;
 }
 
@@ -1243,21 +1243,21 @@ void PathGenerate::short_time_segment()
 	std::vector<RoadPoint> rdpt;
 	std::vector<float> road_qf;
 	do {
-		//generate candidate path
-		for (float i = 0; i < 12; i += 0.2) {
+	//generate candidate path
+	for (float i = 0; i < 12; i += 0.2) {
 			float qf = i - 6;
-			std::vector<RoadPoint> pts;
+		std::vector<RoadPoint> pts;
 			pts = trajectory_build(qf, qi, theta, sf, spline);
 			if (CheckCollision(veloGrids, pts, false) < 0) {
-				cadidatePath.push_back(pts);
-				road_qf.push_back(qf);
-			}
+			cadidatePath.push_back(pts);
+			road_qf.push_back(qf);
 		}
+	}
 		if (!cadidatePath.empty()) break;
 		std::vector<RoadPoint> searchRoot;
 		if (pre_Root.empty()) {
 			searchRoot = trajectory_build(0, qi, theta, sf, spline);
-		}
+			}
 		else {
 			for (RoadPoint& rpt : pre_Root) {
 				RoadPoint srpt;
@@ -1269,7 +1269,7 @@ void PathGenerate::short_time_segment()
 		spline.init(searchRoot);
 		theta = PI / 2 - searchRoot[0].angle;
 		sf = *spline.S.rbegin();
-		std::vector<RoadPoint> pts;
+				std::vector<RoadPoint> pts;
 		pts = trajectory_build(0, qi, theta, sf, spline);
 		int findOb = CheckCollision(veloGrids, pts, false);
 		//if (findOb < 0) {
@@ -1280,7 +1280,7 @@ void PathGenerate::short_time_segment()
 		double tmpSf =findOb<0?*spline.S.rbegin():spline.S[findOb];
 		if (tmpSf < 4) {
 			break;
-		}
+				}
 		tmpSf += 4;
 		if (sf == tmpSf) break;
 		sf = fmin(tmpSf, sf);
@@ -1552,15 +1552,6 @@ void PathGenerate::short_time_several_lanes(){
 				_root_.push_back(pts);
 				road_qf.push_back(qf);
 			}
-			//std::vector<RoadPoint> pts;
-			//double firstObstacle_x, firstObstacle_y;
-			//int index;
-			//double new_sf;
-			//if (short_time_planning(qf, qi, theta, sf, veloGrids, spline, pts, curPos, firstObstacle_x,firstObstacle_y,index,new_sf)<0)
-			//{
-			//	_root_.push_back(pts);
-			//	road_qf.push_back(qf);
-			//}
 		}
 		if (_root_.empty()){
 			laneIndex++;
@@ -1772,7 +1763,7 @@ void PathGenerate::short_time_uturn()
 							else {
 								i = go_end;
 								break;
-							}
+	}
 							
 						}
 					}
@@ -1900,4 +1891,39 @@ std::vector<RoadPoint> PathGenerate::trajectory_build(float qf, float qi, float 
 		pts.push_back(tmp);
 	}
 	return pts;
+}
+
+
+bool check_circle_area_collision(VeloGrid_t & grids, std::vector<RoadPoint> localPath){
+
+	//liyong yuanxing jinxing pengzhuang jiance
+	int index[13] = { 13, 13, 13, 13, 12, 12, 11, 11, 10, 9, 8, 6, 4 };
+	for (int ptIndex = 0; ptIndex < localPath.size(); ptIndex++) {
+		RoadPoint rpt = localPath[ptIndex];
+
+		for (int i = 0; i < 13; i++){
+
+			int colnum = index[i];
+			for (int j = -colnum; j < colnum; j++)
+			{
+				int pos = (rpt.y - i) * MAP_WIDTH + rpt.x + j;
+				if (grids.velo_grid[pos])
+					return false;
+			}
+		}
+
+		//¼ì²éÏÂ°ëÔ²
+		for (int i = -12; i <= 0; i++){
+
+			int colnum = index[abs(i)];
+			for (int j = -colnum; j < colnum; j++)
+			{
+				int pos = (rpt.y - i) * MAP_WIDTH + rpt.x + j;
+				if (grids.velo_grid[pos])
+					return false;
+			}
+		}
+	}
+	return true;
+	
 }

@@ -55,7 +55,8 @@ public:
 		double &k_response, double & v_response);
 	bool speed_logic_control(double k_next, double v_next, double v, double &v_response);
 	std::vector<RoadPoint> BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath);
-	
+	std::vector<PointPt> getColisionArea(PointPt inPt);
+	bool check_circle_area_collision(VeloGrid_t & grids, std::vector<RoadPoint> localPath);
 	void gps_tracking();
 
 	void short_time_several_lanes();
