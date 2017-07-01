@@ -64,6 +64,7 @@ public:
 
 	std::vector<std::vector<RoadPoint>> generateTrajectories(std::vector<RoadPoint>& path,bool local=false);
 	void plan();
+	void planJoint();
 	std::vector<std::vector<RoadPoint>> planRef(std::vector<RoadPoint>& baseFrame);
 	std::vector<std::vector<RoadPoint>> planRefWithSegment(std::vector<RoadPoint>& baseFrame);
 	std::vector<std::vector<RoadPoint>> planRefInUTurn(std::vector<RoadPoint>& baseFrame);

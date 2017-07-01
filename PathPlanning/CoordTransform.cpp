@@ -86,7 +86,7 @@ void CoordTransform::LocalToWorld(PosPoint org, PosPoint ptIn, PosPoint* ptOut)
 	Topology::Rotate(org.angle - PI / 2, ptIn.x, ptIn.y, ptOut->x, ptOut->y);
 	ptOut->x += org.x;
 	ptOut->y += org.y;
-	ptOut->angle = -ptIn.angle + org.angle + PI / 2;
+	ptOut->angle = ptIn.angle + org.angle - PI / 2;
 }
 double CoordTransform::TrimLocalPathToCurPt(std::vector<RoadPoint>& localPath)
 {
@@ -100,6 +100,10 @@ double CoordTransform::TrimLocalPathToCurPt(std::vector<RoadPoint>& localPath)
 			min = dis;
 			minIndex = i;
 		}
+	}
+	if (minIndex + 1 >= localPath.size()){
+		localPath = std::vector<RoadPoint>();
+		return -0;
 	}
 	std::pair<double, double> v1;
 	v1.first = localPath[minIndex + 1].x - localPath[minIndex].x;

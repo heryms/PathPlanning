@@ -44,7 +44,9 @@ double SXYSpline::getKappa(double Sf)
 	int index = std::find_if(S.begin(), S.end(), 
 		[Sf](double d)->bool {
 			return d > Sf;
-	}) - S.begin() - 1;
+	}) - S.begin()-1;
+	if (index >= splineNum) index = splineNum - 1;
+	if (index < 0) index = 0;
 	Eigen::Vector4d kx = skX.row(index);
 	Eigen::Vector4d ky = skY.row(index);
 	double ds = Sf - S[index];
@@ -59,7 +61,9 @@ RadAngle SXYSpline::getTangent(double Sf)
 {
 	int index = std::find_if(S.begin(), S.end(), [Sf](double d)->bool {
 		return d > Sf;
-	}) - S.begin() - 1;
+	}) - S.begin()-1;
+	if (index >= splineNum) index = splineNum - 1;
+	if (index < 0) index = 0;
 	Eigen::Vector4d kx = skX.row(index);
 	Eigen::Vector4d ky = skY.row(index);
 	double ds = Sf - S[index];
@@ -71,8 +75,10 @@ RadAngle SXYSpline::getTangent(double Sf)
 void SXYSpline::getDeriveXY(double Sf, double & dx, double & dy)
 {
 	int index = std::find_if(S.begin(), S.end(), [Sf](double d)->bool {
-		return d > Sf;
-	}) - S.begin() - 1;
+		return d >Sf;
+	}) - S.begin()-1;
+	if (index >= splineNum) index = splineNum - 1;
+	if (index < 0) index = 0;
 	Eigen::Vector4d kx = skX.row(index);
 	Eigen::Vector4d ky = skY.row(index);
 	double ds = Sf - S[index];
@@ -84,7 +90,9 @@ void SXYSpline::getXY(double Sf, double & X, double & Y)
 {
 	int index = std::find_if(S.begin(), S.end(), [Sf](double d)->bool {
 		return d > Sf;
-	}) - S.begin() - 1;
+	}) - S.begin()-1;
+	if (index >= splineNum) index = splineNum - 1;
+	if (index < 0) index = 0;
 	Eigen::Vector4d kx = skX.row(index);
 	Eigen::Vector4d ky = skY.row(index);
 	double ds = Sf - S[index];

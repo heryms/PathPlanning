@@ -245,5 +245,8 @@
     <ClInclude Include="lcmtype\Map_t.hpp">
       <Filter>LcmType</Filter>
     </ClInclude>
+    <ClInclude Include="lcmtype\Lane_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

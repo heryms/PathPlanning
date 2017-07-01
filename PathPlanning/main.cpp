@@ -14,7 +14,7 @@
 #include <chrono>
 int main()
  {
-	test_axis_transform();
+	//test_axis_transform();
 	//test_spline();
 	//CoordTransform transform;
 	//test_Clothoid();
@@ -24,6 +24,7 @@ int main()
 	DataCenter::GetInstance().StartRefTrajectory();
 	DataCenter::GetInstance().StartLocation();
 	DataCenter::GetInstance().StartMultiLane();
+	DataCenter::GetInstance().StartCamLane();
 	__thread_sleep_for(1000);
 	PathGenerate pathGen;
 	while (true)
@@ -33,7 +34,7 @@ int main()
 		}
 		std::chrono::steady_clock::time_point startTime
 			= std::chrono::steady_clock::now();
-		pathGen.plan();
+		pathGen.planJoint();
 		std::chrono::steady_clock::time_point endTime
 			= std::chrono::steady_clock::now();
 		std::chrono::milliseconds time

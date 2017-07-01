@@ -755,8 +755,8 @@ int PathGenerate::CheckCollision(VeloGrid_t & grids, std::vector<RoadPoint>& loc
 	const double gridL = Grid;
 	const int gridW = MAP_WIDTH;
 	const int gridH = MAP_HEIGHT;
-	const double carW = 2.0;//2.8
-	const double carH = 2.0;
+	const double carW = 1.6;//2.8
+	const double carH = 1.6;
 	if (!hasAngle) {
 		for (int i = 0; i + 1 < localPath.size(); i++) {
 			localPath[i].angle = atan2((localPath[i + 1].y - localPath[i].y), (localPath[i + 1].x - localPath[i].x));
@@ -1875,9 +1875,10 @@ std::vector<std::vector<RoadPoint>> PathGenerate::generateTrajectories(std::vect
 	double theta = PI / 2 - baseFrame.begin()->angle;
 	SXYSpline spline;
 	spline.init(baseFrame);
+	if (spline.splineNum <= 4) return trajectories;
 	double Sf = *spline.S.rbegin();
 	baseFrame.clear();
-	for (int i = 0; i < 50; i++) {
+	for (int i = 0; i <= 50; i++) {
 		double deltaS = i*Sf / 50;
 		RoadPoint rpt;
 		spline.getXY(deltaS, rpt.x, rpt.y);
@@ -1899,6 +1900,44 @@ std::vector<std::vector<RoadPoint>> PathGenerate::generateTrajectories(std::vect
 
 void PathGenerate::plan()
 {
+	//{
+	//	if (!DataCenter::GetInstance().HasCamLane()) {
+	//		std::cout << "没有车道线" << std::endl;
+	//		return;
+	//	}
+	//	std::vector<RoadPoint> baseFrame = DataCenter::GetInstance().GetCamLanes();
+	//	if (baseFrame.empty()) {
+	//		std::cout << "没有足够的车道线信息" << std::endl;
+	//		return;
+	//	}
+	//	//SendPath(baseFrame, baseFrame, std::vector<std::vector<RoadPoint>>());	
+	//	//return;
+	//	double qi = CoordTransform::TrimLocalPathToCurPt(baseFrame);
+	//	double theta = PI / 2 - baseFrame.begin()->angle;
+	//	SXYSpline spline;
+	//	spline.init(baseFrame);
+	//	double Sf = *spline.S.rbegin();
+	//	baseFrame.clear();
+	//	for (int i = 0; i < 50; i++) {
+	//		double deltaS = i*Sf / 50;
+	//		RoadPoint rpt;
+	//		spline.getXY(deltaS, rpt.x, rpt.y);
+	//		double deltaX, deltaY;
+	//		spline.getDeriveXY(deltaS, deltaX, deltaY);
+	//		rpt.angle = atan2(deltaY, deltaX);
+	//		baseFrame.push_back(rpt);
+	//	}
+	//	//for (double step = 0; step < 12; step += 0.2) {
+	//	double qf = 0;
+	//	std::vector<RoadPoint> trajectory = trajectory_build(qf, qi, theta, *spline.S.rbegin(), spline);
+	//	//trajectories.push_back(trajectory);
+	//	//}
+	//	track.SetLocalPath(trajectory);
+	//	std::vector<std::vector<RoadPoint>> rrr;
+	//	rrr.push_back(trajectory);
+	//	SendPath(baseFrame, std::vector<RoadPoint>(), rrr);
+	//	return;
+	//}
 	std::vector<std::vector<RoadPoint>> baseFrames;
 	int laneI;
 	if (DataCenter::GetInstance().HasMultiLane()) {
@@ -1911,6 +1950,7 @@ void PathGenerate::plan()
 		}
 		else {
 			std::cout << "没有参考路径" << std::endl;
+			return;
 		}
 	}
 	if (DataCenter::GetInstance().HasMultiLane())
@@ -1961,32 +2001,266 @@ void PathGenerate::plan()
 	for (int laneIndex = laneI; laneIndex < baseFrames.size(); laneIndex = (++laneIndex) >= baseFrames.size() ? (0) : ((laneIndex == laneI) ? baseFrames.size() : laneIndex)) {
 		std::vector<RoadPoint> baseFrame = baseFrames[laneIndex];
 		PosPoint curPos = DataCenter::GetInstance().GetCurPosition();
+		for (RoadPoint& rpt : baseFrame) {
+			CoordTransform::WorldToLocal(curPos, rpt, &rpt);
+		}
 		std::vector<std::vector<RoadPoint>> candidateTraj = planRef(baseFrame);
 		if (candidateTraj.empty()) {
 			std::cout << "纯路径走不了" << std::endl;
 			CarControl::GetInstance().StopCommand();
-			continue;
-		}
-		if (onUTurn) {
-			candidateTraj = planRefInUTurn(baseFrame);
-			if (candidateTraj.empty()) {
-				std::cout << "调不了头" << std::endl;
-				CarControl::GetInstance().StopCommand();
-				continue;
+			bool onUTurn = false;
+			if (onUTurn) {
+				candidateTraj = planRefInUTurn(baseFrame);
+				if (candidateTraj.empty()) {
+					std::cout << "调不了头" << std::endl;
+					CarControl::GetInstance().StopCommand();
+					continue;
+				}
 			}
-		}
-		else {
-			candidateTraj = planRefWithSegment(baseFrame);
-			if (candidateTraj.empty()) {
-				std::cout << "无路径" << std::endl;
-				CarControl::GetInstance().StopCommand();
-				continue;
+			else {
+				candidateTraj = planRefWithSegment(baseFrame);
+				if (candidateTraj.empty()) {
+					std::cout << "无路径" << std::endl;
+					CarControl::GetInstance().StopCommand();
+					continue;
+				}
 			}
 		}
 		std::vector<RoadPoint> bestRoot = selectBestTraj(candidateTraj, pre_Root, baseFrame);
 		pre_Root = bestRoot;
+		track.SetLocalPath(bestRoot);
 		SendPath(baseFrame, bestRoot, candidateTraj);
 		return;
+	}
+}
+
+void PathGenerate::planJoint(){
+	std::vector<std::vector<RoadPoint>> baseFrames;
+	int laneI;
+	if (DataCenter::GetInstance().HasMultiLane()) {
+		baseFrames = DataCenter::GetInstance().GetMultiLanes(laneI);
+	}
+	else {
+		if (DataCenter::GetInstance().HasRefTrajectory()) {
+			baseFrames.push_back(DataCenter::GetInstance().GetRefTrajectories());
+			laneI = 0;
+		}
+		else {
+			std::cout << "没有参考路径" << std::endl;
+			return;
+		}
+	}
+	for (int laneIndex = laneI; laneIndex < baseFrames.size(); laneIndex = (++laneIndex) >= baseFrames.size() ? (0) : ((laneIndex == laneI) ? baseFrames.size() : laneIndex)) {
+		std::vector<RoadPoint> baseFrame = baseFrames[laneIndex];
+		PosPoint curPos = DataCenter::GetInstance().GetCurPosition();
+		for (RoadPoint& rpt : baseFrame) {
+			CoordTransform::WorldToLocal(curPos, rpt, &rpt);
+		}
+		std::vector<std::vector<RoadPoint>> candidateTraj;
+		if (pre_Root.empty()){
+			plan();
+			if (pre_Root.empty()){
+				std::cout << "no path to go" << std::endl;
+				continue;
+			}
+			double disSum = 0;
+			for (int i = 1; i < pre_Root.size(); i++){
+				double dis = sqrt(Topology::Distance2(pre_Root[i], pre_Root[0]));
+				if (disSum > 8){
+					pre_Root.erase(pre_Root.begin() + i + 1, pre_Root.end());
+					break;
+				}
+			}
+			for (RoadPoint & rpt : pre_Root){
+				CoordTransform::LocalToWorld(curPos, rpt, &rpt);
+			}
+			return;
+		}
+		else{
+			VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+			for (RoadPoint& rpt : pre_Root) {
+				CoordTransform::WorldToLocal(curPos, rpt, &rpt);
+			}
+			if (CheckCollision(veloGrids, pre_Root, true) < 0){
+				RoadPoint planStart = *pre_Root.rbegin();
+				{
+					for (int i = 0; i < pre_Root.size(); i++){
+						double dis = sqrt(Topology::Distance2(pre_Root[i], pre_Root[0]));
+						if (dis > 8){
+							planStart = pre_Root[i];
+							pre_Root.erase(pre_Root.begin() + i, pre_Root.end());
+							break;
+						}
+					}
+				}
+				for (RoadPoint& rpt : baseFrame){
+					CoordTransform::WorldToLocal(planStart, rpt, &rpt);
+				}
+				std::vector<std::vector<RoadPoint>> candidateTraj;
+				///planRef(baseFrame);
+				do{
+					std::vector<std::vector<RoadPoint>> trajectories;
+					VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+					double qi = CoordTransform::TrimLocalPathToCurPt(baseFrame);
+					double theta = PI / 2 - baseFrame.begin()->angle;
+					SXYSpline spline;
+					spline.init(baseFrame);
+					if (spline.splineNum <= 4) break;
+					double Sf = *spline.S.rbegin();
+					baseFrame.clear();
+					for (int i = 0; i <= 50; i++) {
+						double deltaS = i*Sf / 50;
+						RoadPoint rpt;
+						spline.getXY(deltaS, rpt.x, rpt.y);
+						double deltaX, deltaY;
+						spline.getDeriveXY(deltaS, deltaX, deltaY);
+						rpt.angle = atan2(deltaY, deltaX);
+						baseFrame.push_back(rpt);
+					}
+					for (double step = 0; step < 12; step += 0.2) {
+						double qf = step - 6;
+						std::vector<RoadPoint> trajectory = trajectory_build(qf, qi, theta, *spline.S.rbegin(), spline);
+						std::vector<RoadPoint> ttrajectory = trajectory;
+						for (RoadPoint& rpt : trajectory){
+							CoordTransform::LocalToWorld(planStart, rpt, &rpt);
+						}
+						int findOb = CheckCollision(veloGrids, trajectory, true);
+						if (findOb < 0) {
+							trajectories.push_back(ttrajectory);
+						}
+					}
+					candidateTraj= trajectories;
+				} while (false);
+				if (candidateTraj.empty()) {
+					std::cout << "纯路径走不了" << std::endl;
+					CarControl::GetInstance().StopCommand();
+					bool onUTurn = false;
+					if (onUTurn) {
+						candidateTraj = planRefInUTurn(baseFrame);
+						if (candidateTraj.empty()) {
+							std::cout << "调不了头" << std::endl;
+							CarControl::GetInstance().StopCommand();
+							pre_Root.clear();
+							continue;
+						}
+					}
+					else {
+						candidateTraj;
+						///planRefWithSegment(baseFrame);
+						do{
+							int count = 0;
+							do
+							{
+								VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+								std::vector<RoadPoint> searchRoot;
+								if (pre_Root.empty()) {
+									searchRoot = baseFrame;
+								}
+								else {
+									searchRoot = pre_Root;
+								}
+								double qi = CoordTransform::TrimLocalPathToCurPt(searchRoot);
+								SXYSpline spline;
+								spline.init(searchRoot);
+								if (spline.splineNum <= 4) break;
+								double Sf = *spline.S.rbegin();
+								searchRoot = trajectory_build(0, qi, PI / 2 - searchRoot.begin()->angle, Sf, spline);
+								int findOb = CheckCollision(veloGrids, searchRoot, true);
+								if (findOb >= 0) {
+									findOb = (findOb + 2) < spline.S.size() ? findOb + 2 : spline.S.size();
+									searchRoot.erase(searchRoot.begin() + findOb, searchRoot.end());
+								}
+								if (searchRoot.size() <= 5) break;
+								candidateTraj;
+								/// generateTrajectories(searchRoot, true);
+								do{
+									std::vector<std::vector<RoadPoint>> trajectories;
+									VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+									double qi = CoordTransform::TrimLocalPathToCurPt(baseFrame);
+									double theta = PI / 2 - baseFrame.begin()->angle;
+									SXYSpline spline;
+									spline.init(baseFrame);
+									if (spline.splineNum <= 4) break;
+									double Sf = *spline.S.rbegin();
+									baseFrame.clear();
+									for (int i = 0; i <= 50; i++) {
+										double deltaS = i*Sf / 50;
+										RoadPoint rpt;
+										spline.getXY(deltaS, rpt.x, rpt.y);
+										double deltaX, deltaY;
+										spline.getDeriveXY(deltaS, deltaX, deltaY);
+										rpt.angle = atan2(deltaY, deltaX);
+										baseFrame.push_back(rpt);
+									}
+									for (double step = 0; step < 12; step += 0.2) {
+										double qf = step - 6;
+										std::vector<RoadPoint> trajectory = trajectory_build(qf, qi, theta, *spline.S.rbegin(), spline);
+										std::vector<RoadPoint> ttrajectory = trajectory;
+										for (RoadPoint& rpt : trajectory){
+											CoordTransform::LocalToWorld(planStart, rpt, &rpt);
+										}
+										int findOb = CheckCollision(veloGrids, trajectory, true);
+										if (findOb < 0) {
+											trajectories.push_back(ttrajectory);
+										}
+									}
+									candidateTraj = trajectories;
+								} while (false);
+								if (!candidateTraj.empty()){
+									double deltaS = Sf*findOb / 50;
+									qi = CoordTransform::TrimLocalPathToCurPt(baseFrame);
+									spline.init(baseFrame);
+									baseFrame.clear();
+									for (int i = 0; i <= 50; i++){
+										RoadPoint rpt;
+										spline.getXY(deltaS*i / 50, rpt.x, rpt.y);
+										double dx, dy;
+										spline.getDeriveXY(deltaS*i / 50, dx, dy);
+										rpt.angle = atan2(dy, dx);
+										baseFrame.push_back(rpt);
+									}
+									break;
+								}
+							} while (count++ < 10);
+						} while (false);
+						if (candidateTraj.empty()) {
+							std::cout << "无路径" << std::endl;
+							CarControl::GetInstance().StopCommand();
+							pre_Root.clear();
+							continue;
+						}
+					}
+				}
+
+				std::vector<RoadPoint> bestRoot = selectBestTraj(candidateTraj, pre_Root, baseFrame);
+				for (RoadPoint & rpt : bestRoot){
+					CoordTransform::LocalToWorld(planStart, rpt, &rpt);
+				}
+				double disSum = 0;
+				for (int i = 1; i < bestRoot.size(); i++){
+					double dis = sqrt(Topology::Distance2(bestRoot[i], bestRoot[0]));
+					if (dis > 8){
+						bestRoot.erase(bestRoot.begin() + i + 1, bestRoot.end());
+						break;
+					}
+				}
+				pre_Root.insert(pre_Root.end(), bestRoot.begin(), bestRoot.end());
+				track.SetLocalPath(pre_Root); std::vector<std::vector<RoadPoint>> rrr;
+				rrr.push_back(pre_Root);
+				for (RoadPoint& rpt : baseFrame){
+					CoordTransform::LocalToWorld(planStart, rpt, &rpt);
+				}
+				SendPath(baseFrame, std::vector<RoadPoint>(), rrr);
+				for (RoadPoint & rpt : pre_Root){
+					CoordTransform::LocalToWorld(curPos, rpt, &rpt);
+				}
+				return;
+			}
+			else{
+				pre_Root.clear();
+				continue;
+			}
+		}
 	}
 }
 
@@ -1998,34 +2272,47 @@ std::vector<std::vector<RoadPoint>> PathGenerate::planRef(std::vector<RoadPoint>
 
 std::vector<std::vector<RoadPoint>> PathGenerate::planRefWithSegment(std::vector<RoadPoint>& baseFrame)
 {
-	std::vector<std::vector<RoadPoint>> candidateTraj;// = generateTrajectories(baseFrame, true);
-	//if (candidateTraj.empty()) {
-	//	std::cout << "纯路径走不了" << std::endl;
-	//	CarControl::GetInstance().StopCommand();
-		int count = 0;
-		do
-		{
-			VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
-			std::vector<RoadPoint> searchRoot;
-			if (pre_Root.empty()) {
-				searchRoot = baseFrame;
+	std::vector<std::vector<RoadPoint>> candidateTraj;
+	int count = 0;
+	do
+	{
+		VeloGrid_t veloGrids = DataCenter::GetInstance().GetLidarData();
+		std::vector<RoadPoint> searchRoot;
+		if (pre_Root.empty()) {
+			searchRoot = baseFrame;
+		}
+		else {
+			searchRoot = pre_Root;
+		}
+		double qi = CoordTransform::TrimLocalPathToCurPt(searchRoot);
+		SXYSpline spline;
+		spline.init(searchRoot);
+		if (spline.splineNum <= 4) break;
+		double Sf = *spline.S.rbegin();
+		searchRoot = trajectory_build(0, qi, PI / 2 - searchRoot.begin()->angle, Sf, spline);
+		int findOb = CheckCollision(veloGrids, searchRoot, true);
+		if (findOb >= 0) {
+			findOb = (findOb + 2) < spline.S.size() ? findOb + 2 : spline.S.size();
+			searchRoot.erase(searchRoot.begin() + findOb, searchRoot.end());
+		}
+		if (searchRoot.size() <= 5) break;
+		candidateTraj = generateTrajectories(searchRoot, true);
+		if (!candidateTraj.empty()){
+			double deltaS = Sf*findOb / 50;
+			qi = CoordTransform::TrimLocalPathToCurPt(baseFrame);
+			spline.init(baseFrame);
+			baseFrame.clear();
+			for (int i = 0; i <= 50; i++){
+				RoadPoint rpt;
+				spline.getXY(deltaS*i / 50, rpt.x, rpt.y);
+				double dx, dy;
+				spline.getDeriveXY(deltaS*i / 50, dx, dy);
+				rpt.angle = atan2(dy, dx);
+				baseFrame.push_back(rpt);
 			}
-			else {
-				searchRoot = pre_Root;
-			}
-			double qi = CoordTransform::TrimLocalPathToCurPt(searchRoot);
-			SXYSpline spline;
-			spline.init(searchRoot);
-			double Sf = *spline.S.rbegin();
-			searchRoot = trajectory_build(0, qi, PI / 2 - searchRoot.begin()->angle, Sf, spline);
-			int findOb = CheckCollision(veloGrids, searchRoot, true);
-			if (findOb >= 0) {
-				findOb = (findOb + 2) < spline.S.size() ? findOb + 2 : spline.S.size();
-				searchRoot.erase(searchRoot.begin() + findOb, searchRoot.end());
-			}
-			candidateTraj = generateTrajectories(searchRoot, true);
-		} while (candidateTraj.empty()&&count++<10);
-//	}
+			break;
+		}
+	} while (count++ < 10);
 	return candidateTraj;
 }
 
@@ -2095,18 +2382,19 @@ std::vector<std::vector<RoadPoint>> PathGenerate::planRefInUTurn(std::vector<Roa
 			}
 		}
 	}
+	return std::vector<std::vector<RoadPoint>>();
 }
 
 std::vector<RoadPoint> PathGenerate::selectBestTraj(std::vector<std::vector<RoadPoint>>& paths, std::vector<RoadPoint>& prePath,std::vector<RoadPoint>& refPath)
 {
 	std::vector<RoadPoint> bestRoot;
 	float min = FLT_MAX;
-	float minI = -1;
-	if (pre_Root.empty()) {
+	float minI = 0;
+	//if (pre_Root.empty()) {
 		for (int i = 0; i < paths.size(); i++) {
 			float disSum = 0;
 			for (int j = 0; j < paths[i].size() && j < refPath.size(); j++) {
-				float dis = Topology::Distance2(paths[i][j], refPath[i]);
+				float dis = Topology::Distance2(paths[i][j], refPath[j]);
 				disSum += dis;
 			}
 			if (disSum < min) {
@@ -2114,28 +2402,29 @@ std::vector<RoadPoint> PathGenerate::selectBestTraj(std::vector<std::vector<Road
 				minI = i;
 			}
 		}
-	}
-	else {
-		float min = FLT_MAX;
-		int minI = -1;
-		for (int n = 0; n < paths.size(); n++) {
-			std::vector<RoadPoint>& tmpRoot = paths[n];
-			float distanceSum = 0;
-			for (int i = 0; i < tmpRoot.size(); i++) {
-				distanceSum += Topology::Distance2(refPath[i], tmpRoot[i]);
-			}
-			float distanceSum2 = 0;
-			for (int i = 0; i<tmpRoot.size(); i++) {
-				distanceSum2 += Topology::Distance2(prePath[i], tmpRoot[i]);
-			}
-			distanceSum2 *= 1;
-			distanceSum += distanceSum2;
-			if (distanceSum < min) {
-				min = distanceSum;
-				minI = n;
-			}
-		}
-	}
+//	}
+	//else {
+	//	for (int n = 0; n < paths.size(); n++) {
+	//		std::vector<RoadPoint>& tmpRoot = paths[n];
+	//		float distanceSum = 0;
+	//		for (int i = 0; i < tmpRoot.size(); i++) {
+	//			int index=TrackFinder::FindPointIndex(refPath, tmpRoot[i]);
+	//			if (index >= 0){
+	//				distanceSum += Topology::Distance2(refPath[index], tmpRoot[i]);
+	//			}
+	//		}
+	//		float distanceSum2 = 0;
+	//		for (int i = 0; i<tmpRoot.size(); i++) {
+	//			distanceSum2 += Topology::Distance2(prePath[i], tmpRoot[i]);
+	//		}
+	//		distanceSum2 *= 0;
+	//		distanceSum += distanceSum2;
+	//		if (distanceSum < min) {
+	//			min = distanceSum;
+	//			minI = n;
+	//		}
+	//	}
+	//}
 	bestRoot = paths[minI];
 	return bestRoot;
 }
@@ -2175,7 +2464,7 @@ std::vector<RoadPoint> PathGenerate::trajectory_build(float qf, float qi, float 
 	float b = 3 * (qf - qi) / (pow(sf, 2)) - 2 * c / sf;
 	bool firstObstacle = true;
 
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i <= 50; i++)
 	{
 		double delta_s = sf / 50 * i;
 		float q = a * pow(delta_s, 3) + b * pow(delta_s, 2) + c * delta_s + qi;
