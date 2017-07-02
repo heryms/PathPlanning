@@ -2066,7 +2066,7 @@ void PathGenerate::planJoint(){
 			double disSum = 0;
 			for (int i = 1; i < pre_Root.size(); i++){
 				double dis = sqrt(Topology::Distance2(pre_Root[i], pre_Root[0]));
-				if (disSum > 8){
+				if (dis > 8){
 					pre_Root.erase(pre_Root.begin() + i + 1, pre_Root.end());
 					break;
 				}
@@ -2380,6 +2380,7 @@ std::vector<std::vector<RoadPoint>> PathGenerate::planRefInUTurn(std::vector<Roa
 					return candicatePaths;
 				}
 			}
+			back_start++;
 		}
 	}
 	return std::vector<std::vector<RoadPoint>>();
