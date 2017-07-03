@@ -948,7 +948,7 @@ int PathGenerate::short_time_planning(float qf, float qi, float theta, double sf
 	return CheckCollision(veloGrids, pts);
 	//pts[0].x = 0;
 	//pts[0].y = 0;
-	return true;
+	//return true;
 	/*for (int i = 1; i < x_ref.size();i++)
 	{
 		float delta_s = s[i];
@@ -1875,9 +1875,11 @@ std::vector<std::vector<RoadPoint>> PathGenerate::generateTrajectories(std::vect
 	double theta = PI / 2 - baseFrame.begin()->angle;
 	SXYSpline spline;
 	spline.init(baseFrame);
-	if (spline.splineNum <= 4) return trajectories;
+	if (spline.splineNum <= 4) 
+		return trajectories;
 	double Sf = *spline.S.rbegin();
 	baseFrame.clear();
+	//将BaseFrame等间隔划分为50个点
 	for (int i = 0; i <= 50; i++) {
 		double deltaS = i*Sf / 50;
 		RoadPoint rpt;
