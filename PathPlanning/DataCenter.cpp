@@ -333,14 +333,17 @@ std::vector<std::vector<RoadPoint>> DataCenter::GetMultiLanes(int & laneIndex){
 	QuickLock lk(m_lockMultiLane);
 	laneIndex = m_lcmMsgMultiLane.index;
 	std::vector < std::vector<RoadPoint>> lanes;
-	for (int i = 0; i < m_lcmMsgMultiLane.lanenum; i++){
+	for (int i = 0; i < m_lcmMsgMultiLane.lanenum; i++)
+	{
 		std::vector<RoadPoint> pos;
-		for (int j = 0; j < m_lcmMsgMultiLane.pointnum; j++){
+		for (int j = 0; j < m_lcmMsgMultiLane.pointnum; j++)
+		{
 			RoadPoint p;
 			p.x = m_lcmMsgMultiLane.vy[i][j];
 			p.y = m_lcmMsgMultiLane.vx[i][j];
 			p.angle = PI / 2 - m_lcmMsgMultiLane.vyaw[i][j] * PI / 180;
-			if (p.x == -1){
+			if (p.x == -1)
+			{
 				continue;
 			}
 			pos.push_back(p);

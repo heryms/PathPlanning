@@ -6,6 +6,9 @@
 #include "PathJoint.h"
 #include "TrackFinder.h"
 #include <chrono>
+#include <algorithm>
+#include <numeric>
+
 using ckLcmType::PlanOutput;
 
 #define LOG_CLOTHOID
@@ -750,13 +753,13 @@ void PathGenerate::gps_tracking()
 	m_sendPath.SendDraw(draw);
 }
 
-int PathGenerate::CheckCollision(VeloGrid_t & grids, std::vector<RoadPoint>& localPath, bool hasAngle)
+int PathGenerate::CheckCollision_2(VeloGrid_t & grids, std::vector<RoadPoint>& localPath, bool hasAngle)
 {//未考虑车屁股
 	const double gridL = Grid;
 	const int gridW = MAP_WIDTH;
 	const int gridH = MAP_HEIGHT;
-	const double carW = 1.6;//2.8
-	const double carH = 1.6;
+	const double carW = 2.6;//2.8
+	const double carH = 4.5;
 	if (!hasAngle) {
 		for (int i = 0; i + 1 < localPath.size(); i++) {
 			localPath[i].angle = atan2((localPath[i + 1].y - localPath[i].y), (localPath[i + 1].x - localPath[i].x));
@@ -847,6 +850,314 @@ int PathGenerate::CheckCollision(VeloGrid_t & grids, std::vector<RoadPoint>& loc
 	return -1;
 }
 
+
+
+int PathGenerate::CheckCollision(VeloGrid_t& grids, std::vector<RoadPoint>& localPath, bool hasAngle /*= false*/)
+{
+	double gridSize = 0.2;
+	double carWidth = 2.8;
+	double carLength = 4.5;
+
+	double rear2Back = 0.8;//后轮轴到车屁股的长度
+
+	for (int i = 0; i < localPath.size(); i++)
+	{
+		RoadPoint pt = localPath[i];
+		RoadPoint co;
+		bool flag1 = DetectGridObs(pt, grids, co);
+		if (flag1 == 1)
+			return i;
+	}
+	return -1;
+}
+
+typedef struct  Car
+{
+	RoadPoint Position;
+	double rearx;
+	double reary;
+	double phi;
+	double frontx;
+	double fronty;
+	double theta;
+	double width;
+	double length;
+	double L;
+	double RtoT;
+};
+bool PathGenerate::DetectGridObs(RoadPoint Cur, VeloGrid_t & grids, RoadPoint &collisionpoint)
+{
+	/*for (int i = 0; i < localPath.size(); i++)
+	{*/
+	Car myCar;
+	myCar.Position = Cur;
+	myCar.length = 4.5;
+	myCar.width = 2.8;
+	myCar.RtoT = 1.5;
+
+
+	//RoadPoint curPo = DataCenter::GetInstance().GetCurPosition();
+	//double dx = myCar.Position.x;//- curPo.x;
+	//double dy = myCar.Position.y;//- curPo.y;
+	//double angle11 = Topology::AngleNormalnize1(PI / 2.0 - curPo.angle);
+	//double cx = dx*cos(angle11) - dy*sin(angle11);
+	//double cy = dx*sin(angle11) + dy*cos(angle11);
+
+	//double angle = Topology::AngleNormalnize1(myCar.Position.angle + angle11);
+
+	////double angle=myCar.Position.angle-g_CurrentLocation.angle;
+
+	//myCar.Position.x = cx;
+	//myCar.Position.y = cy;
+	//myCar.Position.angle = angle;
+
+	myCar.rearx = myCar.Position.x;
+	myCar.reary = myCar.Position.y;
+	myCar.phi = myCar.Position.angle;
+
+	RoadPoint LeftRear;
+	LeftRear.x = myCar.rearx - myCar.RtoT*cos(myCar.phi) - 0.5*myCar.width*sin(myCar.phi);
+	LeftRear.y = myCar.reary - myCar.RtoT*sin(myCar.phi) + 0.5*myCar.width*cos(myCar.phi);
+
+	//unsigned int LRx = LeftRear.x / 0.2 + GRID_WidthNum / 2;
+	//unsigned int LRy = LeftRear.y / 0.2;
+
+	double grid_widthX = 0.2;
+	double grid_widthY = 0.2;
+	//转化车所占的所有点到格网，并对其做检查
+	for (double i = 0; i<myCar.width; i += grid_widthX)
+		for (double j = 0; j<myCar.length; j += grid_widthY)
+		{
+
+			RoadPoint point;
+			int GRID_WidthNum = 150;
+			point.x = i*sin(myCar.phi) + j*cos(myCar.phi) + LeftRear.x;
+			point.y = -i*cos(myCar.phi) + j*sin(myCar.phi) + LeftRear.y;
+			int grid_X = point.x / grid_widthX + GRID_WidthNum / 2;
+			int grid_Y = point.y / grid_widthY + 200;
+
+			if (grid_X <= 0)
+			{
+				return 0;
+			}
+			if (grid_Y <= 0)
+			{
+				return 0;
+			}
+			if (grid_X >= 150)
+			{
+				return 0;
+			}
+			if (grid_Y >= 400)
+			{
+				return 0;
+			}
+			int aaa = grids.velo_grid[grid_Y*GRID_WidthNum + grid_X];
+			if (aaa>0)
+			{
+				collisionpoint.x = point.x;
+				collisionpoint.y = point.y;
+				return 1;//说明有障碍物
+			}
+		}
+
+	return 0;
+}
+
+double CalLineLength(const std::vector<RoadPoint> &line)
+{
+	if (line.empty())
+		return -1;
+	double length = 0.0;
+	for (int i = 0; i < line.size() - 1; i++)
+	{
+		RoadPoint cur = line[i];
+		RoadPoint next = line[i + 1];
+		length += std::sqrt(Topology::Distance2(cur, next));
+	}
+	return length;
+}
+
+double CalculateDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS)
+{
+	std::vector<double>DistanceToGPS;//用来存储最后的距离
+	std::vector<RoadPoint>::iterator iter;
+	double minDIs = 0;
+
+	for (iter = N1.begin(); iter != N1.end(); iter++)
+	{
+		double temp_Distance = 1000000;
+		std::vector<RoadPoint>::iterator iter1;
+		//一个点到GPS线上的每一个点求距离
+		for (iter1 = N_GPS.begin(); iter1 != N_GPS.end(); iter1++)
+		{
+			double ljy = Topology::Distance2(*iter, *iter1);/*(iter->x-iter1->x)*(iter->x-iter1->x)
+															+(iter->y-iter1->y)*(iter->y-iter1->y);*/
+			if (abs(ljy)<temp_Distance)
+				temp_Distance = abs(ljy);
+		}
+		if (temp_Distance > minDIs)
+			minDIs = temp_Distance;
+		DistanceToGPS.push_back(temp_Distance);//每次存入一个点
+	}
+
+	//return sum value
+	//return std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0);
+	double sum = std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0);
+
+	//return max value
+	std::sort(DistanceToGPS.begin(), DistanceToGPS.end());
+	return DistanceToGPS.back() / sum;
+}
+
+double CalculateAveDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS)
+{
+	std::vector<double>DistanceToGPS;//用来存储最后的距离
+	std::vector<RoadPoint>::iterator iter;
+	double minDIs = 0;
+
+	for (iter = N1.begin(); iter != N1.end(); iter++)
+	{
+		double temp_Distance = 1000000;
+		std::vector<RoadPoint>::iterator iter1;
+		//一个点到GPS线上的每一个点求距离
+		for (iter1 = N_GPS.begin(); iter1 != N_GPS.end(); iter1++)
+		{
+			double ljy = Topology::Distance2(*iter, *iter1);/*(iter->x-iter1->x)*(iter->x-iter1->x)
+															+(iter->y-iter1->y)*(iter->y-iter1->y);*/
+			if (abs(ljy)<temp_Distance)
+				temp_Distance = abs(ljy);
+		}
+		if (temp_Distance > minDIs)
+			minDIs = temp_Distance;
+		DistanceToGPS.push_back(temp_Distance);//每次存入一个点
+	}
+	//average
+	return std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0) / (DistanceToGPS.size() + 0.00000001);
+}
+
+double CalculateFinalDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS)
+{
+	std::vector<double> DistanceToGPS;//用来存储最后的距离
+	std::vector<double> FinalDis;
+	std::vector<RoadPoint>::iterator iter;
+	double minDIs = 0;
+
+	int region = N1.size() / 10.0;
+	if (region < 3)
+		region = 3;
+	if (region == N1.size())
+		region = 0;
+	//std::cout << "Region Size : " << region << std::endl;
+	int startpos = N1.size() - region;
+	int curpos = 0;
+	for (iter = N1.begin(); iter != N1.end(); iter++)
+	{
+		double temp_Distance = 1000000;
+		std::vector<RoadPoint>::iterator iter1;
+		//一个点到GPS线上的每一个点求距离
+		for (iter1 = N_GPS.begin(); iter1 != N_GPS.end(); iter1++)
+		{
+			double ljy = Topology::Distance2(*iter, *iter1);
+														
+			if (abs(ljy)<temp_Distance)
+				temp_Distance = abs(ljy);
+		}
+		if (temp_Distance > minDIs)
+			minDIs = temp_Distance;
+		DistanceToGPS.push_back(temp_Distance);//每次存入一个点
+		if (curpos >= startpos)
+			FinalDis.push_back(temp_Distance);
+		curpos++;
+	}
+	//average energy
+	//return (std::accumulate(FinalDis.begin(), FinalDis.end(), 0.0) / std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0001)) / (region + 0.00001);
+
+	//std::cout <<"Calculate Final Region Aveage Distance : "<< DistanceToGPS.size() << std::endl;
+	return std::accumulate(FinalDis.begin(), FinalDis.end(), 0.0) / (region + 0.00000001);
+}
+
+
+std::vector<RoadPoint> PathGenerate::SelectTra(std::vector<std::vector<RoadPoint>>& paths, std::vector<RoadPoint>& prePath, std::vector<RoadPoint>& refPath, double& min_maxDis)
+{
+	RoadPoint curPt = DataCenter::GetInstance().GetCurPosition();
+	//init last path in this relative coordinate system
+	//std::vector<RoadPoint> pre_r_cur(prePath.begin(), prePath.end());
+	std::vector<RoadPoint> path_tmp;
+	int collision;
+	if (!prePath.empty())
+	{
+		VeloGrid_t velol = DataCenter::GetInstance().GetLidarData();
+		collision = CheckCollision(velol, prePath, true);
+		
+		if (collision == -1 && m_isSegmentMode)
+		{
+			std::cout << "与上一条路径比较！！！" << std::endl;
+			path_tmp = prePath;
+		}
+		else
+		{
+			path_tmp = refPath;
+		}
+	}
+	else
+	{
+		path_tmp = refPath;
+	}
+	//select best trajectory in this term
+	std::vector<double > disIndex;
+	for (int i = 0; i < paths.size(); i++)
+	{
+		double DisI = CalculateDisTOGPS(paths[i], path_tmp);
+		disIndex.push_back(DisI);
+	}
+	double aaa = DBL_MIN;
+	int index = 0;
+	for (int u = 0; u < disIndex.size(); u++)
+	{
+		if (aaa  < disIndex[u])
+		{
+			aaa = disIndex[u];
+			index = u;
+		}
+	}
+	min_maxDis = CalculateAveDisTOGPS(paths[index], path_tmp);
+	return paths[index];
+}
+
+bool  PathGenerate::UpdateOrNot(std::vector<RoadPoint>& curPath, std::vector<RoadPoint>& prePath, std::vector<RoadPoint>& refPath)
+{
+	//update or not
+	VeloGrid_t velol = DataCenter::GetInstance().GetLidarData();
+	int collision = CheckCollision(velol, prePath, true);
+	double pre_length = CalLineLength(prePath);
+	double cur_length = CalLineLength(curPath);
+	//last path empty or has collison or in segment mode or too short
+	if (prePath.empty() || collision != -1 || pre_length <= 0.6*cur_length || m_isSegmentMode || pre_length < 25)
+	{
+		return true;
+	}
+	else if (!prePath.empty())
+	{
+		double pre_factor = CalculateFinalDisTOGPS(prePath, refPath);
+		double ths_factor = CalculateFinalDisTOGPS(curPath, refPath);
+		std::cout << "last path distance to ref path : " << pre_factor << std::endl;
+		std::cout << "this path distance to ref path : " << ths_factor << std::endl;
+
+		if (pre_factor > ths_factor)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return true;
+	}
+}
 
 
 std::vector<RoadPoint> PathGenerate::BestPathSelector(const std::vector<std::vector<RoadPoint>> cadidatePath)
@@ -1940,6 +2251,7 @@ void PathGenerate::plan()
 	//	SendPath(baseFrame, std::vector<RoadPoint>(), rrr);
 	//	return;
 	//}
+	std::cout << "------------------Plan Start------------------------" << std::endl;
 	std::vector<std::vector<RoadPoint>> baseFrames;
 	int laneI;
 	if (DataCenter::GetInstance().HasMultiLane()) {
@@ -2000,40 +2312,99 @@ void PathGenerate::plan()
 			}
 		}
 	}
-	for (int laneIndex = laneI; laneIndex < baseFrames.size(); laneIndex = (++laneIndex) >= baseFrames.size() ? (0) : ((laneIndex == laneI) ? baseFrames.size() : laneIndex)) {
+
+	//init last path in this relative coordinate system
+	PosPoint curPos = DataCenter::GetInstance().GetCurPosition();
+	std::vector<RoadPoint> path_tmp;
+	int collision;
+	if (!pre_r.empty())
+	{
+		int indexI = -1;
+		for (PosPoint& rpt : pre_r)
+		{
+			CoordTransform::WorldToLocal(curPos, rpt, &rpt);
+			if (rpt.y < 0)
+				indexI++;
+		}
+		if (indexI >= 0)
+			pre_r.erase(pre_r.begin(), pre_r.begin() + indexI);
+	}
+
+	double best_cost = DBL_MAX;
+	std::vector<RoadPoint> best_bestRoot;
+	std::vector<RoadPoint> best_baseframe;
+	std::vector<std::vector<RoadPoint>> candidateTrajs;
+	for (int laneIndex = 0; laneIndex < baseFrames.size();laneIndex++)
+	//for (int laneIndex = laneI; laneIndex < baseFrames.size(); laneIndex = (++laneIndex) >= baseFrames.size() ? (0) : ((laneIndex == laneI) ? baseFrames.size() : laneIndex)) 
+	{
 		std::vector<RoadPoint> baseFrame = baseFrames[laneIndex];
-		PosPoint curPos = DataCenter::GetInstance().GetCurPosition();
+		
 		for (RoadPoint& rpt : baseFrame) {
 			CoordTransform::WorldToLocal(curPos, rpt, &rpt);
 		}
-		std::vector<std::vector<RoadPoint>> candidateTraj = planRef(baseFrame);
-		if (candidateTraj.empty()) {
+		std::vector<std::vector<RoadPoint>> tmp_candidateTraj = planRef(baseFrame);
+		if (tmp_candidateTraj.empty()) {
 			std::cout << "纯路径走不了" << std::endl;
 			CarControl::GetInstance().StopCommand();
 			bool onUTurn = false;
 			if (onUTurn) {
-				candidateTraj = planRefInUTurn(baseFrame);
-				if (candidateTraj.empty()) {
+				tmp_candidateTraj = planRefInUTurn(baseFrame);
+				if (tmp_candidateTraj.empty()) {
 					std::cout << "调不了头" << std::endl;
 					CarControl::GetInstance().StopCommand();
 					continue;
 				}
 			}
 			else {
-				candidateTraj = planRefWithSegment(baseFrame);
-				if (candidateTraj.empty()) {
+				tmp_candidateTraj = planRefWithSegment(baseFrame);
+				if (tmp_candidateTraj.empty()) {
 					std::cout << "无路径" << std::endl;
 					CarControl::GetInstance().StopCommand();
 					continue;
 				}
 			}
 		}
-		std::vector<RoadPoint> bestRoot = selectBestTraj(candidateTraj, pre_Root, baseFrame);
-		pre_Root = bestRoot;
-		track.SetLocalPath(bestRoot);
-		SendPath(baseFrame, bestRoot, candidateTraj);
-		return;
+
+		candidateTrajs.insert(candidateTrajs.end(), tmp_candidateTraj.begin(), tmp_candidateTraj.end());
+
+		double tmp_cost = 0.0;
+		//select best trajectory in this baseframe
+		//std::vector<RoadPoint> bestRoot = selectBestTraj(candidateTraj, pre_Root, baseFrame);
+		std::vector<RoadPoint> bestRoot = SelectTra(tmp_candidateTraj, pre_r, baseFrame, tmp_cost);
+
+		if (best_cost > tmp_cost)
+		{
+			best_bestRoot = bestRoot; 
+			best_cost = tmp_cost;
+			best_baseframe = baseFrame;
+		}
+
 	}
+
+	//update
+	bool updateflag = true;
+	updateflag = UpdateOrNot(best_bestRoot, pre_r, best_baseframe);
+	if (updateflag)
+	{
+		pre_Root = best_bestRoot;
+		track.SetLocalPath(best_bestRoot);
+		pre_r = best_bestRoot;
+	}
+	else
+		std::cout << "Not Update Path !!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+
+	SendPath(best_baseframe, best_bestRoot, candidateTrajs);
+
+	//transform last path into global coordinate system
+	for (int i = 0; i < pre_r.size(); i++)
+	{
+		PosPoint tmp;
+		CoordTransform::LocalToWorld(curPos, pre_r[i], &tmp);
+		pre_r[i] = tmp;
+	}
+
+	std::cout << "------------------Plan End------------------------" << std::endl << std::endl;
+	return;
 }
 
 void PathGenerate::planJoint(){
@@ -2268,12 +2639,16 @@ void PathGenerate::planJoint(){
 
 std::vector<std::vector<RoadPoint>> PathGenerate::planRef(std::vector<RoadPoint>& baseFrame)
 {
+	m_isSegmentMode = false;
+	m_testVelocityFactor = 1.5;
 	std::vector<std::vector<RoadPoint>> candidateTraj = generateTrajectories(baseFrame, true);
 	return candidateTraj;
 }
 
 std::vector<std::vector<RoadPoint>> PathGenerate::planRefWithSegment(std::vector<RoadPoint>& baseFrame)
 {
+	m_isSegmentMode = true;
+	m_testVelocityFactor = 0.8;
 	std::vector<std::vector<RoadPoint>> candidateTraj;
 	int count = 0;
 	do
@@ -2470,7 +2845,12 @@ std::vector<RoadPoint> PathGenerate::trajectory_build(float qf, float qi, float 
 	for (int i = 0; i <= 50; i++)
 	{
 		double delta_s = sf / 50 * i;
-		float q = a * pow(delta_s, 3) + b * pow(delta_s, 2) + c * delta_s + qi;
+		m_testVelocityFactor = 1.0;
+		double temp = m_testVelocityFactor * delta_s;
+		if (temp > sf)
+			temp = sf;
+
+		float q = a * pow(temp, 3) + b * pow(temp, 2) + c * temp + qi;
 		double x = 0.0, y = 0.0;
 		spline.getXY(delta_s, x, y);
 		double _delta_x_, _delta_y_;

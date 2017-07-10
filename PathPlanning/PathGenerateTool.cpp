@@ -6,6 +6,7 @@ void SXYSpline::init(std::vector<RoadPoint> baseFrame)
 	if (baseFrame.empty())
 	{
 		std::cout << "zzzz" << std::endl;
+		return;
 	}
 	X.clear();
 	Y.clear();

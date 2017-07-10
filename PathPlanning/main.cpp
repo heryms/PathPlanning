@@ -30,11 +30,12 @@ int main()
 	while (true)
 	{
 		if (!DataCenter::GetInstance().WaitForVeloGrid(20)) {
+			//std::cout << "No VeloGrid!!" << std::endl;
 			continue;
 		}
 		std::chrono::steady_clock::time_point startTime
 			= std::chrono::steady_clock::now();
-		pathGen.planJoint();
+		pathGen.plan();
 		std::chrono::steady_clock::time_point endTime
 			= std::chrono::steady_clock::now();
 		std::chrono::milliseconds time

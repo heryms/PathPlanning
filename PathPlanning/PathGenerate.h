@@ -12,6 +12,10 @@
 #include "CarControl.h"
 #include "TrackHelper.h"
 #include "PathGenerateTool.h"
+
+
+#define VELOCITY_ENCORAGE_FACTOR 1.2
+
 class PathGenerate
 {
 private:
@@ -22,6 +26,10 @@ public:
 	{
 		createClothoidTable();
 		track.Start();
+
+		m_isSegmentMode = false;
+		m_testVelocityFactor = 1.2;
+		updatetra = true;
 	}
 
 	~PathGenerate()
@@ -72,6 +80,7 @@ public:
 	void SendPath(std::vector<RoadPoint>& ref, std::vector<RoadPoint>& best, std::vector<std::vector<RoadPoint>>& paths);
 private:
 	std::vector<RoadPoint> pre_Root;
+	std::vector<RoadPoint> best_root;
 	std::vector<RoadPoint> Root_On_Gaussian;
 	std::vector<std::vector<PosPoint>> posPtOnRoot;
 	std::vector<std::vector<RoadPoint>> clothoidMap;
@@ -86,6 +95,19 @@ private:
 	std::vector<float> y_ref;
 	int CheckCollision(VeloGrid_t& grids, std::vector<RoadPoint>& localPath, bool hasAngle = false);
 
+	int CheckCollision_2(VeloGrid_t& grids, std::vector<RoadPoint>& localPath, bool hasAngle = false);
+	bool DetectGridObs(RoadPoint cur, VeloGrid_t & grids, RoadPoint &collisionpoint);
+
+	bool m_isSegmentMode;
+	float m_testVelocityFactor;
+
+	std::vector<RoadPoint> pre_r;
+
+	bool updatetra;
+	std::vector<RoadPoint> SelectTra(std::vector<std::vector<RoadPoint>>& paths, std::vector<RoadPoint>& prePath, std::vector<RoadPoint>& refPath, double& min_maxDis);
+	bool UpdateOrNot(std::vector<RoadPoint>& curPath, std::vector<RoadPoint>& prePath, std::vector<RoadPoint>& refPath);
+
+	bool isChangingLane;
 };
 
 
