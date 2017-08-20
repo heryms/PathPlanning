@@ -100,4 +100,20 @@ struct LINESEG
 	RoadPoint e;
 
 };
+
+typedef struct  Car
+{
+	RoadPoint Position;
+	double rearx;
+	double reary;
+	double phi;
+	double frontx;
+	double fronty;
+	double theta;
+	double width;
+	double length;
+	double L;
+	double RtoT;
+};
+
 #endif // !_PATH_PLANNING_BASE_TYPE_H

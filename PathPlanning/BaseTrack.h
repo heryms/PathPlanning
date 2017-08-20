@@ -8,10 +8,12 @@ class BaseTrack
 {
 protected:
 	std::vector<RoadPoint> path;
-	double refSpeedStraight = 10;
+	double refSpeedStraight = 30;
 	double refSpeedCurve = 5;
 	bool inCurve = false;
+	double recommendSpeed;
 public:
+	bool b_stop;
 	BaseTrack();
 	~BaseTrack();
 	virtual void SetLocalPath(std::vector<RoadPoint>& path);
@@ -21,6 +23,9 @@ public:
 	**/
 	virtual void SetRefSpeed(double straight, double curve);
 	virtual void Track()=0;
+	virtual void SetRecommendSpeed(double speed){
+		recommendSpeed = speed;
+	}
 };
 
 #endif // !_PATH_PLANNING_BASE_TRACK_H

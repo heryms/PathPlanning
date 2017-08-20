@@ -55,6 +55,7 @@ public:
 
 TrackHelper::TrackHelper()
 {
+	m_recommendSpeed = -1.0;
 	track = new PureTrack();
 	//track = new ClothoidTrack();
 	//track = new MPCTrack();
@@ -86,6 +87,7 @@ void TrackHelper::SetLocalPath(std::vector<RoadPoint>& path)
 	LocalCarStatus::GetInstance().SetCurPosition(p);
 	LocalCarStatus::GetInstance().Resume();
 	track->SetLocalPath(path);
+	track->SetRecommendSpeed(m_recommendSpeed);
 	thread->Resume();
 }
 
@@ -100,6 +102,11 @@ void TrackHelper::SetPath(std::vector<RoadPoint>& path)
 	LocalCarStatus::GetInstance().Resume();
 	track->SetLocalPath(path);
 	thread->Resume();
+}
+
+void TrackHelper::SetRecommendSpeed(double speed)
+{
+	m_recommendSpeed = speed;
 }
 
 void TrackHelper::Track()

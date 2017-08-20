@@ -871,20 +871,20 @@ int PathGenerate::CheckCollision(VeloGrid_t& grids, std::vector<RoadPoint>& loca
 	return -1;
 }
 
-typedef struct  Car
-{
-	RoadPoint Position;
-	double rearx;
-	double reary;
-	double phi;
-	double frontx;
-	double fronty;
-	double theta;
-	double width;
-	double length;
-	double L;
-	double RtoT;
-};
+//typedef struct  Car
+//{
+//	RoadPoint Position;
+//	double rearx;
+//	double reary;
+//	double phi;
+//	double frontx;
+//	double fronty;
+//	double theta;
+//	double width;
+//	double length;
+//	double L;
+//	double RtoT;
+//};
 bool PathGenerate::DetectGridObs(RoadPoint Cur, VeloGrid_t & grids, RoadPoint &collisionpoint)
 {
 	/*for (int i = 0; i < localPath.size(); i++)
@@ -2809,6 +2809,10 @@ std::vector<RoadPoint> PathGenerate::selectBestTraj(std::vector<std::vector<Road
 
 void PathGenerate::SendPath(std::vector<RoadPoint>& ref, std::vector<RoadPoint>& best, std::vector<std::vector<RoadPoint>>& paths)
 {
+
+	m_sendPath.SendDraw(paths, best);
+	return;
+
 	DecisionDraw_t draw;
 	for (int i = 0; i < paths.size(); i++)
 	{

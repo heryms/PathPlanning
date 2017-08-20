@@ -31,6 +31,9 @@
     <Filter Include="math">
       <UniqueIdentifier>{a7f266e1-5885-4776-bc74-8ee849a7e219}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Decision">
+      <UniqueIdentifier>{4becf8e6-69ac-4610-8c40-79df912ba4dc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -115,6 +118,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="PathJoint.cpp">
+      <Filter>PathGenerate</Filter>
+    </ClCompile>
+    <ClCompile Include="DecisionMaker.cpp">
+      <Filter>Decision</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionDetection.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="ShortTimePlanner.cpp">
       <Filter>PathGenerate</Filter>
     </ClCompile>
   </ItemGroup>
@@ -246,6 +258,21 @@
       <Filter>LcmType</Filter>
     </ClInclude>
     <ClInclude Include="lcmtype\Lane_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="DecisionMaker.h">
+      <Filter>Decision</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionDetection.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="ShortTimePlanner.h">
+      <Filter>PathGenerate</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\Draw_t.hpp">
+      <Filter>LcmType</Filter>
+    </ClInclude>
+    <ClInclude Include="lcmtype\Scene_t.hpp">
       <Filter>LcmType</Filter>
     </ClInclude>
   </ItemGroup>

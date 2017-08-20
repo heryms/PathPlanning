@@ -10,6 +10,7 @@
 #include "lcmtype\ckMapStatus_t.hpp"
 #include "lcmtype\Map_t.hpp"
 #include "lcmtype\Lane_t.hpp"
+#include "lcmtype\Scene_t.hpp"
 #include <mutex>
 #include <condition_variable>
 #include <vector>
@@ -22,6 +23,8 @@ using ckLcmType::PlanOutput;
 using ckLcmType::ckMapStatus_t;
 using ckLcmType::Map_t;
 using ckLcmType::Lane_t;
+using ckLcmType::Scene_t;
+
 class SXYSpline;
 enum CurbDirection{
 	LEFT = 0,
@@ -44,6 +47,7 @@ private:
 	LcmRecvHelper<ckMapStatus_t> m_lcmRefTrajectory;
 	LcmRecvHelper<Map_t> m_lcmMultiLane;
 	LcmRecvHelper<Lane_t> m_lcmCamLane;
+	LcmRecvHelper<Scene_t> m_lcmScene;
 
 	Location_t m_lcmMsgLocation;
 	StatusBody_t m_lcmMsgStatusBody;
@@ -52,7 +56,8 @@ private:
 	ckMapStatus_t m_lcmMsgRefTrajectory;
 	Map_t m_lcmMsgMultiLane;
 	Lane_t m_lcmMsgCamLane;
-	
+	Scene_t m_lcmMsgScene;
+
 	std::mutex m_lockLocation;
 	std::mutex m_lockStatusBody;
 	std::mutex m_lockVeloGrid;
@@ -60,6 +65,7 @@ private:
 	std::mutex m_lockRefTrajectory;
 	std::mutex m_lockMultiLane;
 	std::mutex m_lockCamLane;
+	std::mutex m_lockScene;
 
 	std::condition_variable m_waitLocation;
 	//std::mutex m_waitLockLocation;
@@ -71,6 +77,7 @@ private:
 	std::condition_variable m_waitRefTrajectory;
 	std::condition_variable m_waitMultiLane;
 	std::condition_variable m_waitCamLane;
+	std::condition_variable m_waitScene;
 
 	//std::mutex m_waitLockCurb;
 	/*triggered while receiving Location_t */
@@ -87,6 +94,9 @@ private:
 	void MultiLaneRecvOperation(const Map_t* msg, void*);
 
 	void CamLaneRecvOperation(const Lane_t* msg, void*);
+
+	/*receive scene message from map part*/
+	void SceneRecvOperation(const Scene_t* msg, void *);
 
 protected:
 	DataCenter();
@@ -116,6 +126,9 @@ public:
 
 	void StartCamLane();
 
+	void StartScene();
+
+
 	/*end location*/
 	void EndLocation();
 	/*end statusboyd*/
@@ -128,7 +141,8 @@ public:
 	void EndRefTrajectory();
 	void EndMultiLane();
 	void EndCamLane();
-	
+	void EndScene();
+
 	/*@return x,y in Gauss, orientation by x*/
 	PosPoint GetCurPosition();
 	/*@return speed in km/h£¬ steerAngle in deg*/
@@ -149,6 +163,9 @@ public:
 	std::vector<RoadPoint> GetCamLanes();
 	PosPoint GetStopLine(double& width);
 	PosPoint GetCurOnTrajectory();
+
+	Scene_t GetSceneMessage();
+
 	//get init car angle and qi
 	void Get_InitAngle_Qi(SXYSpline* spline,double& angle, double& qi);
 	std::vector<RoadPoint> GetRefTrajectory_Qi(double& qi);
@@ -168,6 +185,8 @@ public:
 
 	bool WaitForCamLane(unsigned int milliseconds);
 
+	bool WaitForScene(unsigned int milliseconds);
+
 	/*@return if having Location_t during 500ms*/
 	bool HasLocation();
 	/*@return if having StatusBody_t during 500ms*/
@@ -182,6 +201,9 @@ public:
 	bool HasMultiLane();
 
 	bool HasCamLane();
+
+	bool HasSceneMsg();
+
 private:
 
 };

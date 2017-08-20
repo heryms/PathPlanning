@@ -1,5 +1,7 @@
 #include "Topology.h"
 #include <cmath>
+#include <algorithm>
+#include <numeric>
 using std::vector;
 
 //两点距离的平方
@@ -357,3 +359,150 @@ double Topology::toAngle(double dx, double dy){
 		return atan(dy / dx);
 	}
 }
+
+//计算轨迹N1每个点相对于轨迹N2的距离最小值中的最大值占所有最小距离之和的比例
+double Topology::CalculateDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS)
+{
+	std::vector<double>DistanceToGPS;//用来存储最后的距离
+	std::vector<RoadPoint>::iterator iter;
+	double minDIs = 0;
+
+	for (iter = N1.begin(); iter != N1.end(); iter++)
+	{
+		double temp_Distance = 1000000;
+		std::vector<RoadPoint>::iterator iter1;
+		//一个点到GPS线上的每一个点求距离
+		for (iter1 = N_GPS.begin(); iter1 != N_GPS.end(); iter1++)
+		{
+			double ljy = Topology::Distance2(*iter, *iter1);/*(iter->x-iter1->x)*(iter->x-iter1->x)
+															+(iter->y-iter1->y)*(iter->y-iter1->y);*/
+			if (abs(ljy)<temp_Distance)
+				temp_Distance = abs(ljy);
+		}
+		if (temp_Distance > minDIs)
+			minDIs = temp_Distance;
+		DistanceToGPS.push_back(temp_Distance);//每次存入一个点
+	}
+
+	//return sum value
+	//return std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0);
+	double sum = std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0);
+
+	//return max value
+	std::sort(DistanceToGPS.begin(), DistanceToGPS.end());
+	return DistanceToGPS.back() / sum;
+}
+
+//计算两条轨迹之间每个点距离最小值的平均值
+double Topology::CalculateAveDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS)
+{
+	std::vector<double>DistanceToGPS;//用来存储最后的距离
+	std::vector<RoadPoint>::iterator iter;
+	double minDIs = 0;
+
+	for (iter = N1.begin(); iter != N1.end(); iter++)
+	{
+		double temp_Distance = 1000000;
+		std::vector<RoadPoint>::iterator iter1;
+		//一个点到GPS线上的每一个点求距离
+		for (iter1 = N_GPS.begin(); iter1 != N_GPS.end(); iter1++)
+		{
+			double ljy = Topology::Distance2(*iter, *iter1);/*(iter->x-iter1->x)*(iter->x-iter1->x)
+															+(iter->y-iter1->y)*(iter->y-iter1->y);*/
+			if (abs(ljy)<temp_Distance)
+				temp_Distance = abs(ljy);
+		}
+		if (temp_Distance > minDIs)
+			minDIs = temp_Distance;
+		DistanceToGPS.push_back(temp_Distance);//每次存入一个点
+	}
+	//average
+	return std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0) / (DistanceToGPS.size() + 0.00000001);
+}
+
+double Topology::CalculateSumDisToGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS)
+{
+	std::vector<double>DistanceToGPS;//用来存储最后的距离
+	std::vector<RoadPoint>::iterator iter;
+	double minDIs = 0;
+
+	for (iter = N1.begin(); iter != N1.end(); iter++)
+	{
+		double temp_Distance = 1000000;
+		std::vector<RoadPoint>::iterator iter1;
+		//一个点到GPS线上的每一个点求距离
+		for (iter1 = N_GPS.begin(); iter1 != N_GPS.end(); iter1++)
+		{
+			double ljy = Topology::Distance2(*iter, *iter1);/*(iter->x-iter1->x)*(iter->x-iter1->x)
+															+(iter->y-iter1->y)*(iter->y-iter1->y);*/
+			if (abs(ljy)<temp_Distance)
+				temp_Distance = abs(ljy);
+		}
+		if (temp_Distance > minDIs)
+			minDIs = temp_Distance;
+		DistanceToGPS.push_back(temp_Distance);//每次存入一个点
+	}
+	//sum
+	return std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0);
+}
+
+//计算N1最后几个点相对于N_GPS的距离平均值
+double Topology::CalculateFinalDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS)
+{
+	std::vector<double> DistanceToGPS;//用来存储最后的距离
+	std::vector<double> FinalDis;
+	std::vector<RoadPoint>::iterator iter;
+	double minDIs = 0;
+
+	int region = N1.size() / 10.0;
+	if (region < 3)
+		region = 3;
+	if (region == N1.size())
+		region = 0;
+	//std::cout << "Region Size : " << region << std::endl;
+	int startpos = N1.size() - region;
+	int curpos = 0;
+	for (iter = N1.begin(); iter != N1.end(); iter++)
+	{
+		double temp_Distance = 1000000;
+		std::vector<RoadPoint>::iterator iter1;
+		//一个点到GPS线上的每一个点求距离
+		for (iter1 = N_GPS.begin(); iter1 != N_GPS.end(); iter1++)
+		{
+			double ljy = Topology::Distance2(*iter, *iter1);
+
+			if (abs(ljy) < temp_Distance)
+				temp_Distance = abs(ljy);
+		}
+		if (temp_Distance > minDIs)
+			minDIs = temp_Distance;
+		DistanceToGPS.push_back(temp_Distance);//每次存入一个点
+		if (curpos >= startpos)
+			FinalDis.push_back(temp_Distance);
+		curpos++;
+	}
+	//average energy
+	//return (std::accumulate(FinalDis.begin(), FinalDis.end(), 0.0) / std::accumulate(DistanceToGPS.begin(), DistanceToGPS.end(), 0.0001)) / (region + 0.00001);
+
+	//std::cout <<"Calculate Final Region Aveage Distance : "<< DistanceToGPS.size() << std::endl;
+	return std::accumulate(FinalDis.begin(), FinalDis.end(), 0.0) / (region + 0.00000001);
+}
+
+
+
+//计算轨迹折线总长度
+double Topology::CalLineLength(const std::vector<RoadPoint>& line)
+{
+	if (line.empty())
+		return -1;
+	double length = 0.0;
+	for (int i = 0; i < line.size() - 1; i++)
+	{
+		RoadPoint cur = line[i];
+		RoadPoint next = line[i + 1];
+		length += std::sqrt(Topology::Distance2(cur, next));
+	}
+	return length;
+}
+
+

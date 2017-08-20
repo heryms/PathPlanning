@@ -4,6 +4,8 @@
 
 BaseTrack::BaseTrack()
 {
+	b_stop = false;
+	recommendSpeed = -1.0;
 }
 
 

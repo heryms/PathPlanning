@@ -77,6 +77,13 @@ void DataCenter::CamLaneRecvOperation(const Lane_t * msg, void *)
 	m_waitCamLane.notify_all();
 }
 
+void DataCenter::SceneRecvOperation(const Scene_t* msg, void *)
+{
+	QuickLock lk(m_lockScene);
+	m_lcmMsgScene = *msg;
+	m_waitScene.notify_all();
+}
+
 void DataCenter::StartAllSensor(){
 	StartLocation();
 	StartStatusBody();
@@ -85,6 +92,7 @@ void DataCenter::StartAllSensor(){
 	StartRefTrajectory();
 	StartMultiLane();
 	StartCamLane();
+	StartScene();
 	//m_lcmLocation.initialLcm(LCM_NET_LOCATION, LCM_CHANNEL_LOCATION
 	//	, std::bind(&DataCenter::LocationRecvOperation, this,std::placeholders::_1,std::placeholders::_2),this);
 	//m_lcmStatusBody.initialLcm(LCM_NET_STATUS_BODY, LCM_CHANNEL_STATUS_BODY
@@ -103,6 +111,7 @@ void DataCenter::EndAllSensor(){
 	EndRefTrajectory();
 	EndMultiLane();
 	EndCamLane();
+	EndScene();
 	//m_lcmLocation.uninitialLcm();
 	//m_lcmStatusBody.uninitialLcm();
 	//m_lcmVeloGrid.uninitialLcm();
@@ -150,6 +159,12 @@ void DataCenter::StartCamLane()
 		, std::bind(&DataCenter::CamLaneRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
 }
 
+void DataCenter::StartScene()
+{
+	m_lcmScene.initialLcm(LCM_NET_SCENE, LCM_CHANNEL_SCENE
+		, std::bind(&DataCenter::SceneRecvOperation, this, std::placeholders::_1, std::placeholders::_2), this);
+}
+
 void DataCenter::EndLocation()
 {
 	m_lcmLocation.uninitialLcm();
@@ -182,6 +197,11 @@ void DataCenter::EndMultiLane(){
 void DataCenter::EndCamLane()
 {
 	m_lcmCamLane.uninitialLcm();
+}
+
+void DataCenter::EndScene()
+{
+	m_lcmScene.uninitialLcm();
 }
 
 PosPoint DataCenter::GetCurPosition(){
@@ -279,6 +299,12 @@ PosPoint DataCenter::GetCurOnTrajectory(){
 	pt.y = m_lcmMsgRefTrajectory.y[0];
 	return pt;
 }
+
+Scene_t DataCenter::GetSceneMessage()
+{
+	return m_lcmMsgScene;
+}
+
 std::vector<RoadPoint> DataCenter::GetReferenceTrajectory(RoadPoint &car) {
 	QuickLock lk(m_lockRefTrajectory);
 	std::vector<RoadPoint> trajectory;
@@ -339,10 +365,10 @@ std::vector<std::vector<RoadPoint>> DataCenter::GetMultiLanes(int & laneIndex){
 		for (int j = 0; j < m_lcmMsgMultiLane.pointnum; j++)
 		{
 			RoadPoint p;
-			p.x = m_lcmMsgMultiLane.vy[i][j];
-			p.y = m_lcmMsgMultiLane.vx[i][j];
-			p.angle = PI / 2 - m_lcmMsgMultiLane.vyaw[i][j] * PI / 180;
-			if (p.x == -1)
+			p.x = m_lcmMsgMultiLane.y[i][j];
+			p.y = m_lcmMsgMultiLane.x[i][j];
+			p.angle = PI / 2 - m_lcmMsgMultiLane.yaw[i][j] * PI / 180;
+			if (p.x == -1000)
 			{
 				continue;
 			}
@@ -474,18 +500,20 @@ std::vector<RoadPoint> DataCenter::GetCamLanes()
 
 PosPoint DataCenter::GetStopLine(double& width){
 	QuickLock lk(m_lockMultiLane);
-	if (m_lcmMsgMultiLane.stopline){
-		PosPoint p;
-		p.x = m_lcmMsgMultiLane.sly;
-		p.y = m_lcmMsgMultiLane.slx;
-		p.angle = PI / 2 - m_lcmMsgMultiLane.slyaw*PI/180;
-		width = m_lcmMsgMultiLane.slwidth;
-		return p;
-	}
-	else{
-		width = 0;
-		return PosPoint();
-	}
+
+	//if (m_lcmMsgMultiLane.stopline){
+	//	PosPoint p;
+	//	p.x = m_lcmMsgMultiLane.sly;
+	//	p.y = m_lcmMsgMultiLane.slx;
+	//	p.angle = PI / 2 - m_lcmMsgMultiLane.slyaw*PI/180;
+	//	width = m_lcmMsgMultiLane.slwidth;
+	//	return p;
+	//}
+	//else{
+	//	width = 0;
+	//	return PosPoint();
+	//}
+	return PosPoint();
 }
 
 
@@ -701,6 +729,12 @@ bool DataCenter::WaitForCamLane(unsigned int milliseconds)
 	return m_waitCamLane.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
 }
 
+bool DataCenter::WaitForScene(unsigned int milliseconds)
+{
+	QuickLock lk(m_lockScene);
+	return m_waitScene.wait_for(lk, std::chrono::milliseconds(milliseconds)) == std::cv_status::no_timeout;
+}
+
 bool DataCenter::HasLocation(){
 	return m_lcmLocation.HasLcmMessage();
 }
@@ -730,5 +764,10 @@ bool DataCenter::HasMultiLane()
 bool DataCenter::HasCamLane()
 {
 	return m_lcmCamLane.HasLcmMessage();
+}
+
+bool DataCenter::HasSceneMsg()
+{
+	return m_lcmScene.HasLcmMessage();
 }
 

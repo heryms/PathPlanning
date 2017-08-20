@@ -32,13 +32,14 @@ void PureTrack::Track()
 			if (TrackFinder::FindPursuitPoint(path, curX, refX, LocalCarStatus::GetInstance().GetSpeed()/3.6)){
 				info.steerAngle = TrackFinder::MiddlePiont_Shan(curX,refX.x, refX.y);
 				info.gear = D;
-				info.speed = 10;
+				info.speed = 20;
 				info.state = START;
 			}
 			else{
 				info.gear = D;
 				info.speed = 0;
 				info.state = E_STOP;
+				printf("estop\n");
 				info.steerAngle = LocalCarStatus::GetInstance().GetSteerAngle();
 			}
 			break;
@@ -62,5 +63,16 @@ void PureTrack::Track()
 			atan(2 * LocalCarStatus::GetInstance().GetL()*sin(alpha) / ld)
 			*LocalCarStatus::GetInstance().GetSteerRatio()*180.0 / PI;
 	} while (false);
+
+	if (b_stop)
+	{
+		CarControl::GetInstance().StopCommand();
+		return;
+	}
+
+	if (recommendSpeed >= 0.0)
+	{
+		info.speed = recommendSpeed;
+	}
 	CarControl::GetInstance().SendCommand(info);
 }

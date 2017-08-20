@@ -20,7 +20,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -92,12 +92,15 @@
     <ClCompile Include="BaseCarStatus.cpp" />
     <ClCompile Include="BaseTrack.cpp" />
     <ClCompile Include="ClothoidTrack.cpp" />
+    <ClCompile Include="CollisionDetection.cpp" />
+    <ClCompile Include="DecisionMaker.cpp" />
     <ClCompile Include="ForMPC\Array.cc" />
     <ClCompile Include="ForMPC\QuadProg++.cc" />
     <ClCompile Include="MPCTrack.cpp" />
     <ClCompile Include="PathGenerateTool.cpp" />
     <ClCompile Include="PathJoint.cpp" />
     <ClCompile Include="ShortTimePathPlanning.cpp" />
+    <ClCompile Include="ShortTimePlanner.cpp" />
     <ClCompile Include="TrackHelper.cpp" />
     <ClCompile Include="CarControl.cpp" />
     <ClCompile Include="Clothoid.cpp" />
@@ -123,16 +126,21 @@
     <ClInclude Include="BaseCarStatus.h" />
     <ClInclude Include="BaseTrack.h" />
     <ClInclude Include="ClothoidTrack.h" />
+    <ClInclude Include="CollisionDetection.h" />
+    <ClInclude Include="DecisionMaker.h" />
     <ClInclude Include="ForMPC\Array.hh" />
     <ClInclude Include="ForMPC\MMatrix.h" />
     <ClInclude Include="ForMPC\QuadProg++.hh" />
     <ClInclude Include="lcmtype\ckMapStatus_t.hpp" />
+    <ClInclude Include="lcmtype\Draw_t.hpp" />
     <ClInclude Include="lcmtype\Lane_t.hpp" />
     <ClInclude Include="lcmtype\Map_t.hpp" />
+    <ClInclude Include="lcmtype\Scene_t.hpp" />
     <ClInclude Include="MPCTrack.h" />
     <ClInclude Include="PathGenerateTool.h" />
     <ClInclude Include="PathJoint.h" />
     <ClInclude Include="ShortTimePathPlanning.h" />
+    <ClInclude Include="ShortTimePlanner.h" />
     <ClInclude Include="TrackHelper.h" />
     <ClInclude Include="BaseType.h" />
     <ClInclude Include="CarControl.h" />

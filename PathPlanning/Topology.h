@@ -33,5 +33,12 @@ public:
 	static void Rotate(double theta, double x, double y, double& x_out, double& y_out);
 	static void Rotate_To_Guassian(double theta, double x, double y, double& x_out, double& y_out);
 	static double toAngle(double dx, double dy);
+
+	//calculat some distance
+	static double CalculateDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS);
+	static double CalculateAveDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS);
+	static double CalculateSumDisToGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS);
+	static double CalculateFinalDisTOGPS(std::vector<RoadPoint>N1, std::vector<RoadPoint>N_GPS);
+	static double CalLineLength(const std::vector<RoadPoint> &line);
 };
 #endif
